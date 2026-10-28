@@ -1,0 +1,28 @@
+# Alternativa com PostgreSQL + PostGIS "de verdade" (Docker Desktop no Windows).
+#   docker compose up --build
+# Depois acesse http://localhost:3000
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_USER: conecta
+      POSTGRES_PASSWORD: conecta
+      POSTGRES_DB: conecta
+    volumes:
+      - dados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U conecta"]
+      interval: 3s
+      retries: 20
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://conecta:conecta@db:5432/conecta
+      SMS_MODE: dev
+    ports:
+      - "3000:3000"
+volumes:
+  dados:
