@@ -1068,33 +1068,6 @@ input[type='range'] {
   background: var(--accent);
 }
 
-table.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-.table th,
-.table td {
-  padding: 10px 8px;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-}
-.table th {
-  font-size: 0.78rem;
-  color: var(--muted);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-.table td.num,
-.table th.num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-.table-wrap {
-  overflow-x: auto;
-}
-
 .tabs {
   display: flex;
   gap: 4px;

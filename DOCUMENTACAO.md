@@ -1,6 +1,7 @@
 # ConectaBairro: documentação técnica
 
 Este documento liga o que foi especificado no artigo (AC1) e no documento do projeto ao que está implementado.
+A explicação de cada arquivo, linha por linha, está em [docs/codigo/](docs/codigo/README.md).
 
 ## 1. Arquitetura
 

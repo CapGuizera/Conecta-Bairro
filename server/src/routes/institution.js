@@ -105,7 +105,7 @@ r.get('/institution/export.csv', requireRole('instituicao', 'moderador'), async 
     lines.push([`satisfacao ${s.group}`, 'intencao de continuar (%)', s.continuePct])
   }
   for (const w of o.weekly) lines.push(['semanal', `semana de ${w.week}`, `${w.contacts} contatos / ${w.concluded} concluidas`])
-  const csv = '﻿' + lines.map((l) => l.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n')
+  const csv = '\uFEFF' + lines.map((l) => l.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')).join('\r\n')
   res.setHeader('Content-Type', 'text/csv; charset=utf-8')
   res.setHeader('Content-Disposition', 'attachment; filename="conectabairro-indicadores.csv"')
   res.send(csv)

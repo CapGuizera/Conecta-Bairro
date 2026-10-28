@@ -30,11 +30,6 @@ export function normalizePhone(input) {
   return `+55${digits}`
 }
 
-export function maskPhoneForDisplay(phone) {
-  const d = phone.replace(/\D/g, '').slice(2)
-  return `(${d.slice(0, 2)}) *****-${d.slice(-4)}`
-}
-
 // RF07/RF15: remove telefones, e-mails, links e convites para outros aplicativos.
 const EMAIL_RE = /[\w.+-]+@[\w-]+\.[\w.-]+/gi
 const URL_RE = /\b(?:https?:\/\/|www\.)\S+|\b[\w-]+\.(?:com|net|org|br|me|ly|app)(?:\.br)?(?:\/\S*)?/gi

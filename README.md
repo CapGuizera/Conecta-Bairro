@@ -97,4 +97,7 @@ docker compose up --build
 - Navegador atualizado (Chrome, Edge, Firefox ou Safari)
 - Internet na primeira instalação e para carregar o mapa (OpenStreetMap)
 
-A documentação técnica (arquitetura, requisitos, API e testes) está em [DOCUMENTACAO.md](DOCUMENTACAO.md).
+## Documentação
+
+- [DOCUMENTACAO.md](DOCUMENTACAO.md): arquitetura, onde está cada requisito, API e testes.
+- [docs/codigo/](docs/codigo/README.md): o código inteiro explicado linha por linha, em 13 partes.

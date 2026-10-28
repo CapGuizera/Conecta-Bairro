@@ -16,11 +16,6 @@ export async function enqueue(item) {
   return q.length
 }
 
-export async function removeFromQueue(clientUuid) {
-  const q = (await listQueue()).filter((x) => x.clientUuid !== clientUuid)
-  await set(KEY, q)
-}
-
 let syncing = null
 
 // Retorna { sent, failed: [{clientUuid, error}] }. Itens com erro de validação ficam na fila com a mensagem.

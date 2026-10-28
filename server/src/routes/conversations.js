@@ -509,15 +509,4 @@ r.post('/contracts/:id/review', async (req, res) => {
   res.status(201).json({ contract: await contractDetails(c, req.user.id) })
 })
 
-// Avaliações recebidas pelo usuário como contratante (visíveis para o prestador ao negociar).
-r.get('/conversations/:id/counterpart', async (req, res) => {
-  const conv = await loadConversation(req.params.id, req.user.id)
-  const otherId = conv.client_id === req.user.id ? conv.provider_id : conv.client_id
-  const rep = await one(
-    `SELECT count(*)::int AS n, round(avg(rating)::numeric, 1)::float8 AS avg FROM reviews WHERE reviewee_id = $1`,
-    [otherId],
-  )
-  res.json({ reviews: rep.n, avgRating: rep.avg })
-})
-
 export default r
