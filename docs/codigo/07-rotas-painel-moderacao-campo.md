@@ -76,7 +76,7 @@ r.post('/highlights', requireProvider, async (req, res) => {
     Number(req.body?.offerId) || 0,
     req.user.id,
   ])
-  if (!offer) fail(404, 'Escolha uma oferta ativa')
+  if (!offer) fail(404, 'Escolha um anúncio ativo')
 ```
 
 **Contratar destaque.** Valida o plano e confere que a oferta é ativa e do próprio prestador.
@@ -107,8 +107,8 @@ O código de pagamento é fictício (`PIX-SIMULADO-...`), já que o protótipo n
 ```js
   await notify(req.user.id, {
     kind: 'destaque',
-    title: 'Destaque contratado',
-    body: `"${offer.title}" em destaque na categoria ${categoryName(offer.category)} até ${new Date(h.ends_at).toLocaleDateString('pt-BR')} (${formatBRL(plan.priceCents)})`,
+    title: 'Destaque ativado',
+    body: `"${offer.title}" aparece primeiro em ${categoryName(offer.category)} até ${new Date(h.ends_at).toLocaleDateString('pt-BR')} (${formatBRL(plan.priceCents)})`,
     link: '/painel',
   })
   res.status(201).json({ highlight: { id: h.id, endsAt: h.ends_at, startsAt: h.starts_at, paymentCode: h.payment_code } })
@@ -447,16 +447,16 @@ r.post('/moderation/reports/:id/resolve', requireRole('moderador'), async (req, 
 ```js
   if (decision === 'procedente') {
     if (action === 'remover_oferta') {
-      if (rep.target_type !== 'oferta') fail(400, 'Ação válida apenas para ofertas')
+      if (rep.target_type !== 'oferta') fail(400, 'Isso só vale para anúncios')
       await q("UPDATE offers SET status = 'removida' WHERE id = $1", [rep.target_id])
       await notify(target.ownerId, {
         kind: 'moderacao',
-        title: 'Oferta removida pela moderação',
+        title: 'Anúncio removido pela moderação',
         body: `"${target.title}" foi removida. ${resolution}`.trim(),
         link: '/painel',
       })
     } else if (action === 'ocultar_mensagem') {
-      if (rep.target_type !== 'mensagem') fail(400, 'Ação válida apenas para mensagens')
+      if (rep.target_type !== 'mensagem') fail(400, 'Isso só vale para mensagens')
       await q("UPDATE messages SET body = '[mensagem removida pela moderação]', masked = true WHERE id = $1", [rep.target_id])
     } else if (action === 'bloquear_usuario') {
       if (!target?.ownerId) fail(400, 'Usuário não identificado')

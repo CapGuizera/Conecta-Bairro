@@ -21,7 +21,7 @@ A única página HTML. O React desenha tudo dentro da `div` com id `root`.
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0f5c4d" />
+    <meta name="theme-color" content="#1c4b86" />
     <meta name="description" content="Serviços e comércio do seu bairro, sem expor o endereço de ninguém." />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -30,7 +30,7 @@ A única página HTML. O React desenha tudo dentro da `div` com id `root`.
 ```
 
 Idioma português, codificação UTF-8 e o `viewport`, que faz o layout se adaptar à largura do celular (`viewport-fit=cover` aproveita a área das bordas arredondadas dos celulares modernos).
-`theme-color` pinta a barra do navegador no celular com o verde do sistema. Ícones da aba e da tela inicial do iPhone.
+`theme-color` pinta a barra do navegador no celular com o azul do sistema. Ícones da aba e da tela inicial do iPhone.
 
 **Linhas 12 a 16**
 
@@ -87,8 +87,8 @@ export default defineConfig({
         short_name: 'ConectaBairro',
         description: 'Serviços e comércio do seu bairro, sem expor o endereço de ninguém.',
         lang: 'pt-BR',
-        theme_color: '#0f5c4d',
-        background_color: '#f6f4ef',
+        theme_color: '#1c4b86',
+        background_color: '#f4f1ea',
         display: 'standalone',
         start_url: '/',
         icons: [
@@ -164,7 +164,7 @@ O `build` gera a pasta `dist` e eleva o limite do aviso de tamanho (o mapa e o R
 
 Entrada da interface: define as telas (rotas) e quem pode acessar cada uma.
 
-**Linhas 1 a 23**
+**Linhas 1 a 25**
 
 ```jsx
 import { StrictMode } from 'react'
@@ -189,12 +189,14 @@ import Profile from './pages/Profile.jsx'
 import ProviderProfile from './pages/ProviderProfile.jsx'
 import Receipt from './pages/Receipt.jsx'
 import { SessionProvider, useSession } from './session.jsx'
+import '@fontsource-variable/figtree'
+import '@fontsource-variable/bricolage-grotesque'
 import './styles.css'
 ```
 
 Importa as telas, o layout, a sessão e o CSS global.
 
-**Linhas 25 a 32**
+**Linhas 27 a 34**
 
 ```jsx
 function Private({ children, provider, roles }) {
@@ -210,18 +212,18 @@ function Private({ children, provider, roles }) {
 **Porteiro das telas.** Sem login, manda para "Entrar", lembrando de onde a pessoa veio (`state.from`) para voltar depois do login. Telas de prestador exigem o perfil de prestador; telas de equipe exigem o perfil certo.
 Isso é só conveniência de navegação: a proteção de verdade está no servidor, que recusa qualquer acesso indevido.
 
-**Linhas 34 a 49**
+**Linhas 36 a 51**
 
 ```jsx
 function App() {
   const { ready, meta } = useSession()
-  if (!ready) return <Loading label="Abrindo o ConectaBairro..." />
+  if (!ready) return <Loading label="Abrindo..." />
   if (!meta) {
     return (
       <div className="login">
         <div className="card center">
-          <h2>Sem conexão com o servidor</h2>
-          <p className="muted">Verifique se o ConectaBairro está rodando e tente de novo.</p>
+          <h2>Não consegui falar com o servidor</h2>
+          <p className="muted">Confere se a janela do ConectaBairro está aberta no computador e tenta de novo.</p>
           <button className="btn" onClick={() => window.location.reload()}>
             Tentar de novo
           </button>
@@ -233,7 +235,7 @@ function App() {
 
 Enquanto a sessão carrega, mostra "Abrindo...". Se não conseguiu falar com o servidor, mostra uma tela com botão para tentar de novo.
 
-**Linhas 50 a 72**
+**Linhas 52 a 74**
 
 ```jsx
   return (
@@ -263,7 +265,7 @@ Enquanto a sessão carrega, mostra "Abrindo...". Se não conseguiu falar com o s
 
 A tabela de rotas. "Entrar" fica fora do layout (tela cheia); as demais ficam dentro do `Layout` (barra superior e navegação inferior). Telas públicas: início, oferta e perfil do prestador. As outras passam pelo `Private`. O `*` final é a página não encontrada.
 
-**Linhas 74 a 82**
+**Linhas 76 a 84**
 
 ```jsx
 createRoot(document.getElementById('root')).render(
@@ -342,12 +344,12 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
     })
   } catch (err) {
     if (err.name === 'AbortError') throw err
-    throw new ApiError(0, 'Sem conexão com o servidor. Verifique sua internet.')
+    throw new ApiError(0, 'Sem conexão. Confere a internet e tenta de novo.')
   }
 ```
 
 Função única de chamada: monta o endereço `/api...`, envia o token no cabeçalho `Authorization` e o corpo em JSON.
-Falha de rede vira a mensagem "Sem conexão com o servidor". Cancelamentos (`AbortError`, quando a pessoa digita de novo na busca) são repassados sem mensagem.
+Falha de rede vira a mensagem "Sem conexão. Confere a internet e tenta de novo". Cancelamentos (`AbortError`, quando a pessoa digita de novo na busca) são repassados sem mensagem.
 
 **Linhas 45 a 54**
 
@@ -358,7 +360,7 @@ Falha de rede vira a mensagem "Sem conexão com o servidor". Cancelamentos (`Abo
       setToken(null)
       window.dispatchEvent(new Event('cb:logout'))
     }
-    throw new ApiError(res.status, data.error || 'Algo deu errado')
+    throw new ApiError(res.status, data.error || 'Deu algo errado. Tenta de novo.')
   }
   return data
 }
@@ -647,14 +649,14 @@ O GPS só é liberado pelos navegadores em "contexto seguro" (`https` ou `localh
 ```js
 export function getCurrentPosition() {
   return new Promise((resolve, reject) => {
-    if (!('geolocation' in navigator)) return reject(new Error('Este navegador não informa localização'))
+    if (!('geolocation' in navigator)) return reject(new Error('Este navegador não informa a localização'))
     if (!window.isSecureContext) {
-      return reject(new Error('O navegador só libera a localização em https ou em localhost. Escolha o ponto no mapa.'))
+      return reject(new Error('Por este endereço o navegador não libera o GPS. Marca o ponto no mapa.'))
     }
     navigator.geolocation.getCurrentPosition(
       (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: Math.round(p.coords.accuracy) }),
       (err) =>
-        reject(new Error(err.code === 1 ? 'Permissão de localização negada. Escolha o ponto no mapa.' : 'Não foi possível obter sua localização')),
+        reject(new Error(err.code === 1 ? 'Sem permissão pra usar a localização. Marca o ponto no mapa.' : 'Não deu pra achar sua localização agora')),
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
     )
   })
@@ -688,9 +690,9 @@ export function usePosition(pilot) {
 
 ```js
 export const SOURCE_LABEL = {
-  gps: 'Sua localização atual',
-  mapa: 'Ponto escolhido no mapa',
-  piloto: 'Centro do bairro piloto',
+  gps: 'Você está aqui',
+  mapa: 'Ponto que você marcou no mapa',
+  piloto: 'Centro do bairro',
 }
 ```
 
@@ -888,19 +890,73 @@ O ícone do aplicativo em formato vetorial (SVG), desenhado em código. A partir
 
 ```xml
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#0f5c4d"/>
-  <circle cx="256" cy="256" r="150" fill="none" stroke="#f6f4ef" stroke-width="22" stroke-dasharray="18 26" opacity=".55"/>
-  <circle cx="256" cy="256" r="88" fill="none" stroke="#f6f4ef" stroke-width="22" opacity=".8"/>
-  <path d="M196 268 256 214l60 54v62a10 10 0 0 1-10 10h-30v-44h-40v44h-30a10 10 0 0 1-10-10z" fill="#f6f4ef"/>
-  <circle cx="368" cy="150" r="30" fill="#e8833a"/>
+  <rect width="512" height="512" rx="96" fill="#1c4b86"/>
+  <rect x="36" y="36" width="440" height="440" rx="66" fill="none" stroke="#ffffff" stroke-width="14"/>
+  <circle cx="256" cy="262" r="138" fill="none" stroke="#ffffff" stroke-width="18" stroke-dasharray="16 24" opacity=".55"/>
+  <path d="M184 276 256 212l72 64v74a12 12 0 0 1-12 12h-36v-52h-48v52h-36a12 12 0 0 1-12-12z" fill="#ffffff"/>
+  <circle cx="362" cy="160" r="32" fill="#e9a800"/>
 </svg>
 ```
 
-- quadrado verde com cantos arredondados (o fundo do ícone);
+- quadrado azul com um filete branco por dentro, como uma placa de rua;
 - um círculo tracejado e outro contínuo, que lembram o **raio de busca**;
 - uma casa no centro, o bairro;
-- um ponto laranja, a cor de destaque, sugerindo uma notificação ou um ponto no mapa.
+- um ponto amarelo, a cor de destaque, sugerindo uma notificação ou um ponto no mapa.
 
 `viewBox="0 0 512 512"` define a área de desenho; o SVG pode ser ampliado sem perder nitidez.
+
+---
+
+## `web/src/categories.jsx`
+
+Ícones das categorias e cores dos avatares. Dá identidade aos cartões: um anúncio de bolo mostra um bolo, um de costura mostra uma tesoura, em vez de todos com o mesmo desenho.
+
+**Linhas 1 a 18**
+
+```jsx
+// Ícone de cada categoria, usado nos cartões, nos chips e quando o anúncio não tem foto.
+import { BookOpen, Brush, CakeSlice, HeartHandshake, House, Palette, Scissors, Smartphone, Store, Truck, Wrench } from 'lucide-react'
+
+export const CATEGORY_ICONS = {
+  alimentacao: CakeSlice,
+  costura: Scissors,
+  beleza: Brush,
+  aulas: BookOpen,
+  manutencao: Wrench,
+  domesticos: House,
+  cuidados: HeartHandshake,
+  tecnologia: Smartphone,
+  artesanato: Palette,
+  fretes: Truck,
+  outros: Store,
+}
+
+export const categoryIcon = (slug) => CATEGORY_ICONS[slug] || Store
+```
+
+Cada categoria (o mesmo identificador usado no servidor) aponta para um ícone do lucide. `categoryIcon` devolve o ícone, ou uma lojinha para categorias desconhecidas.
+
+**Linhas 20 a 34**
+
+```jsx
+// Cor do avatar a partir do nome: a mesma pessoa tem sempre a mesma cor.
+const AVATAR_COLORS = [
+  ['#dfe8f4', '#1c4b86'],
+  ['#fbefc9', '#7a5700'],
+  ['#dff1e5', '#2c7a4b'],
+  ['#f6e0da', '#9a3b22'],
+  ['#e8e0f3', '#5b3d8a'],
+  ['#dcefee', '#1f6b68'],
+]
+
+export function avatarColors(name = '') {
+  let h = 0
+  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0
+  return AVATAR_COLORS[h % AVATAR_COLORS.length]
+}
+```
+
+Seis pares de cor (fundo claro e letra escura, sempre com bom contraste). `avatarColors` transforma o nome num número (multiplica por 31 e soma o código de cada letra, a mesma ideia do `hashCode` do Java) e usa o resto da divisão por 6 para escolher o par.
+Assim a cor é sempre a mesma para o mesmo nome, sem precisar guardar nada no banco.
 
 ---

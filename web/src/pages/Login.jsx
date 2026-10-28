@@ -59,9 +59,11 @@ export default function Login() {
   return (
     <div className="login">
       <div className="card">
-        <img src="/icon.svg" alt="" className="logo" />
-        <h1>ConectaBairro</h1>
-        <p className="muted">Serviços e comércio do seu bairro, sem expor o endereço de ninguém.</p>
+        <span className="sign login-sign">
+          <small>Sorocaba</small>
+          ConectaBairro
+        </span>
+        <p className="muted mt">Quem faz, vende e conserta pertinho da sua casa.</p>
 
         {step === 'phone' && (
           <form onSubmit={requestCode}>
@@ -76,16 +78,16 @@ export default function Login() {
                 onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
                 autoFocus
               />
-              <span className="hint">Enviamos um código para confirmar que o número é seu. Não pedimos CNPJ nem documentos.</span>
+              <span className="hint">A gente manda um código pra confirmar que o número é seu. Não pedimos CNPJ nem documento.</span>
             </label>
             {error && <div className="error">{error}</div>}
             <button className="btn block" disabled={busy || phone.replace(/\D/g, '').length < 10}>
-              {busy && <Loader2 size={18} className="spin" />} Receber código
+              {busy && <Loader2 size={18} className="spin" />} Mandar código
             </button>
             {meta?.demoAccounts?.length > 0 && (
               <div className="mt-lg">
-                <div className="small strong">Contas de demonstração</div>
-                <div className="tiny muted">Modo de teste: o código aparece na tela, sem SMS.</div>
+                <div className="small strong">Entrar como alguém do bairro de teste</div>
+                <div className="tiny muted">Pra apresentação: o código aparece aqui mesmo, sem SMS.</div>
                 <div className="demo-accounts">
                   {meta.demoAccounts.map((a) => (
                     <button
@@ -114,12 +116,12 @@ export default function Login() {
               <div className="notice mb">
                 <ShieldCheck size={18} />
                 <span>
-                  Modo demonstração: seu código é <strong>{devCode}</strong>. Em produção ele chega por SMS.
+                  Seu código é <strong>{devCode}</strong>. Na versão de verdade ele chega por SMS.
                 </span>
               </div>
             )}
             <label className="field">
-              <span>Código de 6 dígitos</span>
+              <span>Código que chegou no celular</span>
               <input
                 className="input code"
                 inputMode="numeric"
@@ -132,29 +134,29 @@ export default function Login() {
             </label>
             {error && <div className="error">{error}</div>}
             <button className="btn block" disabled={busy || code.length !== 6}>
-              {busy && <Loader2 size={18} className="spin" />} Confirmar
+              {busy && <Loader2 size={18} className="spin" />} Entrar
             </button>
           </form>
         )}
 
         {step === 'name' && (
           <form onSubmit={verify}>
-            <h2>Bem-vindo ao bairro</h2>
+            <h2>Primeira vez por aqui?</h2>
             <label className="field">
-              <span>Como podemos te chamar?</span>
+              <span>Como você quer ser chamado?</span>
               <input className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} autoFocus autoComplete="name" />
             </label>
             <label className="checkbox">
               <input type="checkbox" checked={isProvider} onChange={(e) => setIsProvider(e.target.checked)} />
               <span>
-                <strong>Também quero oferecer serviços ou produtos</strong>
+                <strong>Também quero anunciar meu trabalho</strong>
                 <br />
-                <span className="small muted">Você aparece para os vizinhos só pela distância aproximada. Seu endereço nunca é mostrado.</span>
+                <span className="small muted">Os vizinhos só veem a que distância você está. Seu endereço fica com a gente.</span>
               </span>
             </label>
             {error && <div className="error">{error}</div>}
             <button className="btn block mt" disabled={busy || !name.trim()}>
-              {busy && <Loader2 size={18} className="spin" />} Criar minha conta
+              {busy && <Loader2 size={18} className="spin" />} Criar conta
             </button>
           </form>
         )}

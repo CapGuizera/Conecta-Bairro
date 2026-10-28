@@ -33,7 +33,7 @@ export function ProviderLocation({ onSaved, onCancel }) {
         ? await api('/me/location', { method: 'PUT', body: { lat: point.lat, lng: point.lng, serviceRadiusKm: radius } })
         : await api('/me/location', { method: 'PATCH', body: { serviceRadiusKm: radius } })
       setLocation(r.location)
-      showToast('Ponto de atendimento salvo', 'ok')
+      showToast('Salvo!', 'ok')
       onSaved?.()
     } catch (err) {
       setError(err.message)
@@ -44,23 +44,23 @@ export function ProviderLocation({ onSaved, onCancel }) {
 
   return (
     <div className="card">
-      <h2>Onde você atende?</h2>
+      <h2>De onde você atende?</h2>
       <div className="notice mb">
         <Lock size={18} />
         <span className="small">
-          Esse ponto serve só para calcular distâncias. Os vizinhos veem apenas algo como "1,2 km de você", calculado a partir de um ponto deslocado
-          entre 100 e 300 metros do seu endereço. Ninguém vê sua rua ou seu número.
+          Esse ponto serve só pra calcular a distância. Os vizinhos veem algo como "a 1,2 km de você", e a conta é feita a partir de um ponto que a
+          gente afasta de 100 a 300 metros da sua casa. Ninguém vê sua rua nem seu número.
         </span>
       </div>
       <button className="btn outline block mb" onClick={gps} disabled={!!busy}>
-        {busy === 'gps' ? <Loader2 size={18} className="spin" /> : <Crosshair size={18} />} Estou no local de atendimento agora
+        {busy === 'gps' ? <Loader2 size={18} className="spin" /> : <Crosshair size={18} />} Estou no lugar onde atendo
       </button>
-      <p className="small muted">Ou toque no mapa para marcar o ponto.</p>
+      <p className="small muted">Ou toca no mapa pra marcar.</p>
       <PickPointMap value={point} onChange={setPoint} fallback={meta.pilot} radiusKm={radius} />
       <label className="field mt">
         <span>
           Atendo até {String(radius).replace('.', ',')} km de distância
-          <span className="hint">Para quem vai até você ou para onde você se desloca para atender.</span>
+          <span className="hint">Até onde vale a pena o cliente vir até você, ou você ir até ele.</span>
         </span>
         <input type="range" min={0.5} max={20} step={0.5} value={radius} onChange={(e) => setRadius(Number(e.target.value))} />
       </label>
@@ -73,7 +73,7 @@ export function ProviderLocation({ onSaved, onCancel }) {
         )}
         <button className="btn grow" onClick={save} disabled={!!busy || (!point && !location.hasLocation)}>
           {busy === 'save' && <Loader2 size={18} className="spin" />}
-          {point || !location.hasLocation ? 'Salvar ponto de atendimento' : 'Salvar raio de atendimento'}
+          {point || !location.hasLocation ? 'Salvar' : 'Salvar distância'}
         </button>
       </div>
     </div>

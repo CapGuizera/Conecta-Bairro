@@ -19,8 +19,8 @@ export default defineConfig({
         short_name: 'ConectaBairro',
         description: 'Serviços e comércio do seu bairro, sem expor o endereço de ninguém.',
         lang: 'pt-BR',
-        theme_color: '#0f5c4d',
-        background_color: '#f6f4ef',
+        theme_color: '#1c4b86',
+        background_color: '#f4f1ea',
         display: 'standalone',
         start_url: '/',
         icons: [

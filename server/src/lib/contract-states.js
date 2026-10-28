@@ -9,12 +9,12 @@
 //  solicitada | proposta_enviada | aceita | em_andamento --(qualquer parte cancela)--> cancelada
 
 export const STATUS_LABELS = {
-  solicitada: 'Solicitada',
-  proposta_enviada: 'Proposta enviada',
-  aceita: 'Proposta aceita',
+  solicitada: 'Orçamento pedido',
+  proposta_enviada: 'Orçamento enviado',
+  aceita: 'Negócio fechado',
   em_andamento: 'Em andamento',
-  concluida: 'Concluída',
-  cancelada: 'Cancelada',
+  concluida: 'Concluído',
+  cancelada: 'Cancelado',
 }
 
 export const TRANSITIONS = {
@@ -33,12 +33,12 @@ export function nextStatus(currentStatus, action, actorSide) {
   const t = TRANSITIONS[action]
   if (!t) throw Object.assign(new Error(`Ação desconhecida: ${action}`), { status: 400 })
   if (t.by !== 'any' && t.by !== actorSide) {
-    const who = t.by === 'provider' ? 'o prestador' : 'o contratante'
-    throw Object.assign(new Error(`Somente ${who} pode realizar esta ação`), { status: 403 })
+    const who = t.by === 'provider' ? 'quem presta o serviço' : 'quem está contratando'
+    throw Object.assign(new Error(`Só ${who} pode fazer isso`), { status: 403 })
   }
   if (!t.from.includes(currentStatus)) {
     throw Object.assign(
-      new Error(`Não é possível "${action}" uma contratação no estado "${STATUS_LABELS[currentStatus]}"`),
+      new Error(`Isso não dá pra fazer agora (situação atual: ${STATUS_LABELS[currentStatus].toLowerCase()})`),
       { status: 409 },
     )
   }

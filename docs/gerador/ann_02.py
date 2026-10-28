@@ -49,7 +49,22 @@ Camada de acesso ao banco. Expõe sempre a mesma interface (`query`, `exec`, `tr
 Comentário explicando os dois modos. Importações e leitura do arquivo `schema.sql`, que fica na mesma pasta.
 '''),
 ('let impl = null', '''
-Guarda a conexão aberta (padrão *singleton*): o banco é aberto uma vez e reaproveitado.
+Guarda a conexão aberta (padrão *singleton*: o banco é aberto uma vez e reaproveitado) e a função que libera a trava do banco.
+'''),
+('// O PGlite não aguenta', '''
+**A trava do banco embutido.** O PGlite não foi feito para dois processos abrirem a mesma pasta: o segundo atrapalha as gravações do primeiro e o banco pode corromper.
+Isso aconteceu de verdade durante o desenvolvimento, quando o sistema foi aberto duas vezes ao mesmo tempo (as páginas de oferta passaram a dar "erro interno").
+
+`processAlive` confere se um processo ainda existe: `process.kill(pid, 0)` não mata nada, só pergunta ao sistema operacional se o PID existe (funciona igual no Windows). O erro `EPERM` significa "existe, mas é de outro usuário".
+'''),
+('function acquireLock(dir) {', '''
+`acquireLock` cria o arquivo `server/data/pglite.lock` com o PID do processo:
+
+- a opção `flag: 'wx'` só cria se o arquivo **não existir**, numa operação única do sistema de arquivos. Dois processos tentando ao mesmo tempo nunca ganham os dois;
+- se já existir e o dono ainda estiver vivo, recusa com o erro `DB_LOCKED`;
+- se o dono já morreu (por exemplo, a janela foi fechada no X sem encerrar direito), a trava é considerada esquecida: apaga e tenta de novo.
+
+A liberação só apaga o arquivo se ele ainda for deste processo, e é registrada no evento `exit` para acontecer também quando o programa termina.
 '''),
 ('export async function initDb', '''
 Abre o banco. O parâmetro `memory` é usado pelos testes para criar um banco temporário só na memória.
@@ -64,7 +79,7 @@ O `Pool` mantém várias conexões abertas para atender requisições em paralel
 se algo der errado, faz `ROLLBACK` e nada fica gravado pela metade. O `finally` devolve a conexão ao pool em qualquer caso.
 '''),
 ('  } else {', '''
-**Modo PGlite**: carrega o PostgreSQL em WebAssembly com a extensão PostGIS e grava os dados na pasta `server/data/pglite` (ou só em memória nos testes).
+**Modo PGlite**: pega a trava (só quando grava em disco; o banco em memória dos testes não precisa), carrega o PostgreSQL em WebAssembly com a extensão PostGIS e grava os dados na pasta `server/data/pglite`.
 O PGlite já tem transação própria; aqui ela só é adaptada para o mesmo formato do modo PostgreSQL.
 '''),
 ('  await impl.exec(schemaSql)', '''
@@ -74,7 +89,7 @@ Executa o `schema.sql` a cada inicialização. Ele usa `CREATE ... IF NOT EXISTS
 Devolve o banco aberto, ou avisa claramente se alguém tentar usar antes de abrir.
 '''),
 ('export async function closeDb()', '''
-Fecha o banco (usado no encerramento e nos testes).
+Fecha o banco e libera a trava (usado no encerramento, no seed e nos testes).
 '''),
 ('export const q =', '''
 Atalhos usados em todo o servidor: `q` executa e devolve o resultado completo, `one` devolve a primeira linha (ou `null`) e `many` devolve todas as linhas.
@@ -89,7 +104,7 @@ Importações: o servidor HTTP nativo, `os` (para descobrir os IPs da máquina) 
 '''),
 ('const started', '''
 Marca o horário de início para mostrar quanto tempo a inicialização levou. O `await` no nível do módulo é permitido em módulos ES.
-Abre o banco, mostra qual modo está em uso e roda o seed se for a primeira vez.
+Abre o banco. Se ele já estiver aberto por outra janela (erro `DB_LOCKED` da trava), explica isso e encerra **antes** de tocar no banco, em vez de mostrar um erro técnico. Depois mostra qual modo está em uso e roda o seed se for a primeira vez.
 '''),
 ('const app = createApp()', '''
 Cria o aplicativo Express e o servidor HTTP, liga o Socket.IO no mesmo servidor (mesma porta) e agenda a rotina do RF16.

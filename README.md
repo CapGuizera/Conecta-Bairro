@@ -56,13 +56,17 @@ Abra esse endereço no celular ou em outro computador **conectado ao mesmo Wi-Fi
 
 ## Fluxo para apresentar
 
-1. Entre como **Thiago**, busque "bolo de aniversário" ou "chuveiro queimou" e ajuste o raio.
-2. Abra uma oferta, toque em **Conversar com o prestador** e mande uma mensagem com um telefone: ele é removido automaticamente.
-3. Toque em **Solicitar este serviço**.
-4. Em outra janela anônima (`Ctrl+Shift+N`), entre como o prestador daquela oferta, envie a **proposta** com valor e prazo. Ela aparece na hora para o Thiago.
-5. Thiago **aceita**; o prestador **inicia** e **conclui**. A comissão de 6% é apurada e o comprovante fica disponível.
-6. Os dois se **avaliam**. A reputação aparece no perfil do prestador.
-7. Mostre o **Painel do prestador** (métricas, destaque, confirmação de atividade), o **Cadastro de campo** (agente), a **Moderação** e os **Indicadores** (associação).
+1. Entre como **Thiago**, busque "bolo de aniversário" ou "chuveiro queimou" e ajuste a distância.
+2. Abra um anúncio, toque em **Chamar no chat** e mande uma mensagem com um telefone: ele some sozinho da mensagem.
+3. Toque em **Pedir orçamento**.
+4. Em outra janela anônima (`Ctrl+Shift+N`), entre como quem fez o anúncio e toque em **Mandar orçamento** com valor e data. Ele aparece na hora para o Thiago.
+5. Thiago toca em **Fechar negócio**; o prestador toca em **Comecei o serviço** e depois em **Terminei**. A taxa de 6% é calculada e o comprovante sai na hora.
+6. Os dois se **avaliam**. A nota aparece no perfil do prestador.
+7. Mostre o **painel do prestador** (números, destaque, confirmação de que continua atendendo), o **cadastro de campo** (agente), a **moderação** e os **indicadores** (associação).
+
+## Se aparecer "já está aberto em outra janela"
+
+O sistema não deixa abrir duas cópias ao mesmo tempo, porque isso estraga o banco de dados. Use a janela que já está aberta, ou feche-a antes de abrir de novo. O `npm run seed` também pede para fechar o sistema antes de recriar os dados.
 
 ## Comandos
 

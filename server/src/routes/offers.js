@@ -90,7 +90,7 @@ r.get('/offers/:id', async (req, res) => {
     params,
   )
   const isOwner = req.user && req.user.id === row?.provider_id
-  if (!row || (row.status === 'pausada' && !isOwner)) fail(404, 'Oferta não encontrada')
+  if (!row || (row.status === 'pausada' && !isOwner)) fail(404, 'Esse anúncio não existe mais')
 
   // RF14: registra a visualização (uma por visitante por dia, sem contar o próprio prestador).
   if (!isOwner) {
@@ -151,7 +151,7 @@ function readOfferBody(b) {
   const priceMin = parseMoneyToCents(b.priceMin)
   const priceMax = parseMoneyToCents(b.priceMax)
   if (priceMin !== null && priceMin < 0) fail(400, 'Preço inválido')
-  if (priceMin !== null && priceMax !== null && priceMax < priceMin) fail(400, 'O preço máximo deve ser maior que o mínimo')
+  if (priceMin !== null && priceMax !== null && priceMax < priceMin) fail(400, 'O preço máximo tem que ser maior que o mínimo')
   const priceUnit = str(b.priceUnit, { max: 30, name: 'unidade de preço' }) || 'a combinar'
   return { title, description, category: b.category, kind, priceMin, priceMax, priceUnit }
 }
@@ -189,7 +189,7 @@ async function ownOffer(req) {
     Number(req.params.id) || 0,
     req.user.id,
   ])
-  if (!row) fail(404, 'Oferta não encontrada')
+  if (!row) fail(404, 'Esse anúncio não existe mais')
   return row
 }
 

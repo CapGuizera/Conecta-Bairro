@@ -10,6 +10,44 @@ import { config } from './config.js'
 const schemaSql = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), 'schema.sql'), 'utf8')
 
 let impl = null
+let releaseLock = null
+
+// O PGlite não aguenta dois processos no mesmo banco: o segundo atrapalha as gravações do primeiro
+// (aconteceu ao abrir o sistema duas vezes). A trava guarda o PID de quem está com o banco aberto.
+function processAlive(pid) {
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch (err) {
+    return err.code === 'EPERM'
+  }
+}
+
+function acquireLock(dir) {
+  const file = path.join(path.dirname(dir), 'pglite.lock')
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      fs.writeFileSync(file, String(process.pid), { flag: 'wx' })
+      break
+    } catch (err) {
+      if (err.code !== 'EEXIST') throw err
+      const owner = Number(fs.readFileSync(file, 'utf8'))
+      if (owner && owner !== process.pid && processAlive(owner)) {
+        throw Object.assign(new Error(`O banco já está aberto por outro processo (PID ${owner})`), { code: 'DB_LOCKED', owner })
+      }
+      fs.rmSync(file, { force: true }) // trava esquecida por um processo que já terminou
+    }
+  }
+  const release = () => {
+    try {
+      if (Number(fs.readFileSync(file, 'utf8')) === process.pid) fs.rmSync(file, { force: true })
+    } catch {
+      /* já removida */
+    }
+  }
+  process.on('exit', release)
+  return release
+}
 
 export async function initDb({ memory = false } = {}) {
   if (impl) return impl
@@ -41,7 +79,10 @@ export async function initDb({ memory = false } = {}) {
   } else {
     const { PGlite } = await import('@electric-sql/pglite')
     const { postgis } = await import('@electric-sql/pglite-postgis')
-    if (!memory) fs.mkdirSync(config.pgliteDir, { recursive: true })
+    if (!memory) {
+      fs.mkdirSync(config.pgliteDir, { recursive: true })
+      releaseLock = acquireLock(config.pgliteDir)
+    }
     const db = await PGlite.create(memory ? undefined : config.pgliteDir, { extensions: { postgis } })
     impl = {
       kind: memory ? 'pglite-memory' : 'pglite',
@@ -63,6 +104,8 @@ export function db() {
 export async function closeDb() {
   if (impl) await impl.close()
   impl = null
+  releaseLock?.()
+  releaseLock = null
 }
 
 export const q = (sql, params = []) => db().query(sql, params)

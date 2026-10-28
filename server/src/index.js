@@ -10,7 +10,15 @@ import { seedIfEmpty } from './seed.js'
 
 const started = Date.now()
 console.log('Iniciando o ConectaBairro...')
-const db = await initDb()
+let db
+try {
+  db = await initDb()
+} catch (err) {
+  if (err.code !== 'DB_LOCKED') throw err
+  console.error(`\nO ConectaBairro já está aberto em outra janela (processo ${err.owner}).`)
+  console.error('Use a janela que já está aberta ou feche-a antes de abrir de novo.')
+  process.exit(1)
+}
 console.log(`Banco: ${db.kind === 'postgres' ? 'PostgreSQL + PostGIS (DATABASE_URL)' : `PGlite embutido em ${config.pgliteDir}`}`)
 await seedIfEmpty()
 

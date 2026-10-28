@@ -83,8 +83,8 @@ export default function Home() {
 
   return (
     <div>
-      <h1>{user ? `Olá, ${user.name.split(' ')[0]}` : 'O que você precisa hoje?'}</h1>
-      <p className="muted small">Encontre quem atende a poucos minutos de caminhada.</p>
+      <h1>{user ? `Oi, ${user.name.split(' ')[0]}! Do que você precisa?` : 'Do que você precisa hoje?'}</h1>
+      <p className="muted small">Gente do bairro que faz, vende e conserta. Tudo a uma caminhada de você.</p>
 
       <form
         className="search-box mb"
@@ -97,7 +97,7 @@ export default function Home() {
         <input
           className="input"
           type="search"
-          placeholder="Ex.: bolo de aniversário, conserto de chuveiro"
+          placeholder="Bolo de aniversário, chuveiro queimado, barra de calça..."
           value={text}
           onChange={(e) => {
             setText(e.target.value)
@@ -123,7 +123,7 @@ export default function Home() {
           <MapPin size={18} color="var(--accent)" />
           <div className="grow">
             <div className="small strong">{SOURCE_LABEL[position.source] || 'Ponto de busca'}</div>
-            <div className="tiny muted">Raio de busca: até {String(radius).replace('.', ',')} km</div>
+            <div className="tiny muted">Até {String(radius).replace('.', ',')} km daqui</div>
           </div>
           <button className="btn ghost sm" onClick={() => setShowLocation(true)}>
             Alterar
@@ -151,7 +151,7 @@ export default function Home() {
           <div className="mt">
             <RadiusMap position={position} radiusKm={radius} onPick={(p) => setPosition({ ...p, source: 'mapa' })} />
             <div className="row tiny muted mt">
-              <Lock size={12} /> Por privacidade, o mapa não mostra onde os prestadores moram. Você vê só a distância aproximada.
+              <Lock size={12} /> O mapa mostra só você. Onde cada pessoa mora fica guardado; aqui aparece apenas a distância.
             </div>
           </div>
         )}
@@ -159,7 +159,7 @@ export default function Home() {
 
       <div className="section-title">
         <h2>{heading}</h2>
-        {results && !loading && <span className="small muted">{results.length} encontrados</span>}
+        {results && !loading && <span className="small muted">{results.length === 1 ? '1 resultado' : `${results.length} resultados`}</span>}
       </div>
 
       <ErrorBox error={error} />
@@ -171,12 +171,12 @@ export default function Home() {
         </div>
       )}
       {results && results.length === 0 && (
-        <Empty icon={SearchX} title="Nada encontrado neste raio">
-          Tente aumentar o raio de busca ou usar outras palavras.
+        <Empty icon={SearchX} title="Ninguém por perto com isso ainda">
+          Tenta aumentar a distância ou escrever de outro jeito.
           {radius < 10 && (
             <div className="mt">
               <button className="btn outline sm" onClick={() => update({ raio: radiusOptions[Math.min(radiusOptions.length - 1, radiusIndex + 1)] })}>
-                Ampliar para {String(radiusOptions[Math.min(radiusOptions.length - 1, radiusIndex + 1)]).replace('.', ',')} km
+                Procurar até {String(radiusOptions[Math.min(radiusOptions.length - 1, radiusIndex + 1)]).replace('.', ',')} km
               </button>
             </div>
           )}

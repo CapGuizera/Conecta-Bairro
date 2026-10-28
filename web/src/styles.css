@@ -1,51 +1,58 @@
 :root {
-  --bg: #f6f4ef;
-  --surface: #ffffff;
-  --surface-2: #efece4;
-  --ink: #1c2925;
-  --muted: #5d6a65;
-  --line: #e2ddd2;
-  --primary: #0f5c4d;
-  --primary-hover: #0b4a3e;
+  /* Cores de placa de rua (azul e branco) com o amarelo dos ipês da cidade */
+  --bg: #f4f1ea;
+  --surface: #fffdf9;
+  --surface-2: #ece7dc;
+  --ink: #1d2330;
+  --muted: #5c6371;
+  --line: #ddd6c7;
+  --primary: #1c4b86;
+  --primary-hover: #163c6c;
   --primary-ink: #ffffff;
-  --primary-soft: #dcebe5;
-  --accent: #d9702b;
-  --accent-soft: #fbe8d8;
+  --primary-soft: #dfe8f4;
+  --accent: #e9a800;
+  --accent-ink: #2a2000;
+  --accent-soft: #fbefc9;
+  --accent-text: #7a5700;
   --danger: #b3261e;
   --danger-soft: #fbe4e2;
-  --ok: #2b7a4b;
+  --ok: #2c7a4b;
   --ok-soft: #dff1e5;
-  --warn: #9a5b00;
+  --warn: #8a5a00;
   --warn-soft: #fbefd5;
   --star: #e0a100;
-  --shadow: 0 1px 2px rgba(28, 41, 37, 0.06), 0 4px 16px rgba(28, 41, 37, 0.06);
-  --radius: 14px;
-  --radius-sm: 10px;
+  --shadow: 0 1px 0 rgba(29, 35, 48, 0.06);
+  --radius: 10px;
+  --radius-sm: 8px;
   --nav-h: 64px;
+  --font-body: 'Figtree Variable', system-ui, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-title: 'Bricolage Grotesque Variable', 'Figtree Variable', system-ui, sans-serif;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #111816;
-    --surface: #18221f;
-    --surface-2: #1f2b27;
-    --ink: #e7eeeb;
-    --muted: #9aaba5;
-    --line: #2a3833;
-    --primary: #3fb393;
-    --primary-hover: #52c4a4;
-    --primary-ink: #08231c;
-    --primary-soft: #183a31;
-    --accent: #f0904f;
-    --accent-soft: #3a2616;
+    --bg: #14171d;
+    --surface: #1b2029;
+    --surface-2: #232a35;
+    --ink: #e8ebf0;
+    --muted: #9ba3b0;
+    --line: #2c3440;
+    --primary: #7eaee8;
+    --primary-hover: #9cc2ef;
+    --primary-ink: #0c1a2c;
+    --primary-soft: #1e2f47;
+    --accent: #f2c14e;
+    --accent-ink: #231a00;
+    --accent-soft: #3a3016;
+    --accent-text: #f2c14e;
     --danger: #f07a72;
     --danger-soft: #3b1b19;
     --ok: #6cd197;
     --ok-soft: #173525;
     --warn: #f0b860;
     --warn-soft: #3a2b12;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 16px rgba(0, 0, 0, 0.25);
+    --shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
     color-scheme: dark;
   }
 }
@@ -59,9 +66,9 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-body);
   font-size: 16px;
-  line-height: 1.45;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
 }
@@ -74,12 +81,14 @@ a {
 h1,
 h2,
 h3 {
-  line-height: 1.2;
+  font-family: var(--font-title);
+  font-weight: 700;
+  line-height: 1.15;
   margin: 0 0 0.5rem;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 h1 {
-  font-size: 1.5rem;
+  font-size: 1.65rem;
 }
 h2 {
   font-size: 1.15rem;
@@ -116,18 +125,30 @@ img {
   gap: 12px;
 }
 .topbar .brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   color: inherit;
-  font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: -0.01em;
 }
-.topbar .brand img {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+/* A marca imita uma placa de rua: fundo azul, filete branco por dentro e letras brancas */
+.sign {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3px 12px 4px;
+  border: 2px solid currentColor;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 2px var(--primary);
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+}
+.sign small {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.85;
 }
 .topbar .spacer {
   flex: 1;
@@ -143,7 +164,7 @@ img {
   color: inherit;
   opacity: 0.85;
   padding: 8px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   font-weight: 500;
   font-size: 0.95rem;
 }
@@ -177,7 +198,7 @@ img {
   padding: 0 5px;
   border-radius: 999px;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink);
   font-size: 0.7rem;
   font-weight: 700;
   display: grid;
@@ -342,18 +363,18 @@ img {
   gap: 12px;
 }
 .grid.two {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
 .grid.stats {
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 @media (min-width: 640px) {
   .grid.two {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .grid.stats {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -366,12 +387,12 @@ img {
   gap: 8px;
   min-height: 44px;
   padding: 0 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   border: 1px solid transparent;
   background: var(--primary);
   color: var(--primary-ink);
   font: inherit;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
   transition: background 0.15s, transform 0.05s;
@@ -405,7 +426,10 @@ img {
 }
 .btn.accent {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-ink);
+}
+.btn.accent:hover {
+  background: #d69a00;
 }
 .btn.danger {
   background: transparent;
@@ -482,9 +506,9 @@ textarea.input {
 .search-box .input {
   padding-left: 44px;
   min-height: 52px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   font-size: 1rem;
-  box-shadow: var(--shadow);
+  border-width: 2px;
 }
 
 .checkbox {
@@ -505,15 +529,17 @@ textarea.input {
 .segmented {
   display: flex;
   background: var(--surface-2);
-  border-radius: 999px;
+  border-radius: var(--radius);
   padding: 4px;
   gap: 4px;
 }
 .segmented button {
   flex: 1;
+  white-space: nowrap;
+  padding: 0 12px;
   border: 0;
   background: transparent;
-  border-radius: 999px;
+  border-radius: calc(var(--radius) - 3px);
   min-height: 38px;
   font: inherit;
   font-size: 0.9rem;
@@ -565,7 +591,7 @@ input[type='range'] {
   background: var(--accent-soft);
 }
 .notice.accent svg {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 /* ---------- chips e etiquetas ---------- */
@@ -619,7 +645,7 @@ input[type='range'] {
 }
 .badge.accent {
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--accent-text);
 }
 .badge.ok {
   background: var(--ok-soft);
@@ -676,10 +702,12 @@ input[type='range'] {
 .offer-list {
   display: grid;
   gap: 12px;
+  /* minmax(0, ...) impede que um título comprido alargue a coluna além da tela */
+  grid-template-columns: minmax(0, 1fr);
 }
 @media (min-width: 720px) {
   .offer-list {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 .offer-card {
@@ -926,7 +954,7 @@ input[type='range'] {
   font-size: 0.8rem;
   color: var(--muted);
   background: var(--surface-2);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   padding: 5px 12px;
 }
 .proposal-card {
@@ -938,7 +966,8 @@ input[type='range'] {
   margin: 4px 0;
 }
 .proposal-card .amount {
-  font-size: 1.4rem;
+  font-family: var(--font-title);
+  font-size: 1.5rem;
   font-weight: 700;
 }
 .chat-input {
@@ -948,7 +977,7 @@ input[type='range'] {
   border-top: 1px solid var(--line);
 }
 .chat-input .input {
-  border-radius: 999px;
+  border-radius: var(--radius);
 }
 .contract-bar {
   border: 1px solid var(--line);
@@ -991,7 +1020,8 @@ input[type='range'] {
   font-weight: 500;
 }
 .stat .value {
-  font-size: 1.5rem;
+  font-family: var(--font-title);
+  font-size: 1.6rem;
   font-weight: 700;
   margin-top: 2px;
   font-variant-numeric: tabular-nums;
@@ -1220,11 +1250,11 @@ input[type='range'] {
   max-width: 420px;
   padding: 24px;
 }
-.login .logo {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  margin-bottom: 12px;
+.login-sign {
+  background: var(--primary);
+  color: #fff;
+  font-size: 1.6rem;
+  padding: 6px 18px 8px;
 }
 .demo-accounts {
   display: grid;

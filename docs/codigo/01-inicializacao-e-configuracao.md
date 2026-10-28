@@ -63,12 +63,14 @@ Comandos do projeto, chamados com `npm run <nome>`:
 - `seed`: apaga o banco e recria os dados de demonstração.
 - `test`: roda os testes da pasta `server/test` com o executor de testes nativo do Node (`node --test`), sem biblioteca extra.
 
-**Linhas 19 a 34**
+**Linhas 19 a 36**
 
 ```json
   "dependencies": {
     "@electric-sql/pglite": "^0.5.12",
     "@electric-sql/pglite-postgis": "^0.2.12",
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource-variable/figtree": "^5.3.0",
     "express": "^5.3.0",
     "idb-keyval": "^6.3.0",
     "jsonwebtoken": "^9.0.3",
@@ -87,6 +89,7 @@ Comandos do projeto, chamados com `npm run <nome>`:
 Bibliotecas usadas pelo sistema em funcionamento:
 
 - `@electric-sql/pglite` e `@electric-sql/pglite-postgis`: o PostgreSQL compilado para WebAssembly e a extensão geográfica PostGIS. É o que permite ter banco de dados sem instalar nada no Windows.
+- `@fontsource-variable/figtree` e `@fontsource-variable/bricolage-grotesque`: as fontes do texto e dos títulos, instaladas junto com o projeto (funcionam sem internet e não dependem do Google Fonts).
 - `express`: o servidor HTTP da API.
 - `idb-keyval`: acesso simples ao IndexedDB do navegador, usado na fila offline do cadastro de campo (RF18).
 - `jsonwebtoken`: gera e confere o token de sessão (JWT) depois que o telefone é verificado.
@@ -98,7 +101,7 @@ Bibliotecas usadas pelo sistema em funcionamento:
 
 O `^` antes da versão permite atualizações compatíveis; as versões exatas instaladas ficam travadas no `package-lock.json`.
 
-**Linhas 35 a 40**
+**Linhas 37 a 42**
 
 ```json
   "devDependencies": {

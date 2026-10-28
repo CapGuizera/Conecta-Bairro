@@ -47,7 +47,7 @@ r.post('/highlights', requireProvider, async (req, res) => {
     Number(req.body?.offerId) || 0,
     req.user.id,
   ])
-  if (!offer) fail(404, 'Escolha uma oferta ativa')
+  if (!offer) fail(404, 'Escolha um anúncio ativo')
   const h = await db().transaction(async (tx) => {
     // Se já houver destaque ativo, o novo período começa quando o atual termina.
     const cur = (await tx.query('SELECT max(ends_at) AS ends FROM highlights WHERE offer_id = $1 AND ends_at > now()', [offer.id])).rows[0]
@@ -63,8 +63,8 @@ r.post('/highlights', requireProvider, async (req, res) => {
   })
   await notify(req.user.id, {
     kind: 'destaque',
-    title: 'Destaque contratado',
-    body: `"${offer.title}" em destaque na categoria ${categoryName(offer.category)} até ${new Date(h.ends_at).toLocaleDateString('pt-BR')} (${formatBRL(plan.priceCents)})`,
+    title: 'Destaque ativado',
+    body: `"${offer.title}" aparece primeiro em ${categoryName(offer.category)} até ${new Date(h.ends_at).toLocaleDateString('pt-BR')} (${formatBRL(plan.priceCents)})`,
     link: '/painel',
   })
   res.status(201).json({ highlight: { id: h.id, endsAt: h.ends_at, startsAt: h.starts_at, paymentCode: h.payment_code } })

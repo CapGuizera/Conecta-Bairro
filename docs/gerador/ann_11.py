@@ -24,7 +24,7 @@ Pede o código ao servidor. No modo demonstração o código volta na resposta e
 Confirma o código. Se o servidor responder `needsName`, avança para o passo do nome; senão, guarda a sessão e volta para a tela de origem.
 '''),
 ('  return (', '''
-Cartão central com a marca e a frase da proposta de valor.
+Cartão central com a placa de rua grande e a frase do projeto, escrita do jeito que se fala.
 '''),
 ("        {step === 'phone' && (", '''
 **Passo 1**: campo de celular com formatação automática e `inputMode="tel"` (abre o teclado numérico no celular). O texto de ajuda reforça que não há pedido de CNPJ nem de documentos. O botão só é liberado com pelo menos 10 dígitos.
@@ -102,7 +102,7 @@ O diálogo de escolha do ponto de busca.
 '''),
 ]),
 ('web/src/pages/OfferDetail.jsx', '''
-Detalhe da oferta, com o botão de conversar.
+Detalhe da oferta (o "anúncio", como aparece na tela), com o botão de chamar no chat.
 ''', [
 ("import { useState }", '''
 Importações.
@@ -114,7 +114,7 @@ Carrega a oferta enviando o ponto de busca do morador, para o servidor calcular 
 Carregando, erro e os dados recebidos. O ícone muda entre produto e serviço.
 '''),
 ('  async function contact()', '''
-**Conversar com o prestador**: sem login, vai para a entrada e volta para cá depois; com conversa já existente, abre a conversa; senão, cria e abre.
+**Chamar no chat**: sem login, vai para a entrada e volta para cá depois; com conversa já existente, abre a conversa; senão, cria e abre.
 '''),
 ('  return (', '''
 Botão de voltar.
@@ -132,7 +132,7 @@ A descrição, preservando as quebras de linha, e o aviso de privacidade: endere
 Cartão do prestador com link para o perfil: nome, desde quando está na plataforma, estrelas e serviços concluídos (RF12).
 '''),
 ('      <ErrorBox error={error} />', '''
-O botão principal: "Editar minha oferta" para o dono, "Conversar" ou "Abrir conversa" para os demais.
+O botão principal: "Editar meu anúncio" para o dono, "Chamar <nome> no chat" ou "Continuar a conversa" para os demais.
 '''),
 ('      {user && !isOwner && (', '''
 Link de denúncia para usuários logados (RF15).
@@ -217,7 +217,7 @@ Envia a mensagem. Se o servidor removeu dados de contato, mostra o aviso explica
 Executa uma ação da contratação. Ações sérias (concluir, cancelar) passam primeiro por um diálogo de confirmação próprio. O `window.confirm` do navegador não é usado porque bloqueia a página e destoa do visual no celular.
 '''),
 ('  const pendingProposal =', '''
-A proposta pendente (que pode receber "Aceitar" ou "Recusar") e o atalho `can`, que consulta as ações liberadas pelo servidor.
+A proposta pendente (que pode receber "Fechar negócio" ou "Recusar") e o atalho `can`, que consulta as ações liberadas pelo servidor.
 '''),
 ('  return (', '''
 Cabeçalho: voltar, iniciais e nome da outra pessoa (com link para o perfil, se for prestador), título da oferta e botão de denúncia.
@@ -230,10 +230,10 @@ Os botões dependem da lista `actions` calculada pelo servidor, então a tela nu
 Área das mensagens, começando com o lembrete de que contatos são removidos automaticamente. Mensagens de sistema aparecem centralizadas.
 '''),
 ("          if (m.kind === 'proposta' && m.proposal) {", '''
-**Cartão de proposta**: quem propôs, situação, valor, prazo e observações. Os botões "Aceitar" e "Recusar" só aparecem para o contratante e só na proposta pendente.
+**Cartão de proposta**: quem propôs, situação, valor, prazo e observações. Os botões "Fechar negócio" (aceitar) e "Recusar" só aparecem para o contratante e só na proposta pendente.
 '''),
 ('          const mine = m.senderId === conv.me', '''
-Balões de mensagem: os próprios à direita, em verde; os da outra pessoa à esquerda. Mensagens que tiveram contato removido ganham contorno tracejado.
+Balões de mensagem: os próprios à direita, em azul; os da outra pessoa à esquerda. Mensagens que tiveram contato removido ganham contorno tracejado.
 '''),
 ('        {contract?.canReview &&', '''
 A caixa de avaliação, quando liberada, e a confirmação da nota já dada.
@@ -242,7 +242,7 @@ A caixa de avaliação, quando liberada, e a confirmação da nota já dada.
 Aviso de que dados de contato foram removidos, explicando a vantagem de negociar pela plataforma.
 '''),
 ('      {canRequest && !contract && (', '''
-O botão "Solicitar este serviço", em destaque, quando ainda não há contratação.
+O botão "Pedir orçamento", em destaque, quando ainda não há contratação.
 '''),
 ('      <form className="chat-input"', '''
 Campo de mensagem e botão de enviar.

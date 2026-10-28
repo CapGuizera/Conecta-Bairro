@@ -88,6 +88,7 @@ Apaga tudo: remove o esquema `public` inteiro (tabelas e extensão) e o recria v
 '''),
 ('// Execução direta', '''
 Quando o arquivo é executado diretamente (`npm run seed`), e não importado, abre o banco, apaga com `--reset`, reabre (o que recria as tabelas pelo `schema.sql`) e popula.
+Se o sistema estiver aberto, a trava do banco impede o seed de rodar e ele pede para fechar o ConectaBairro primeiro. Apagar o banco por baixo de um servidor em funcionamento foi justamente o que corrompeu os dados uma vez.
 A comparação com `pathToFileURL` funciona igual no Windows, onde os caminhos usam barra invertida.
 '''),
 ]),

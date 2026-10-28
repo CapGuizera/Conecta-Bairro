@@ -19,10 +19,10 @@ export default function Contracts() {
   )
   return (
     <div>
-      <h1>Contratações</h1>
+      <h1>Meus serviços</h1>
       <div className="tabs">
         {[
-          ['abertas', 'Em aberto'],
+          ['abertas', 'Rolando'],
           ['concluidas', 'Concluídas'],
           ['canceladas', 'Canceladas'],
         ].map(([id, label]) => (
@@ -33,7 +33,7 @@ export default function Contracts() {
       </div>
       {list.length === 0 ? (
         <Empty icon={ClipboardList} title="Nada por aqui">
-          As contratações começam pelo chat, com o botão "Solicitar este serviço".
+          Tudo começa no chat, quando alguém pede um orçamento.
         </Empty>
       ) : (
         <div className="list">
@@ -45,10 +45,10 @@ export default function Contracts() {
                   <span className={`badge ${TONE[c.status]}`}>{c.statusLabel}</span>
                 </div>
                 <div className="small muted">
-                  {c.side === 'client' ? 'Prestador' : 'Cliente'}: {c.counterpart.name}
+                  {c.side === 'client' ? 'Com' : 'Para'} {c.counterpart.name}
                 </div>
                 <div className="row between small">
-                  <span>{c.amountCents ? `${brl(c.amountCents)} · prazo ${ymdToBr(c.deadline)}` : 'Aguardando proposta'}</span>
+                  <span>{c.amountCents ? `${brl(c.amountCents)} · pronto até ${ymdToBr(c.deadline)}` : 'Esperando o orçamento'}</span>
                   <span className="tiny muted">{relative(c.updatedAt)}</span>
                 </div>
               </div>

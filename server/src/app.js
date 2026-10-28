@@ -50,7 +50,7 @@ export function createApp() {
   app.use((err, _req, res, _next) => {
     const status = err.status || (err.type === 'entity.too.large' ? 413 : err.type === 'entity.parse.failed' ? 400 : 500)
     if (status >= 500) console.error(err)
-    res.status(status).json({ error: status >= 500 ? 'Erro interno. Tente novamente.' : err.message })
+    res.status(status).json({ error: status >= 500 ? 'Deu um problema aqui do nosso lado. Tenta de novo daqui a pouco.' : err.message })
   })
   return app
 }

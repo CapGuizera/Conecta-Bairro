@@ -16,7 +16,7 @@ A única página HTML. O React desenha tudo dentro da `div` com id `root`.
 ''', [
 ('<!doctype html>', '''
 Idioma português, codificação UTF-8 e o `viewport`, que faz o layout se adaptar à largura do celular (`viewport-fit=cover` aproveita a área das bordas arredondadas dos celulares modernos).
-`theme-color` pinta a barra do navegador no celular com o verde do sistema. Ícones da aba e da tela inicial do iPhone.
+`theme-color` pinta a barra do navegador no celular com o azul do sistema. Ícones da aba e da tela inicial do iPhone.
 '''),
 ('  <body>', '''
 O ponto de montagem do React e o arquivo JavaScript de entrada.
@@ -80,7 +80,7 @@ Erro com o código HTTP, para as telas tratarem casos específicos (por exemplo,
 '''),
 ('export async function api(', '''
 Função única de chamada: monta o endereço `/api...`, envia o token no cabeçalho `Authorization` e o corpo em JSON.
-Falha de rede vira a mensagem "Sem conexão com o servidor". Cancelamentos (`AbortError`, quando a pessoa digita de novo na busca) são repassados sem mensagem.
+Falha de rede vira a mensagem "Sem conexão. Confere a internet e tenta de novo". Cancelamentos (`AbortError`, quando a pessoa digita de novo na busca) são repassados sem mensagem.
 '''),
 ('  const data = await res.json()', '''
 Se o servidor recusar a sessão (401), apaga o token e avisa o restante da interface com o evento `cb:logout`. Qualquer erro vira `ApiError` com a mensagem do servidor, já pronta para mostrar ao usuário.
@@ -208,12 +208,23 @@ Formata o celular enquanto a pessoa digita: `(15`, `(15) 9987`, `(15) 99876-5432
 O ícone do aplicativo em formato vetorial (SVG), desenhado em código. A partir dele foram geradas as versões PNG de 180, 192 e 512 pixels exigidas para instalar o aplicativo no Android e no iPhone.
 ''', [
 ('<svg', '''
-- quadrado verde com cantos arredondados (o fundo do ícone);
+- quadrado azul com um filete branco por dentro, como uma placa de rua;
 - um círculo tracejado e outro contínuo, que lembram o **raio de busca**;
 - uma casa no centro, o bairro;
-- um ponto laranja, a cor de destaque, sugerindo uma notificação ou um ponto no mapa.
+- um ponto amarelo, a cor de destaque, sugerindo uma notificação ou um ponto no mapa.
 
 `viewBox="0 0 512 512"` define a área de desenho; o SVG pode ser ampliado sem perder nitidez.
+'''),
+]),
+('web/src/categories.jsx', '''
+Ícones das categorias e cores dos avatares. Dá identidade aos cartões: um anúncio de bolo mostra um bolo, um de costura mostra uma tesoura, em vez de todos com o mesmo desenho.
+''', [
+('// Ícone de cada categoria', '''
+Cada categoria (o mesmo identificador usado no servidor) aponta para um ícone do lucide. `categoryIcon` devolve o ícone, ou uma lojinha para categorias desconhecidas.
+'''),
+('// Cor do avatar', '''
+Seis pares de cor (fundo claro e letra escura, sempre com bom contraste). `avatarColors` transforma o nome num número (multiplica por 31 e soma o código de cada letra, a mesma ideia do `hashCode` do Java) e usa o resto da divisão por 6 para escolher o par.
+Assim a cor é sempre a mesma para o mesmo nome, sem precisar guardar nada no banco.
 '''),
 ]),
 ]

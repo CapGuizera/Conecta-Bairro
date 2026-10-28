@@ -24,12 +24,12 @@ export function LocationDialog({ current, pilot, onClose, onSave }) {
   }
 
   return (
-    <Modal title="De onde você está buscando?" onClose={onClose}>
+    <Modal title="Onde você está?" onClose={onClose}>
       <button className="btn block" onClick={useGps} disabled={busy}>
-        {busy ? <Loader2 size={18} className="spin" /> : <Crosshair size={18} />} Usar minha localização atual
+        {busy ? <Loader2 size={18} className="spin" /> : <Crosshair size={18} />} Usar minha localização
       </button>
       {error && <div className="error mt">{error}</div>}
-      <p className="small muted mt">Ou toque no mapa para escolher um ponto. Sua posição fica só neste aparelho.</p>
+      <p className="small muted mt">Ou toca no mapa pra marcar. Sua posição fica só neste aparelho, a gente não guarda.</p>
       <PickPointMap value={point} fallback={pilot} onChange={(p) => setPoint({ ...p, source: 'mapa' })} />
       <div className="row mt">
         <button className="btn ghost" onClick={() => onSave({ lat: pilot.lat, lng: pilot.lng, source: 'piloto' })}>
@@ -37,7 +37,7 @@ export function LocationDialog({ current, pilot, onClose, onSave }) {
         </button>
         <span className="grow" />
         <button className="btn" disabled={!point || point.source !== 'mapa'} onClick={() => onSave(point)}>
-          Usar este ponto
+          Buscar daqui
         </button>
       </div>
     </Modal>

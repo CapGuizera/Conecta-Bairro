@@ -31,7 +31,7 @@ function navItems(user) {
   const items = [
     { to: '/', label: 'Início', icon: Home, end: true },
     { to: '/conversas', label: 'Conversas', icon: MessageCircle },
-    { to: '/contratacoes', label: 'Contratações', icon: ClipboardList },
+    { to: '/contratacoes', label: 'Serviços', icon: ClipboardList },
   ]
   if (user.role === 'agente') items.push({ to: '/campo', label: 'Campo', icon: ClipboardList })
   else if (user.role === 'moderador') items.push({ to: '/moderacao', label: 'Moderação', icon: ShieldCheck })
@@ -42,7 +42,7 @@ function navItems(user) {
 }
 ```
 
-Define os itens de navegação conforme quem está logado: visitante vê Início e Entrar; usuário vê Início, Conversas e Contratações, mais um item do seu perfil (Campo, Moderação, Indicadores ou, para prestadores, Painel) e Perfil.
+Define os itens de navegação conforme quem está logado: visitante vê Início e Entrar; usuário vê Início, Conversas e Serviços (as contratações), mais um item do seu perfil (Campo, Moderação, Indicadores ou, para prestadores, Painel) e Perfil.
 
 **Linhas 26 a 29**
 
@@ -94,16 +94,18 @@ Esconde o aviso rápido depois de 4,5 segundos.
 
 Volta ao topo a cada troca de tela. As chaves `{ }` são necessárias: no Chromium recente `window.scrollTo` devolve uma `Promise`, e um efeito do React só pode devolver uma função de limpeza.
 
-**Linhas 52 a 74**
+**Linhas 52 a 76**
 
 ```jsx
   const items = navItems(user)
   return (
     <div className="app">
       <header className="topbar">
-        <NavLink to="/" className="brand">
-          <img src="/icon.svg" alt="" />
-          ConectaBairro
+        <NavLink to="/" className="brand" aria-label="ConectaBairro, início">
+          <span className="sign">
+            <small>Sorocaba</small>
+            ConectaBairro
+          </span>
         </NavLink>
         <nav className="topnav" aria-label="Principal">
           {items.map((i) => (
@@ -122,21 +124,21 @@ Volta ao topo a cada troca de tela. As chaves `{ }` são necessárias: no Chromi
       </header>
 ```
 
-Barra superior com a marca e, em telas largas (computador), os itens de navegação no topo. O sino com o número de não lidas aparece para quem está logado.
+Barra superior com a marca em forma de **placa de rua** ("Sorocaba" em cima, "ConectaBairro" embaixo; o `aria-label` diz a leitores de tela que ela leva ao início) e, em telas largas (computador), os itens de navegação no topo. O sino com o número de não lidas aparece para quem está logado.
 
-**Linhas 75 a 79**
+**Linhas 77 a 81**
 
 ```jsx
       {!online && (
         <div className="offline-bar">
-          <WifiOff size={14} style={{ verticalAlign: -2 }} /> Sem conexão. {user?.role === 'agente' ? 'Os cadastros de campo serão guardados e enviados depois.' : 'Algumas funções ficam indisponíveis.'}
+          <WifiOff size={14} style={{ verticalAlign: -2 }} /> Sem internet. {user?.role === 'agente' ? 'Pode continuar cadastrando: tudo fica guardado e sobe quando a internet voltar.' : 'Algumas coisas só funcionam com internet.'}
         </div>
       )}
 ```
 
 Faixa amarela de sem conexão. Para o agente de campo, explica que os cadastros serão guardados e enviados depois.
 
-**Linhas 80 a 82**
+**Linhas 82 a 84**
 
 ```jsx
       <main className="main">
@@ -146,7 +148,7 @@ Faixa amarela de sem conexão. Para o agente de campo, explica que os cadastros 
 
 `<Outlet />` é onde o React Router desenha a tela atual.
 
-**Linhas 83 a 98**
+**Linhas 85 a 100**
 
 ```jsx
       <nav className="bottomnav" aria-label="Navegação">
@@ -175,20 +177,21 @@ Navegação inferior (no celular) e o aviso rápido, que some ao ser tocado. `ro
 
 Componentes visuais pequenos usados em várias telas e o *hook* `useLoad`.
 
-**Linhas 1 a 2**
+**Linhas 1 a 3**
 
 ```jsx
 import { useCallback, useEffect, useState } from 'react'
 import { Loader2, Star, X } from 'lucide-react'
+import { avatarColors } from '../categories.jsx'
 ```
 
 Importações.
 
-**Linhas 4 a 16**
+**Linhas 5 a 17**
 
 ```jsx
 export function Stars({ value, count, size = 14 }) {
-  if (value === null || value === undefined) return <span className="muted small">Sem avaliações</span>
+  if (value === null || value === undefined) return <span className="muted small">Ainda sem nota</span>
   const full = Math.round(value)
   return (
     <span className="stars" title={`${value} de 5`}>
@@ -204,7 +207,7 @@ export function Stars({ value, count, size = 14 }) {
 
 Estrelas da avaliação: arredonda a média para escolher quantas preencher, mostra a nota com vírgula e, opcionalmente, a quantidade de avaliações.
 
-**Linhas 18 a 28**
+**Linhas 19 a 29**
 
 ```jsx
 export function StarInput({ value, onChange }) {
@@ -222,7 +225,7 @@ export function StarInput({ value, onChange }) {
 
 Estrelas clicáveis para dar nota. Cada botão tem rótulo ("3 estrelas") para leitores de tela.
 
-**Linhas 30 a 38**
+**Linhas 31 a 39**
 
 ```jsx
 export function Empty({ icon: Icon, title, children }) {
@@ -238,7 +241,7 @@ export function Empty({ icon: Icon, title, children }) {
 
 Mensagem para listas vazias, com ícone, título e texto opcional.
 
-**Linhas 40 a 59**
+**Linhas 41 a 60**
 
 ```jsx
 export function Modal({ title, onClose, children }) {
@@ -265,7 +268,7 @@ export function Modal({ title, onClose, children }) {
 
 Janela sobreposta (diálogo). Fecha com a tecla Esc ou ao clicar fora (`e.target === e.currentTarget` confere que o clique foi no fundo, não dentro da janela). Os atributos `role` e `aria-modal` informam leitores de tela.
 
-**Linhas 61 a 70**
+**Linhas 62 a 76**
 
 ```jsx
 export function Avatar({ name = '', size }) {
@@ -276,13 +279,18 @@ export function Avatar({ name = '', size }) {
     .map((p) => p[0])
     .join('')
     .toUpperCase()
-  return <div className={`avatar ${size || ''}`}>{initials || '?'}</div>
+  const [bg, fg] = avatarColors(name)
+  return (
+    <div className={`avatar ${size || ''}`} style={{ background: bg, color: fg }}>
+      {initials || '?'}
+    </div>
+  )
 }
 ```
 
-Círculo com as iniciais do nome (por exemplo, "CB" para Cleusa Batista). O sistema não pede foto de perfil.
+Círculo com as iniciais do nome (por exemplo, "CB" para Cleusa Batista), numa cor tirada do próprio nome (`avatarColors`): cada pessoa tem sempre a mesma cor, e a lista de conversas não fica toda igual. O sistema não pede foto de perfil.
 
-**Linhas 72 a 94**
+**Linhas 78 a 100**
 
 ```jsx
 export function Loading({ label = 'Carregando...' }) {
@@ -312,7 +320,7 @@ export function Stat({ label, value, sub }) {
 
 Indicador de carregamento, caixa de erro e cartão de número (estatística) dos painéis.
 
-**Linhas 96 a 123**
+**Linhas 102 a 129**
 
 ```jsx
 // Gráfico de barras simples (sem biblioteca), com até duas séries.
@@ -347,7 +355,7 @@ export function Bars({ data, a, b, labelA, labelB }) {
 
 Gráfico de barras feito só com CSS, sem biblioteca: cada barra tem altura proporcional ao maior valor da série (`max`). Mostra até duas séries lado a lado, com legenda e o valor no `title` (aparece ao passar o mouse).
 
-**Linhas 125 a 137**
+**Linhas 131 a 143**
 
 ```jsx
 export function HBar({ label, value, max, display, accent }) {
@@ -367,7 +375,7 @@ export function HBar({ label, value, max, display, accent }) {
 
 Barra horizontal de proporção, usada no painel de indicadores.
 
-**Linhas 139 a 156**
+**Linhas 145 a 162**
 
 ```jsx
 // Carrega dados assíncronos com estado de carregamento, erro e recarga.
@@ -399,23 +407,24 @@ export function useLoad(fn, deps) {
 
 Cartão de oferta da lista de resultados.
 
-**Linhas 1 a 4**
+**Linhas 1 a 5**
 
 ```jsx
 import { Link } from 'react-router-dom'
-import { MapPin, Package, Sparkles, Wrench } from 'lucide-react'
+import { MapPin, Megaphone } from 'lucide-react'
+import { categoryIcon } from '../categories.jsx'
 import { plural, priceRange } from '../format.js'
 import { Stars } from './ui.jsx'
 ```
 
 Importações.
 
-**Linhas 6 a 14**
+**Linhas 7 a 15**
 
 ```jsx
 export function Thumb({ offer, size }) {
   const img = offer.images?.[0]
-  const Icon = offer.kind === 'produto' ? Package : Wrench
+  const Icon = categoryIcon(offer.category)
   return (
     <div className="thumb" style={size ? { width: size, height: size } : undefined}>
       {img ? <img src={img} alt="" loading="lazy" /> : <Icon size={30} strokeWidth={1.6} />}
@@ -424,9 +433,9 @@ export function Thumb({ offer, size }) {
 }
 ```
 
-Miniatura: a primeira foto da oferta ou, sem foto, um ícone de caixa (produto) ou ferramenta (serviço). `loading="lazy"` só baixa a imagem quando ela chega perto da tela.
+Miniatura: a primeira foto da oferta ou, sem foto, o ícone da categoria (bolo, tesoura, chave inglesa...). `loading="lazy"` só baixa a imagem quando ela chega perto da tela.
 
-**Linhas 16 a 49**
+**Linhas 17 a 50**
 
 ```jsx
 export function OfferCard({ offer }) {
@@ -438,7 +447,7 @@ export function OfferCard({ offer }) {
           <span className="badge">{offer.categoryName}</span>
           {offer.highlighted && (
             <span className="badge accent">
-              <Sparkles size={12} /> Destaque
+              <Megaphone size={12} /> Destaque
             </span>
           )}
         </div>
@@ -465,7 +474,7 @@ export function OfferCard({ offer }) {
 }
 ```
 
-O cartão inteiro é um link para a oferta. Mostra categoria, a etiqueta Destaque (com borda laranja), título, **distância aproximada**, nome do prestador, preço, estrelas e quantidade de serviços concluídos.
+O cartão inteiro é um link para a oferta. Mostra categoria, a etiqueta Destaque com megafone (e borda amarela), título, **distância aproximada**, nome do prestador, preço, estrelas e quantidade de serviços concluídos.
 
 ---
 
@@ -550,7 +559,7 @@ export function RadiusMap({ position, radiusKm, onPick, tall }) {
 }
 ```
 
-Mapa da busca: o círculo do raio e o ponto laranja do **próprio morador**. Mais nada. A rolagem do mouse fica desligada para não atrapalhar a rolagem da página.
+Mapa da busca: o círculo do raio e o ponto do **próprio morador**. Mais nada. A rolagem do mouse fica desligada para não atrapalhar a rolagem da página.
 
 **Linhas 44 a 56**
 
@@ -625,12 +634,12 @@ Pede a localização ao navegador e salva; se falhar, mostra o motivo (por exemp
 
 ```jsx
   return (
-    <Modal title="De onde você está buscando?" onClose={onClose}>
+    <Modal title="Onde você está?" onClose={onClose}>
       <button className="btn block" onClick={useGps} disabled={busy}>
-        {busy ? <Loader2 size={18} className="spin" /> : <Crosshair size={18} />} Usar minha localização atual
+        {busy ? <Loader2 size={18} className="spin" /> : <Crosshair size={18} />} Usar minha localização
       </button>
       {error && <div className="error mt">{error}</div>}
-      <p className="small muted mt">Ou toque no mapa para escolher um ponto. Sua posição fica só neste aparelho.</p>
+      <p className="small muted mt">Ou toca no mapa pra marcar. Sua posição fica só neste aparelho, a gente não guarda.</p>
       <PickPointMap value={point} fallback={pilot} onChange={(p) => setPoint({ ...p, source: 'mapa' })} />
       <div className="row mt">
         <button className="btn ghost" onClick={() => onSave({ lat: pilot.lat, lng: pilot.lng, source: 'piloto' })}>
@@ -638,7 +647,7 @@ Pede a localização ao navegador e salva; se falhar, mostra o motivo (por exemp
         </button>
         <span className="grow" />
         <button className="btn" disabled={!point || point.source !== 'mapa'} onClick={() => onSave(point)}>
-          Usar este ponto
+          Buscar daqui
         </button>
       </div>
     </Modal>
@@ -688,7 +697,7 @@ Estados do formulário: motivo, detalhes, enviando e erro.
     setError('')
     try {
       await api('/reports', { method: 'POST', body: { targetType, targetId, reason, details } })
-      showToast('Denúncia enviada. A moderação vai analisar.', 'ok')
+      showToast('Recebemos. A moderação vai dar uma olhada.', 'ok')
       onClose()
     } catch (err) {
       setError(err.message)
@@ -703,7 +712,7 @@ Envia a denúncia. `e.preventDefault()` impede o formulário de recarregar a pá
 
 ```jsx
   return (
-    <Modal title="Denunciar" onClose={onClose}>
+    <Modal title="O que aconteceu?" onClose={onClose}>
       <form onSubmit={submit}>
         {Object.entries(meta?.reportReasons || {}).map(([id, label]) => (
           <label className="checkbox" key={id}>
@@ -712,12 +721,12 @@ Envia a denúncia. `e.preventDefault()` impede o formulário de recarregar a pá
           </label>
         ))}
         <label className="field mt">
-          <span>Detalhes (opcional)</span>
+          <span>Quer contar mais? (opcional)</span>
           <textarea className="input" value={details} onChange={(e) => setDetails(e.target.value)} maxLength={800} />
         </label>
         {error && <div className="error">{error}</div>}
         <button className="btn block" disabled={!reason || busy}>
-          Enviar denúncia
+          Enviar
         </button>
       </form>
     </Modal>
@@ -759,7 +768,7 @@ function resize(file, maxSide = 1280, quality = 0.82) {
       URL.revokeObjectURL(url)
       resolve(canvas.toDataURL('image/jpeg', quality))
     }
-    img.onerror = () => reject(new Error('Não foi possível ler a imagem'))
+    img.onerror = () => reject(new Error('Não deu pra abrir essa imagem'))
     img.src = url
   })
 }
@@ -872,7 +881,7 @@ Estados: ponto escolhido, raio, ação em andamento e erro.
         ? await api('/me/location', { method: 'PUT', body: { lat: point.lat, lng: point.lng, serviceRadiusKm: radius } })
         : await api('/me/location', { method: 'PATCH', body: { serviceRadiusKm: radius } })
       setLocation(r.location)
-      showToast('Ponto de atendimento salvo', 'ok')
+      showToast('Salvo!', 'ok')
       onSaved?.()
     } catch (err) {
       setError(err.message)
@@ -889,23 +898,23 @@ Com ponto novo, salva ponto e raio (`PUT`); sem ponto novo, só o raio (`PATCH`)
 ```jsx
   return (
     <div className="card">
-      <h2>Onde você atende?</h2>
+      <h2>De onde você atende?</h2>
       <div className="notice mb">
         <Lock size={18} />
         <span className="small">
-          Esse ponto serve só para calcular distâncias. Os vizinhos veem apenas algo como "1,2 km de você", calculado a partir de um ponto deslocado
-          entre 100 e 300 metros do seu endereço. Ninguém vê sua rua ou seu número.
+          Esse ponto serve só pra calcular a distância. Os vizinhos veem algo como "a 1,2 km de você", e a conta é feita a partir de um ponto que a
+          gente afasta de 100 a 300 metros da sua casa. Ninguém vê sua rua nem seu número.
         </span>
       </div>
       <button className="btn outline block mb" onClick={gps} disabled={!!busy}>
-        {busy === 'gps' ? <Loader2 size={18} className="spin" /> : <Crosshair size={18} />} Estou no local de atendimento agora
+        {busy === 'gps' ? <Loader2 size={18} className="spin" /> : <Crosshair size={18} />} Estou no lugar onde atendo
       </button>
-      <p className="small muted">Ou toque no mapa para marcar o ponto.</p>
+      <p className="small muted">Ou toca no mapa pra marcar.</p>
       <PickPointMap value={point} onChange={setPoint} fallback={meta.pilot} radiusKm={radius} />
       <label className="field mt">
         <span>
           Atendo até {String(radius).replace('.', ',')} km de distância
-          <span className="hint">Para quem vai até você ou para onde você se desloca para atender.</span>
+          <span className="hint">Até onde vale a pena o cliente vir até você, ou você ir até ele.</span>
         </span>
         <input type="range" min={0.5} max={20} step={0.5} value={radius} onChange={(e) => setRadius(Number(e.target.value))} />
       </label>
@@ -918,7 +927,7 @@ Com ponto novo, salva ponto e raio (`PUT`); sem ponto novo, só o raio (`PATCH`)
         )}
         <button className="btn grow" onClick={save} disabled={!!busy || (!point && !location.hasLocation)}>
           {busy === 'save' && <Loader2 size={18} className="spin" />}
-          {point || !location.hasLocation ? 'Salvar ponto de atendimento' : 'Salvar raio de atendimento'}
+          {point || !location.hasLocation ? 'Salvar' : 'Salvar distância'}
         </button>
       </div>
     </div>

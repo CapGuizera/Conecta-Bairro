@@ -158,8 +158,8 @@ r.post('/conversations', async (req, res) => {
     "SELECT o.* FROM offers o JOIN users u ON u.id = o.provider_id WHERE o.id = $1 AND o.status = 'ativa' AND NOT u.blocked",
     [Number(req.body?.offerId) || 0],
   )
-  if (!offer) fail(404, 'Oferta não encontrada')
-  if (offer.provider_id === req.user.id) fail(400, 'Você não pode iniciar conversa com a sua própria oferta')
+  if (!offer) fail(404, 'Esse anúncio não existe mais')
+  if (offer.provider_id === req.user.id) fail(400, 'Esse anúncio é seu')
   let conv = await one('SELECT * FROM conversations WHERE offer_id = $1 AND client_id = $2', [offer.id, req.user.id])
   if (!conv) {
     conv = await one(
@@ -168,8 +168,8 @@ r.post('/conversations', async (req, res) => {
     )
     await notify(offer.provider_id, {
       kind: 'conversa',
-      title: 'Novo contato',
-      body: `${req.user.name.split(' ')[0]} quer conversar sobre "${offer.title}"`,
+      title: `${req.user.name.split(' ')[0]} te chamou`,
+      body: `Sobre "${offer.title}"`,
       link: `/conversas/${conv.id}`,
     })
   }
@@ -178,7 +178,7 @@ r.post('/conversations', async (req, res) => {
 
 r.get('/conversations', async (req, res) => {
   const rows = await many(
-    `SELECT c.id, c.offer_id, c.client_id, c.provider_id, c.last_message_at, o.title AS offer_title, o.images AS offer_images,
+    `SELECT c.id, c.offer_id, c.client_id, c.provider_id, c.last_message_at, o.title AS offer_title, o.images AS offer_images, o.category AS offer_category,
             CASE WHEN c.client_id = $1 THEN pu.name ELSE cu.name END AS other_name,
             CASE WHEN c.client_id = $1 THEN 'client' ELSE 'provider' END AS side,
             (SELECT m.body FROM messages m WHERE m.conversation_id = c.id ORDER BY m.id DESC LIMIT 1) AS last_body,
@@ -199,6 +199,7 @@ r.get('/conversations', async (req, res) => {
       offerId: c.offer_id,
       offerTitle: c.offer_title,
       offerImage: (c.offer_images || [])[0] || null,
+      offerCategory: c.offer_category,
       otherName: c.other_name,
       side: c.side,
       lastBody: c.last_body,
@@ -252,7 +253,7 @@ r.post('/conversations/:id/messages', async (req, res) => {
   const otherId = conv.client_id === req.user.id ? conv.provider_id : conv.client_id
   await notify(otherId, {
     kind: 'mensagem',
-    title: `Mensagem de ${req.user.name.split(' ')[0]}`,
+    title: req.user.name.split(' ')[0],
     body: text.length > 90 ? `${text.slice(0, 90)}...` : text,
     link: `/conversas/${conv.id}`,
   })
@@ -280,13 +281,13 @@ r.post('/conversations/:id/read', async (req, res) => {
 // O contratante solicita o serviço; o prestador responde com proposta.
 r.post('/conversations/:id/contracts', async (req, res) => {
   const conv = await loadConversation(req.params.id, req.user.id)
-  if (conv.client_id !== req.user.id) fail(403, 'Somente o contratante pode solicitar o serviço')
+  if (conv.client_id !== req.user.id) fail(403, 'Só quem está contratando pode pedir orçamento')
   const note = maskContacts(str(req.body?.note, { max: 500, name: 'descrição do pedido' })).text
   const open = await one(
     "SELECT id FROM contracts WHERE conversation_id = $1 AND status NOT IN ('concluida', 'cancelada')",
     [conv.id],
   )
-  if (open) fail(409, 'Já existe uma contratação em aberto nesta conversa')
+  if (open) fail(409, 'Já tem um orçamento em andamento nesta conversa')
   const { contractId, messageId } = await db().transaction(async (tx) => {
     const { rows } = await tx.query(
       'INSERT INTO contracts (conversation_id, offer_id, client_id, provider_id, request_note) VALUES ($1, $2, $3, $4, $5) RETURNING id',
@@ -297,14 +298,14 @@ r.post('/conversations/:id/contracts', async (req, res) => {
       req.user.id,
       note,
     ])
-    const messageId = await insertMessage(tx.query, conv.id, null, 'sistema', `Serviço solicitado${note ? `: ${note}` : ''}`)
+    const messageId = await insertMessage(tx.query, conv.id, null, 'sistema', `Pedido de orçamento${note ? `: "${note}"` : ''}`)
     return { contractId: rows[0].id, messageId }
   })
   await broadcastMessage(conv, messageId)
   await notify(conv.provider_id, {
     kind: 'contratacao',
-    title: 'Nova solicitação de serviço',
-    body: `${req.user.name.split(' ')[0]} solicitou "${conv.offer_title}". Envie sua proposta.`,
+    title: 'Pedido de orçamento',
+    body: `${req.user.name.split(' ')[0]} quer um orçamento de "${conv.offer_title}"`,
     link: `/conversas/${conv.id}`,
   })
   const c = await loadContract(contractId, req.user.id)
@@ -318,12 +319,12 @@ r.post('/contracts/:id/proposals', async (req, res) => {
   const side = c.client_id === req.user.id ? 'client' : 'provider'
   const to = nextStatus(c.status, 'propor', side)
   const amount = parseMoneyToCents(req.body?.amount)
-  if (!amount || amount < 100) fail(400, 'Informe um valor de pelo menos R$ 1,00')
-  if (amount > 10_000_000) fail(400, 'Valor acima do permitido')
+  if (!amount || amount < 100) fail(400, 'Coloque um valor de pelo menos R$ 1,00')
+  if (amount > 10_000_000) fail(400, 'Esse valor passa do limite da plataforma')
   const deadline = String(req.body?.deadline || '')
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(deadline) || Number.isNaN(Date.parse(deadline))) fail(400, 'Informe o prazo')
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(deadline) || Number.isNaN(Date.parse(deadline))) fail(400, 'Escolha a data de entrega')
   const today = localYmd(new Date())
-  if (deadline < today) fail(400, 'O prazo não pode estar no passado')
+  if (deadline < today) fail(400, 'A data de entrega já passou')
   const notes = maskContacts(str(req.body?.notes, { max: 500, name: 'observações' })).text
 
   const messageId = await db().transaction(async (tx) => {
@@ -340,14 +341,14 @@ r.post('/contracts/:id/proposals', async (req, res) => {
       req.user.id,
       `${formatBRL(amount)} até ${deadline.split('-').reverse().join('/')}`,
     ])
-    return insertMessage(tx.query, c.conversation_id, req.user.id, 'proposta', `Proposta: ${formatBRL(amount)}`, { proposalId: rows[0].id })
+    return insertMessage(tx.query, c.conversation_id, req.user.id, 'proposta', `Orçamento: ${formatBRL(amount)}`, { proposalId: rows[0].id })
   })
   const conv = { id: c.conversation_id, client_id: c.client_id, provider_id: c.provider_id }
   await broadcastMessage(conv, messageId)
   await notify(c.client_id, {
     kind: 'proposta',
-    title: 'Proposta recebida',
-    body: `${c.provider_name.split(' ')[0]} enviou uma proposta de ${formatBRL(amount)} para "${c.offer_title}"`,
+    title: 'Chegou o orçamento',
+    body: `${c.provider_name.split(' ')[0]} pediu ${formatBRL(amount)} por "${c.offer_title}"`,
     link: `/conversas/${c.conversation_id}`,
   })
   const updated = await loadContract(c.id, req.user.id)
@@ -361,11 +362,11 @@ function receiptCode() {
 }
 
 const ACTION_MESSAGES = {
-  aceitar: 'Proposta aceita pelo contratante',
-  recusar: 'Proposta recusada pelo contratante',
-  iniciar: 'Serviço iniciado pelo prestador',
+  aceitar: 'Orçamento aceito. Negócio fechado!',
+  recusar: 'Orçamento recusado',
+  iniciar: 'Serviço começou',
   concluir: 'Serviço concluído',
-  cancelar: 'Contratação cancelada',
+  cancelar: 'Cancelado',
 }
 
 // RF09: aceitar, recusar, iniciar, concluir, cancelar.
@@ -384,7 +385,7 @@ r.post('/contracts/:id/actions', async (req, res) => {
 
     if (action === 'aceitar' || action === 'recusar') {
       const p = (await tx.query("SELECT * FROM proposals WHERE contract_id = $1 AND status = 'pendente' ORDER BY id DESC LIMIT 1", [c.id])).rows[0]
-      if (!p) fail(409, 'Não há proposta pendente')
+      if (!p) fail(409, 'Não tem orçamento esperando resposta')
       await tx.query('UPDATE proposals SET status = $2 WHERE id = $1', [p.id, action === 'aceitar' ? 'aceita' : 'recusada'])
       if (action === 'aceitar') {
         await tx.query('UPDATE contracts SET amount_cents = $2, deadline = $3 WHERE id = $1', [c.id, p.amount_cents, p.deadline])
@@ -415,7 +416,7 @@ r.post('/contracts/:id/actions', async (req, res) => {
       note,
     ])
     let body = ACTION_MESSAGES[action]
-    if (action === 'concluir') body += `. Valor ${formatBRL(extra.commission.grossCents)}, comissão da plataforma ${formatBRL(extra.commission.commissionCents)}. Avaliem um ao outro.`
+    if (action === 'concluir') body += ` por ${formatBRL(extra.commission.grossCents)} (taxa da plataforma: ${formatBRL(extra.commission.commissionCents)}). Agora é só um avaliar o outro.`
     if (note) body += ` (${note})`
     const messageId = await insertMessage(tx.query, c.conversation_id, null, 'sistema', body)
     return { c, to, messageId, extra }
@@ -427,7 +428,7 @@ r.post('/contracts/:id/actions', async (req, res) => {
   const otherId = c.client_id === req.user.id ? c.provider_id : c.client_id
   await notify(otherId, {
     kind: 'contratacao',
-    title: `Contratação: ${STATUS_LABELS[to]}`,
+    title: STATUS_LABELS[to],
     body: ACTION_MESSAGES[action],
     link: `/conversas/${c.conversation_id}`,
   })
@@ -435,8 +436,8 @@ r.post('/contracts/:id/actions', async (req, res) => {
     for (const userId of [c.client_id, c.provider_id]) {
       await notify(userId, {
         kind: 'avaliacao',
-        title: 'Avalie a contratação',
-        body: 'Sua avaliação ajuda os vizinhos a contratar com segurança.',
+        title: 'Como foi?',
+        body: 'Dá uma nota rapidinho. Isso ajuda os vizinhos a saber em quem confiar.',
         link: `/conversas/${c.conversation_id}`,
       })
     }
@@ -463,7 +464,7 @@ r.get('/contracts/:id', async (req, res) => {
 r.get('/contracts/:id/receipt', async (req, res) => {
   const c = await loadContract(req.params.id, req.user.id)
   const k = await one('SELECT * FROM commissions WHERE contract_id = $1', [c.id])
-  if (!k) fail(404, 'O comprovante é gerado quando o serviço é concluído')
+  if (!k) fail(404, 'O comprovante sai quando o serviço é concluído')
   res.json({
     receipt: {
       receiptCode: k.receipt_code,
@@ -485,13 +486,13 @@ r.get('/contracts/:id/receipt', async (req, res) => {
 // RF11: avaliação recíproca após a conclusão.
 r.post('/contracts/:id/review', async (req, res) => {
   const c = await loadContract(req.params.id, req.user.id)
-  if (c.status !== 'concluida') fail(409, 'A avaliação fica disponível após a conclusão do serviço')
+  if (c.status !== 'concluida') fail(409, 'Dá pra avaliar depois que o serviço for concluído')
   const rating = Number(req.body?.rating)
-  if (!Number.isInteger(rating) || rating < 1 || rating > 5) fail(400, 'Escolha uma nota de 1 a 5')
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) fail(400, 'Escolha de 1 a 5 estrelas')
   const comment = maskContacts(str(req.body?.comment, { max: 500, name: 'comentário' })).text
   const revieweeId = c.client_id === req.user.id ? c.provider_id : c.client_id
   const exists = await one('SELECT id FROM reviews WHERE contract_id = $1 AND reviewer_id = $2', [c.id, req.user.id])
-  if (exists) fail(409, 'Você já avaliou esta contratação')
+  if (exists) fail(409, 'Você já avaliou este serviço')
   await q('INSERT INTO reviews (contract_id, reviewer_id, reviewee_id, rating, comment) VALUES ($1, $2, $3, $4, $5)', [
     c.id,
     req.user.id,
@@ -501,8 +502,8 @@ r.post('/contracts/:id/review', async (req, res) => {
   ])
   await notify(revieweeId, {
     kind: 'avaliacao',
-    title: 'Você recebeu uma avaliação',
-    body: `Nota ${rating} de 5 em "${c.offer_title}"`,
+    title: `Você ganhou ${rating} ${rating === 1 ? 'estrela' : 'estrelas'}`,
+    body: `Em "${c.offer_title}"`,
     link: `/conversas/${c.conversation_id}`,
   })
   await pushContractUpdate(c)

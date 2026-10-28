@@ -420,12 +420,18 @@ export async function resetDatabase() {
 
 Apaga tudo: remove o esquema `public` inteiro (tabelas e extensão) e o recria vazio.
 
-**Linhas 264 a 276**
+**Linhas 264 a 282**
 
 ```js
 // Execução direta: node server/src/seed.js --reset
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
-  await initDb()
+  try {
+    await initDb()
+  } catch (err) {
+    if (err.code !== 'DB_LOCKED') throw err
+    console.error('\nFeche o ConectaBairro (Ctrl+C na janela dele) antes de recriar os dados.')
+    process.exit(1)
+  }
   if (process.argv.includes('--reset')) {
     console.log('Apagando todos os dados...')
     await resetDatabase()
@@ -439,6 +445,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
 ```
 
 Quando o arquivo é executado diretamente (`npm run seed`), e não importado, abre o banco, apaga com `--reset`, reabre (o que recria as tabelas pelo `schema.sql`) e popula.
+Se o sistema estiver aberto, a trava do banco impede o seed de rodar e ele pede para fechar o ConectaBairro primeiro. Apagar o banco por baixo de um servidor em funcionamento foi justamente o que corrompeu os dados uma vez.
 A comparação com `pathToFileURL` funciona igual no Windows, onde os caminhos usam barra invertida.
 
 ---

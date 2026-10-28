@@ -88,14 +88,14 @@ Marca a conversa como lida até a última mensagem e também as notificações q
 Separador das rotas de contratação.
 '''),
 ('// O contratante solicita o serviço', '''
-**Solicitar serviço.** Só o contratante pode, e só se não houver outra contratação em aberto na conversa (409 se houver). A descrição do pedido também passa pelo filtro de contatos.
+**Pedir orçamento.** Só o contratante pode, e só se não houver outra contratação em aberto na conversa (409 se houver). A descrição do pedido também passa pelo filtro de contatos.
 '''),
 ('  const { contractId, messageId } = await db().transaction(', '''
 Numa única transação: cria a contratação no estado `solicitada`, registra o primeiro evento do histórico e grava a mensagem de sistema no chat.
 Fora da transação (depois que tudo foi confirmado no banco), envia a mensagem em tempo real, notifica o prestador e avisa as duas telas.
 '''),
 ('// RF08: proposta com valor e prazo', '''
-**Enviar proposta.** `nextStatus(c.status, 'propor', side)` já recusa quem não é o prestador ou um estado inválido. Depois valida:
+**Mandar orçamento** (a proposta). `nextStatus(c.status, 'propor', side)` já recusa quem não é o prestador ou um estado inválido. Depois valida:
 
 - valor de pelo menos R$ 1,00 e no máximo R$ 100.000,00;
 - prazo em formato de data válido e não anterior a hoje;

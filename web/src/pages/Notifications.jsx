@@ -1,13 +1,13 @@
 // RF17
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, BellRing, CheckCheck, ClipboardList, MessageCircle, ShieldCheck, Sparkles, Star } from 'lucide-react'
+import { Bell, BellRing, CheckCheck, ClipboardList, Megaphone, MessageCircle, ShieldCheck, Star } from 'lucide-react'
 import { api } from '../api.js'
 import { Empty, ErrorBox, Loading, useLoad } from '../components/ui.jsx'
 import { relative } from '../format.js'
 import { useSession } from '../session.jsx'
 
-const ICONS = { mensagem: MessageCircle, conversa: MessageCircle, proposta: ClipboardList, contratacao: ClipboardList, avaliacao: Star, destaque: Sparkles, confirmacao: BellRing, moderacao: ShieldCheck }
+const ICONS = { mensagem: MessageCircle, conversa: MessageCircle, proposta: ClipboardList, contratacao: ClipboardList, avaliacao: Star, destaque: Megaphone, confirmacao: BellRing, moderacao: ShieldCheck }
 
 export default function Notifications() {
   const navigate = useNavigate()
@@ -32,7 +32,7 @@ export default function Notifications() {
   return (
     <div>
       <div className="row between">
-        <h1 style={{ margin: 0 }}>Notificações</h1>
+        <h1 style={{ margin: 0 }}>Avisos</h1>
         {data.unread > 0 && (
           <button
             className="btn ghost sm"
@@ -42,22 +42,22 @@ export default function Notifications() {
               reload()
             }}
           >
-            <CheckCheck size={16} /> Marcar todas como lidas
+            <CheckCheck size={16} /> Já vi tudo
           </button>
         )}
       </div>
       {'Notification' in window && Notification.permission === 'default' && (
         <div className="notice mt">
           <BellRing size={18} />
-          <span className="grow small">Receba um aviso no aparelho quando chegar mensagem ou proposta.</span>
+          <span className="grow small">Quer ser avisado no celular quando chegar mensagem ou orçamento?</span>
           <button className="btn sm" onClick={() => Notification.requestPermission().then(reload)}>
-            Ativar
+            Quero
           </button>
         </div>
       )}
       <div className="mt">
         {data.notifications.length === 0 ? (
-          <Empty icon={Bell} title="Tudo em dia" />
+          <Empty icon={Bell} title="Nada novo por aqui" />
         ) : (
           <div className="list">
             {data.notifications.map((n) => {

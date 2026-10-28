@@ -15,13 +15,14 @@ Navegador (PWA React)  ──HTTP /api──►  Node.js + Express  ──SQL─
 - **Banco**: o mesmo SQL roda em dois modos (`server/src/db.js`):
   - sem `DATABASE_URL`: PGlite, que é o PostgreSQL compilado para WebAssembly, com a extensão PostGIS. Não exige instalar nada além do Node e funciona igual em Windows, Linux e macOS.
   - com `DATABASE_URL`: PostgreSQL + PostGIS tradicional (por exemplo via `docker compose`).
+  - o PGlite só aceita um processo por vez. Uma trava (`server/data/pglite.lock`) impede abrir o sistema duas vezes ou rodar o seed com ele aberto, o que já corrompeu o banco uma vez durante o desenvolvimento.
 - **Sem dependências nativas no servidor**: as senhas de verificação usam `node:crypto`, as imagens são redimensionadas no navegador. Nada precisa ser compilado na instalação.
 
 ### Tecnologias
 
 | Camada | Tecnologia | Seção do artigo |
 |---|---|---|
-| Interface | React 19, React Router, Leaflet + OpenStreetMap, lucide (ícones) | 5.2 |
+| Interface | React 19, React Router, Leaflet + OpenStreetMap, lucide (ícones), fontes Figtree e Bricolage Grotesque (instaladas, funcionam offline) | 5.2 |
 | PWA | vite-plugin-pwa (Workbox): instalação, cache da interface, funcionamento offline | 5.2 |
 | API | Node.js, Express 5, Socket.IO | 5.2, 5.5 (Programação Web) |
 | Persistência | PostgreSQL + PostGIS (`geography`, `ST_DWithin`, `ST_Distance`) | 5.2 |

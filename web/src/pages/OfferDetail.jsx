@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Flag, Lock, MapPin, MessageCircle, Package, Pencil, Sparkles, Wrench } from 'lucide-react'
+import { ArrowLeft, Flag, Lock, MapPin, Megaphone, MessageCircle, Pencil } from 'lucide-react'
+import { categoryIcon } from '../categories.jsx'
 import { api, qs } from '../api.js'
 import { ReportDialog } from '../components/ReportDialog.jsx'
 import { Avatar, ErrorBox, Loading, Stars, useLoad } from '../components/ui.jsx'
@@ -24,7 +25,7 @@ export default function OfferDetail() {
   if (loading && !data) return <Loading />
   if (loadError) return <ErrorBox error={loadError} />
   const { offer, isOwner, conversationId } = data
-  const Icon = offer.kind === 'produto' ? Package : Wrench
+  const Icon = categoryIcon(offer.category)
 
   async function contact() {
     if (!user) return navigate('/entrar', { state: { from: `/oferta/${id}` } })
@@ -62,7 +63,7 @@ export default function OfferDetail() {
         <span className="badge">{offer.kind === 'produto' ? 'Produto' : 'Serviço'}</span>
         {offer.highlighted && (
           <span className="badge accent">
-            <Sparkles size={12} /> Destaque
+            <Megaphone size={12} /> Destaque
           </span>
         )}
       </div>
@@ -70,7 +71,7 @@ export default function OfferDetail() {
       <div className="row wrap gap-lg mb">
         {offer.distance && (
           <span className="distance">
-            <MapPin size={16} /> {offer.distance.label} de você
+            <MapPin size={16} /> a {offer.distance.label} de você
           </span>
         )}
         <span className="strong">{priceRange(offer)}</span>
@@ -79,7 +80,7 @@ export default function OfferDetail() {
       {offer.outsideServiceArea && (
         <div className="notice warn mb">
           <MapPin size={18} />
-          <span>Você está além do raio de atendimento informado pelo prestador ({String(offer.serviceRadiusKm).replace('.', ',')} km). Combine pelo chat.</span>
+          <span>Você está um pouco longe: {offer.provider.name.split(' ')[0]} atende até {String(offer.serviceRadiusKm).replace('.', ',')} km. Vale perguntar no chat.</span>
         </div>
       )}
 
@@ -88,8 +89,8 @@ export default function OfferDetail() {
       <div className="notice mb">
         <Lock size={18} />
         <span className="small">
-          O endereço do prestador não é divulgado. A negociação acontece pelo chat do ConectaBairro, sem troca de telefone, e fica registrada para a
-          segurança dos dois lados.
+          O endereço de {offer.provider.name.split(' ')[0]} não aparece aqui. Vocês combinam tudo pelo chat, sem precisar trocar telefone, e fica
+          tudo registrado se der algum problema.
         </span>
       </div>
 
@@ -97,7 +98,7 @@ export default function OfferDetail() {
         <Avatar name={offer.provider.name} />
         <div className="grow">
           <div className="strong">{offer.provider.name}</div>
-          <div className="small muted">No ConectaBairro desde {since(offer.provider.memberSince)}</div>
+          <div className="small muted">Está no ConectaBairro desde {since(offer.provider.memberSince)}</div>
           <div className="row wrap small mt" style={{ marginTop: 4 }}>
             <Stars value={offer.reputation.avgRating} count={offer.reputation.reviews} />
             <span className="muted">· {plural(offer.reputation.concluded, 'serviço concluído', 'serviços concluídos')}</span>
@@ -109,18 +110,18 @@ export default function OfferDetail() {
       <div className="row mt-lg">
         {isOwner ? (
           <Link to={`/painel/ofertas/${offer.id}`} className="btn block">
-            <Pencil size={18} /> Editar minha oferta
+            <Pencil size={18} /> Editar meu anúncio
           </Link>
         ) : (
           <button className="btn block" onClick={contact} disabled={busy}>
-            <MessageCircle size={18} /> {conversationId ? 'Abrir conversa' : 'Conversar com o prestador'}
+            <MessageCircle size={18} /> {conversationId ? 'Continuar a conversa' : `Chamar ${offer.provider.name.split(' ')[0]} no chat`}
           </button>
         )}
       </div>
       {user && !isOwner && (
         <div className="center mt">
           <button className="btn ghost sm" onClick={() => setReport(true)}>
-            <Flag size={14} /> Denunciar esta oferta
+            <Flag size={14} /> Tem algo errado neste anúncio?
           </button>
         </div>
       )}

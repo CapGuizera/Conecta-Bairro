@@ -40,7 +40,7 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
     })
   } catch (err) {
     if (err.name === 'AbortError') throw err
-    throw new ApiError(0, 'Sem conexão com o servidor. Verifique sua internet.')
+    throw new ApiError(0, 'Sem conexão. Confere a internet e tenta de novo.')
   }
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
@@ -48,7 +48,7 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
       setToken(null)
       window.dispatchEvent(new Event('cb:logout'))
     }
-    throw new ApiError(res.status, data.error || 'Algo deu errado')
+    throw new ApiError(res.status, data.error || 'Deu algo errado. Tenta de novo.')
   }
   return data
 }

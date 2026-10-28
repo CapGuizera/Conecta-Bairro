@@ -28,18 +28,18 @@ export default function ProviderProfile() {
         <Avatar name={provider.name} size="lg" />
         <div className="grow">
           <h1 style={{ marginBottom: 2 }}>{provider.name}</h1>
-          <div className="small muted">No ConectaBairro desde {since(provider.memberSince)}</div>
+          <div className="small muted">Está no ConectaBairro desde {since(provider.memberSince)}</div>
         </div>
       </div>
       {provider.bio && <p>{provider.bio}</p>}
 
       <div className="grid stats">
-        <Stat label="Serviços concluídos" value={reputation.concluded} />
-        <Stat label="Avaliação média" value={reputation.avgRating !== null ? String(reputation.avgRating).replace('.', ',') : '-'} sub={`${reputation.reviews} avaliações`} />
+        <Stat label="Serviços feitos pela plataforma" value={reputation.concluded} />
+        <Stat label="Nota dos clientes" value={reputation.avgRating !== null ? String(reputation.avgRating).replace('.', ',') : '-'} sub={`${reputation.reviews} avaliações`} />
       </div>
 
       <div className="section-title">
-        <h2>Ofertas</h2>
+        <h2>Anúncios</h2>
       </div>
       {offers.length ? (
         <div className="offer-list">
@@ -48,14 +48,14 @@ export default function ProviderProfile() {
           ))}
         </div>
       ) : (
-        <p className="muted">Nenhuma oferta ativa no momento.</p>
+        <p className="muted">Nenhum anúncio no ar agora.</p>
       )}
 
       <div className="section-title">
-        <h2>Avaliações de clientes</h2>
+        <h2>O que os clientes falaram</h2>
       </div>
       {reviews.length === 0 ? (
-        <Empty icon={MessageSquareQuote} title="Ainda sem avaliações" />
+        <Empty icon={MessageSquareQuote} title="Ainda ninguém avaliou" />
       ) : (
         <div className="stack">
           {reviews.map((r, i) => (
@@ -66,7 +66,7 @@ export default function ProviderProfile() {
               </div>
               {r.comment && <p className="mt" style={{ marginBottom: 4 }}>{r.comment}</p>}
               <div className="tiny muted row">
-                <CheckCircle2 size={12} /> {r.reviewerName} contratou "{r.offerTitle}" pela plataforma
+                <CheckCircle2 size={12} /> {r.reviewerName} contratou "{r.offerTitle}" por aqui
               </div>
             </div>
           ))}
@@ -75,7 +75,7 @@ export default function ProviderProfile() {
       {user && user.id !== provider.id && (
         <div className="center mt-lg">
           <button className="btn ghost sm" onClick={() => setReport(true)}>
-            <Flag size={14} /> Denunciar perfil
+            <Flag size={14} /> Denunciar este perfil
           </button>
         </div>
       )}

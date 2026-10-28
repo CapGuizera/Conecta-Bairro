@@ -11,12 +11,12 @@ const r = Router()
 
 r.post('/auth/request-code', async (req, res) => {
   const phone = normalizePhone(req.body?.phone)
-  if (!phone) fail(400, 'Informe um celular válido com DDD, por exemplo (15) 99876-5432')
+  if (!phone) fail(400, 'Esse celular não parece certo. Coloque com DDD, tipo (15) 99876-5432')
   const recent = await one(
     "SELECT count(*)::int AS n FROM otp_codes WHERE phone = $1 AND created_at > now() - interval '1 hour'",
     [phone],
   )
-  if (recent.n >= 6) fail(429, 'Muitos códigos solicitados. Aguarde alguns minutos e tente de novo')
+  if (recent.n >= 6) fail(429, 'Você pediu muitos códigos. Espera uns minutinhos e tenta de novo')
   const code = generateCode()
   await q("UPDATE otp_codes SET used = true WHERE phone = $1 AND NOT used", [phone])
   await q("INSERT INTO otp_codes (phone, code_hash, expires_at) VALUES ($1, $2, now() + interval '10 minutes')", [
@@ -39,11 +39,11 @@ r.post('/auth/verify', async (req, res) => {
     'SELECT * FROM otp_codes WHERE phone = $1 AND NOT used AND expires_at > now() ORDER BY id DESC LIMIT 1',
     [phone],
   )
-  if (!otp) fail(400, 'Código expirado. Peça um novo código')
-  if (otp.attempts >= 5) fail(429, 'Tentativas esgotadas. Peça um novo código')
+  if (!otp) fail(400, 'Esse código expirou. Pede outro')
+  if (otp.attempts >= 5) fail(429, 'Muitas tentativas erradas. Pede um código novo')
   if (otp.code_hash !== hashCode(phone, code)) {
     await q('UPDATE otp_codes SET attempts = attempts + 1 WHERE id = $1', [otp.id])
-    fail(400, 'Código incorreto')
+    fail(400, 'Código errado. Confere e tenta de novo')
   }
 
   let user = await one('SELECT * FROM users WHERE phone = $1', [phone])
@@ -57,7 +57,7 @@ r.post('/auth/verify', async (req, res) => {
       Boolean(req.body?.isProvider),
     ])
   }
-  if (user.blocked) fail(403, 'Esta conta foi suspensa pela moderação')
+  if (user.blocked) fail(403, 'Essa conta foi suspensa pela moderação')
   await q('UPDATE otp_codes SET used = true WHERE id = $1', [otp.id])
   res.json({ token: signToken(user), user: selfUser(user) })
 })

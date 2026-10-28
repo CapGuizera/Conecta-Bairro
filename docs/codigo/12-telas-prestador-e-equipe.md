@@ -37,17 +37,17 @@ export default function Contracts() {
   )
 ```
 
-Carrega a lista (e recarrega a cada mudança em tempo real) e filtra pela aba escolhida: em aberto, concluídas ou canceladas.
+Carrega a lista (e recarrega a cada mudança em tempo real) e filtra pela aba escolhida: rolando (em aberto), concluídas ou canceladas. Na navegação esta tela se chama "Serviços".
 
 **Linhas 20 a 61**
 
 ```jsx
   return (
     <div>
-      <h1>Contratações</h1>
+      <h1>Meus serviços</h1>
       <div className="tabs">
         {[
-          ['abertas', 'Em aberto'],
+          ['abertas', 'Rolando'],
           ['concluidas', 'Concluídas'],
           ['canceladas', 'Canceladas'],
         ].map(([id, label]) => (
@@ -58,7 +58,7 @@ Carrega a lista (e recarrega a cada mudança em tempo real) e filtra pela aba es
       </div>
       {list.length === 0 ? (
         <Empty icon={ClipboardList} title="Nada por aqui">
-          As contratações começam pelo chat, com o botão "Solicitar este serviço".
+          Tudo começa no chat, quando alguém pede um orçamento.
         </Empty>
       ) : (
         <div className="list">
@@ -70,10 +70,10 @@ Carrega a lista (e recarrega a cada mudança em tempo real) e filtra pela aba es
                   <span className={`badge ${TONE[c.status]}`}>{c.statusLabel}</span>
                 </div>
                 <div className="small muted">
-                  {c.side === 'client' ? 'Prestador' : 'Cliente'}: {c.counterpart.name}
+                  {c.side === 'client' ? 'Com' : 'Para'} {c.counterpart.name}
                 </div>
                 <div className="row between small">
-                  <span>{c.amountCents ? `${brl(c.amountCents)} · prazo ${ymdToBr(c.deadline)}` : 'Aguardando proposta'}</span>
+                  <span>{c.amountCents ? `${brl(c.amountCents)} · pronto até ${ymdToBr(c.deadline)}` : 'Esperando o orçamento'}</span>
                   <span className="tiny muted">{relative(c.updatedAt)}</span>
                 </div>
               </div>
@@ -138,7 +138,7 @@ Carrega o comprovante; o servidor só o entrega às duas partes.
 
 Botões de voltar e de imprimir. "Imprimir ou salvar PDF" usa a impressão do navegador (`window.print()`), que permite salvar em PDF. O CSS de impressão esconde a navegação e os botões (`no-print`).
 
-**Linhas 25 a 80**
+**Linhas 25 a 79**
 
 ```jsx
       <div className="card">
@@ -146,7 +146,7 @@ Botões de voltar e de imprimir. "Imprimir ou salvar PDF" usa a impressão do na
           <img src="/icon.svg" alt="" width={40} height={40} style={{ borderRadius: 10 }} />
           <div>
             <div className="strong">ConectaBairro</div>
-            <div className="small muted">Comprovante de serviço concluído</div>
+            <div className="small muted">Comprovante de serviço</div>
           </div>
         </div>
         <div className="line">
@@ -170,7 +170,7 @@ Botões de voltar e de imprimir. "Imprimir ou salvar PDF" usa a impressão do na
           <span>{r.clientName}</span>
         </div>
         <div className="line">
-          <span className="muted">Prazo combinado</span>
+          <span className="muted">Combinado para</span>
           <span>{ymdToBr(r.deadline)}</span>
         </div>
         <div className="line">
@@ -182,16 +182,15 @@ Botões de voltar e de imprimir. "Imprimir ou salvar PDF" usa a impressão do na
           <span>{brl(r.grossCents)}</span>
         </div>
         <div className="line">
-          <span>Comissão da plataforma ({(r.rate * 100).toLocaleString('pt-BR')}%)</span>
+          <span>Taxa do ConectaBairro ({(r.rate * 100).toLocaleString('pt-BR')}%)</span>
           <span>- {brl(r.commissionCents)}</span>
         </div>
         <div className="line total">
-          <span>Valor líquido do prestador</span>
+          <span>Fica para quem fez</span>
           <span>{brl(r.netCents)}</span>
         </div>
         <p className="tiny muted mt">
-          Comprovante gerado automaticamente pelo ConectaBairro no encerramento da contratação nº {r.contractId}. Protótipo acadêmico: os valores não
-          representam cobrança real.
+          Contratação nº {r.contractId}. Este é um protótipo do projeto UPX IV da FACENS: nenhum valor foi cobrado de verdade.
         </p>
       </div>
     </div>
@@ -213,7 +212,7 @@ Painel do prestador (RF14), com o plano de destaque (RF13) e a confirmação de 
 // RF14 (painel do prestador), RF13 (plano de destaque) e RF16 (confirmação de atividade).
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, BadgeCheck, Eye, MapPin, Pause, Pencil, Play, Plus, Sparkles } from 'lucide-react'
+import { AlertTriangle, BadgeCheck, ClipboardList, Eye, MapPin, Megaphone, Pause, Pencil, Play, Plus, QrCode } from 'lucide-react'
 import { api } from '../api.js'
 import { Thumb } from '../components/OfferCard.jsx'
 import { ProviderLocation } from '../components/ProviderLocation.jsx'
@@ -234,10 +233,10 @@ function HighlightDialog({ offer, onClose, onDone }) {
   const [error, setError] = useState(null)
   const chosen = meta.highlightPlans.find((p) => p.id === plan)
   return (
-    <Modal title="Destacar oferta" onClose={onClose}>
+    <Modal title="Destacar anúncio" onClose={onClose}>
       <p className="small muted">
-        "{offer.title}" aparece no topo das buscas da categoria <strong>{offer.categoryName}</strong>, com a etiqueta Destaque, durante o período
-        contratado.
+        "{offer.title}" aparece em primeiro pra quem procura <strong>{offer.categoryName}</strong>, com a etiqueta Destaque, pelo tempo que você
+        escolher.
       </p>
       <div className="stack">
         {meta.highlightPlans.map((p) => (
@@ -251,7 +250,7 @@ function HighlightDialog({ offer, onClose, onDone }) {
           </label>
         ))}
       </div>
-      {offer.highlightUntil && <p className="small mt">Já em destaque até {date(offer.highlightUntil)}. O novo período começa depois.</p>}
+      {offer.highlightUntil && <p className="small mt">Já está em destaque até {date(offer.highlightUntil)}. O tempo novo é somado depois disso.</p>}
       <ErrorBox error={error} />
       <button
         className="btn accent block mt"
@@ -267,9 +266,9 @@ function HighlightDialog({ offer, onClose, onDone }) {
           }
         }}
       >
-        <Sparkles size={18} /> Pagar {brl(chosen.priceCents)} com PIX (simulado)
+        <QrCode size={18} /> Pagar {brl(chosen.priceCents)} no PIX (simulado)
       </button>
-      <p className="tiny muted center mt">Protótipo: o pagamento é simulado e confirmado na hora.</p>
+      <p className="tiny muted center mt">No protótipo o PIX é de mentirinha e aprova na hora.</p>
     </Modal>
   )
 }
@@ -298,8 +297,8 @@ Estados: período do painel, edição do ponto de atendimento e oferta sendo des
   if (!location.hasLocation || editingLocation) {
     return (
       <div>
-        <h1>Painel do prestador</h1>
-        {!location.hasLocation && <p className="muted">Antes de publicar, informe de onde você atende.</p>}
+        <h1>Seu painel</h1>
+        {!location.hasLocation && <p className="muted">Antes de anunciar, marca de onde você atende.</p>}
         <ProviderLocation onSaved={() => setEditingLocation(false)} onCancel={location.hasLocation ? () => setEditingLocation(false) : undefined} />
       </div>
     )
@@ -335,7 +334,7 @@ Carregando, erro e o cálculo das ofertas que precisam de confirmação (RF16).
 
   async function confirmAll() {
     await api('/my/offers/confirm-all', { method: 'POST' })
-    showToast('Ofertas confirmadas. Obrigado por manter o bairro atualizado!', 'ok')
+    showToast('Pronto! Seus anúncios continuam no ar.', 'ok')
     offers.reload()
   }
 ```
@@ -356,14 +355,14 @@ Prepara as datas do gráfico no formato dia/mês.
   return (
     <div>
       <div className="row between wrap">
-        <h1 style={{ margin: 0 }}>Painel do prestador</h1>
+        <h1 style={{ margin: 0 }}>Seu painel</h1>
         <Link to="/painel/ofertas/nova" className="btn">
-          <Plus size={18} /> Nova oferta
+          <Plus size={18} /> Novo anúncio
         </Link>
       </div>
 ```
 
-Título e botão "Nova oferta".
+Título e botão "Novo anúncio".
 
 **Linhas 109 a 120**
 
@@ -372,27 +371,27 @@ Título e botão "Nova oferta".
         <div className="notice warn mt">
           <AlertTriangle size={18} />
           <div className="grow small">
-            <strong>{stale.length === 1 ? 'Uma oferta precisa' : `${stale.length} ofertas precisam`} de confirmação.</strong> Ofertas sem confirmação há 45 dias
-            saem da busca.
+            <strong>{stale.length === 1 ? 'Um anúncio está' : `${stale.length} anúncios estão`} há um tempo sem confirmação.</strong> Sem confirmar, ele sai
+            da busca em 45 dias, pra ninguém chamar quem já parou.
           </div>
           <button className="btn sm" onClick={confirmAll}>
-            <BadgeCheck size={14} /> Continuam ativas
+            <BadgeCheck size={14} /> Ainda estou atendendo
           </button>
         </div>
       )}
 ```
 
-**Alerta de confirmação** (RF16): quantas ofertas precisam ser confirmadas e o aviso de que saem da busca aos 45 dias, com o botão "Continuam ativas".
+**Alerta de confirmação** (RF16): quantas ofertas precisam ser confirmadas e o aviso de que saem da busca aos 45 dias, com o botão "Ainda estou atendendo".
 
 **Linhas 122 a 130**
 
 ```jsx
       {(d.pending.awaitingProposal > 0 || d.pending.inProgress > 0) && (
         <Link to="/contratacoes" className="notice accent mt" style={{ color: 'inherit' }}>
-          <Sparkles size={18} />
+          <ClipboardList size={18} />
           <span className="small">
-            {d.pending.awaitingProposal > 0 && <strong>{d.pending.awaitingProposal} pedido(s) aguardando sua proposta. </strong>}
-            {d.pending.inProgress > 0 && <span>{d.pending.inProgress} serviço(s) em andamento.</span>}
+            {d.pending.awaitingProposal > 0 && <strong>{plural(d.pending.awaitingProposal, 'pessoa esperando', 'pessoas esperando')} seu orçamento. </strong>}
+            {d.pending.inProgress > 0 && <span>{plural(d.pending.inProgress, 'serviço em andamento', 'serviços em andamento')}.</span>}
           </span>
         </Link>
       )}
@@ -403,9 +402,9 @@ Alerta de pedidos aguardando proposta e serviços em andamento, com link para as
 **Linhas 132 a 141**
 
 ```jsx
-      <div className="row between mt-lg mb">
-        <h2 style={{ margin: 0 }}>Desempenho</h2>
-        <div className="segmented" style={{ width: 240 }}>
+      <div className="row between wrap mt-lg mb">
+        <h2 style={{ margin: 0 }}>Como você está indo</h2>
+        <div className="segmented">
           {[7, 30, 90].map((n) => (
             <button key={n} className={days === n ? 'on' : ''} onClick={() => setDays(n)}>
               {n} dias
@@ -417,38 +416,43 @@ Alerta de pedidos aguardando proposta e serviços em andamento, com link para as
 
 Seletor de período: 7, 30 ou 90 dias.
 
-**Linhas 142 a 147**
+**Linhas 142 a 151**
 
 ```jsx
       <div className="grid stats">
-        <Stat label="Visualizações do perfil" value={d.totals.views} />
-        <Stat label="Contatos iniciados" value={d.totals.contacts} sub={plural(d.totals.requests, 'pedido de serviço', 'pedidos de serviço')} />
-        <Stat label="Contratações concluídas" value={d.totals.concluded} sub={`${String(d.totals.conversion).replace('.', ',')}% dos contatos`} />
-        <Stat label="Receita líquida" value={brl(d.revenue.net)} sub={`bruto ${brl(d.revenue.gross)} · comissão ${brl(d.revenue.commission)}`} />
+        <Stat label="Pessoas que viram" value={d.totals.views} />
+        <Stat label="Te chamaram no chat" value={d.totals.contacts} sub={plural(d.totals.requests, 'pediu orçamento', 'pediram orçamento')} />
+        <Stat
+          label="Serviços feitos"
+          value={d.totals.concluded}
+          sub={d.totals.conversion <= 100 ? `${String(d.totals.conversion).replace('.', ',')}% de quem chamou` : 'tem cliente voltando!'}
+        />
+        <Stat label="Você recebeu" value={brl(d.revenue.net)} sub={`de ${brl(d.revenue.gross)}, já tirando ${brl(d.revenue.commission)} de taxa`} />
       </div>
 ```
 
-Os quatro números do RF14: visualizações, contatos iniciados (com os pedidos de serviço), contratações concluídas (com a taxa de conversão) e receita líquida (com bruto e comissão).
+Os quatro números do RF14, com nomes do dia a dia: "Pessoas que viram" (visualizações), "Te chamaram no chat" (contatos, com quantos pediram orçamento), "Serviços feitos" e "Você recebeu" (o líquido, com o bruto e a taxa).
+A porcentagem de conversão só aparece até 100%: ela passa disso quando o mesmo cliente volta a contratar na mesma conversa, e aí a tela comemora ("tem cliente voltando!") em vez de mostrar um número que confunde.
 
-**Linhas 148 a 154**
+**Linhas 152 a 158**
 
 ```jsx
       <div className="card mt">
         <div className="row between">
-          <h3 style={{ margin: 0 }}>Visualizações e contatos por dia</h3>
+          <h3 style={{ margin: 0 }}>Dia a dia</h3>
           <Stars value={d.rating.avg} count={d.rating.count} />
         </div>
-        <Bars data={series} a="views" b="contacts" labelA="Visualizações" labelB="Contatos" />
+        <Bars data={series} a="views" b="contacts" labelA="Viram o anúncio" labelB="Chamaram" />
       </div>
 ```
 
 O gráfico diário de visualizações e contatos e a avaliação média.
 
-**Linhas 156 a 161**
+**Linhas 160 a 165**
 
 ```jsx
       <div className="section-title">
-        <h2>Minhas ofertas</h2>
+        <h2>Seus anúncios</h2>
         <button className="btn ghost sm" onClick={() => setEditingLocation(true)}>
           <MapPin size={14} /> Atendo até {String(location.serviceRadiusKm).replace('.', ',')} km
         </button>
@@ -457,13 +461,13 @@ O gráfico diário de visualizações e contatos e a avaliação média.
 
 Cabeçalho da lista de ofertas, com o raio de atendimento atual (tocar abre a edição).
 
-**Linhas 162 a 196**
+**Linhas 166 a 200**
 
 ```jsx
       {myOffers.length === 0 ? (
-        <Empty icon={Plus} title="Publique sua primeira oferta">
+        <Empty icon={Plus} title="Que tal colocar o primeiro anúncio?">
           <Link to="/painel/ofertas/nova" className="btn mt">
-            Criar oferta
+            Anunciar
           </Link>
         </Empty>
       ) : (
@@ -476,13 +480,13 @@ Cabeçalho da lista de ofertas, com o raio de atendimento atual (tocar abre a ed
                   <Thumb offer={o} size={64} />
                   <div className="grow">
                     <div className="row wrap">
-                      {o.status === 'pausada' ? <span className="badge">Pausada</span> : <span className="badge ok">Ativa</span>}
+                      {o.status === 'pausada' ? <span className="badge">Pausada</span> : <span className="badge ok">No ar</span>}
                       {o.highlighted && (
                         <span className="badge accent">
-                          <Sparkles size={12} /> Destaque até {date(o.highlightUntil)}
+                          <Megaphone size={12} /> Destaque até {date(o.highlightUntil)}
                         </span>
                       )}
-                      {o.needsConfirmation && o.status === 'ativa' && <span className="badge warn">Confirmar atividade</span>}
+                      {o.needsConfirmation && o.status === 'ativa' && <span className="badge warn">Falta confirmar</span>}
                     </div>
                     <Link to={`/oferta/${o.id}`} className="strong" style={{ color: 'var(--ink)', display: 'block', marginTop: 4 }}>
                       {o.title}
@@ -490,7 +494,7 @@ Cabeçalho da lista de ofertas, com o raio de atendimento atual (tocar abre a ed
                     <div className="small muted">{priceRange(o)}</div>
                     {stats && (
                       <div className="tiny muted row wrap" style={{ marginTop: 4 }}>
-                        <Eye size={12} /> {stats.views} visualizações · {stats.contacts} contatos · {stats.concluded} concluídas · {brl(stats.gross)}
+                        <Eye size={12} /> {stats.views} viram · {stats.contacts} chamaram · {stats.concluded} feitos · {brl(stats.gross)}
                       </div>
                     )}
                   </div>
@@ -499,7 +503,7 @@ Cabeçalho da lista de ofertas, com o raio de atendimento atual (tocar abre a ed
 
 Sem ofertas, um convite para criar a primeira. Com ofertas, um cartão para cada uma com etiquetas (ativa ou pausada, destaque até quando, precisa confirmar), título, preço e os números da oferta no período.
 
-**Linhas 197 a 231**
+**Linhas 201 a 235**
 
 ```jsx
                 <div className="row wrap mt">
@@ -523,12 +527,12 @@ Sem ofertas, um convite para criar a primeira. Com ofertas, um cartão para cada
                         offers.reload()
                       }}
                     >
-                      <BadgeCheck size={14} /> Confirmar
+                      <BadgeCheck size={14} /> Ainda atendo
                     </button>
                   )}
                   {o.status === 'ativa' && (
                     <button className="btn sm accent" onClick={() => setHighlight(o)}>
-                      <Sparkles size={14} /> Destacar
+                      <Megaphone size={14} /> Destacar
                     </button>
                   )}
                 </div>
@@ -541,7 +545,7 @@ Sem ofertas, um convite para criar a primeira. Com ofertas, um cartão para cada
 
 Ações de cada oferta: editar, pausar ou reativar, confirmar (quando necessário) e destacar.
 
-**Linhas 233 a 246**
+**Linhas 237 a 250**
 
 ```jsx
       {highlight && (
@@ -550,7 +554,7 @@ Ações de cada oferta: editar, pausar ou reativar, confirmar (quando necessári
           onClose={() => setHighlight(null)}
           onDone={() => {
             setHighlight(null)
-            showToast('Destaque ativado!', 'ok')
+            showToast('Pronto, seu anúncio está em destaque!', 'ok')
             offers.reload()
           }}
         />
@@ -645,7 +649,7 @@ Função genérica para atualizar um campo: aceita tanto o evento de um campo do
     setError(null)
     try {
       const r = await api(editing ? `/offers/${id}` : '/offers', { method: editing ? 'PUT' : 'POST', body: form })
-      showToast(editing ? 'Oferta atualizada' : 'Oferta publicada para o bairro', 'ok')
+      showToast(editing ? 'Anúncio atualizado' : 'Seu anúncio já está no ar pro bairro!', 'ok')
       navigate(`/oferta/${r.offer.id}`, { replace: true })
     } catch (err) {
       setError(err)
@@ -666,7 +670,7 @@ Salva (`PUT` na edição, `POST` na criação) e abre a página da oferta. `repl
       <button className="btn ghost sm mb" onClick={() => navigate(-1)}>
         <ArrowLeft size={16} /> Voltar
       </button>
-      <h1>{editing ? 'Editar oferta' : 'Nova oferta'}</h1>
+      <h1>{editing ? 'Editar anúncio' : 'Novo anúncio'}</h1>
       <form onSubmit={submit} className="card">
 ```
 
@@ -691,13 +695,13 @@ Seleção entre serviço e produto.
 
 ```jsx
         <label className="field">
-          <span>Título</span>
-          <input className="input" value={form.title} onChange={set('title')} maxLength={80} placeholder="Ex.: Bolos caseiros por encomenda" required />
+          <span>O que você faz ou vende</span>
+          <input className="input" value={form.title} onChange={set('title')} maxLength={80} placeholder="Bolos caseiros por encomenda" required />
         </label>
         <label className="field">
           <span>Categoria</span>
           <select className="input" value={form.category} onChange={set('category')} required>
-            <option value="">Escolha...</option>
+            <option value="">Escolha uma...</option>
             {meta.categories.map((c) => (
               <option key={c.slug} value={c.slug}>
                 {c.name}
@@ -706,9 +710,9 @@ Seleção entre serviço e produto.
           </select>
         </label>
         <label className="field">
-          <span>Descrição</span>
-          <textarea className="input" value={form.description} onChange={set('description')} maxLength={1500} placeholder="O que você faz, como funciona, prazos..." />
-          <span className="hint">Não coloque telefone nem endereço: o contato acontece pelo chat.</span>
+          <span>Conta mais</span>
+          <textarea className="input" value={form.description} onChange={set('description')} maxLength={1500} placeholder="Sabores, como funciona, quanto tempo leva..." />
+          <span className="hint">Não precisa colocar telefone nem endereço: quem se interessar te chama no chat.</span>
         </label>
 ```
 
@@ -719,8 +723,8 @@ Título, categoria (lista vinda do servidor) e descrição, com o lembrete de n�
 ```jsx
         <div className="grid two">
           <label className="field">
-            <span>Preço a partir de (R$)</span>
-            <input className="input" inputMode="decimal" value={form.priceMin} onChange={(e) => set('priceMin')(e.target.value.replace(/[^\d,.]/g, ''))} placeholder="opcional" />
+            <span>A partir de (R$)</span>
+            <input className="input" inputMode="decimal" value={form.priceMin} onChange={(e) => set('priceMin')(e.target.value.replace(/[^\d,.]/g, ''))} placeholder="se quiser" />
           </label>
           <label className="field">
             <span>Até (R$)</span>
@@ -728,7 +732,7 @@ Título, categoria (lista vinda do servidor) e descrição, com o lembrete de n�
           </label>
         </div>
         <label className="field">
-          <span>Unidade</span>
+          <span>Cobrado</span>
           <select className="input" value={form.priceUnit} onChange={set('priceUnit')}>
             {UNITS.map((u) => (
               <option key={u}>{u}</option>
@@ -743,7 +747,7 @@ Faixa de preço e unidade. Os campos de preço aceitam só números, vírgula e 
 
 ```jsx
         <div className="field">
-          <span>Fotos (opcional, até 4)</span>
+          <span>Fotos (até 4, se quiser)</span>
           <ImagePicker images={form.images} onChange={set('images')} />
         </div>
 ```
@@ -755,11 +759,11 @@ Até 4 fotos.
 ```jsx
         <ErrorBox error={error} />
         <button className="btn block" disabled={busy}>
-          {busy && <Loader2 size={18} className="spin" />} {editing ? 'Salvar alterações' : 'Publicar oferta'}
+          {busy && <Loader2 size={18} className="spin" />} {editing ? 'Salvar' : 'Anunciar'}
         </button>
         {editing && (
           <button type="button" className="btn danger block mt" onClick={() => setConfirmDelete(true)}>
-            <Trash2 size={16} /> Excluir oferta
+            <Trash2 size={16} /> Apagar anúncio
           </button>
         )}
       </form>
@@ -771,8 +775,8 @@ Erro, botão de salvar e, na edição, o botão de excluir.
 
 ```jsx
       {confirmDelete && (
-        <Modal title="Excluir oferta?" onClose={() => setConfirmDelete(false)}>
-          <p>A oferta deixa de aparecer na busca. As conversas e contratações já registradas continuam no histórico.</p>
+        <Modal title="Apagar este anúncio?" onClose={() => setConfirmDelete(false)}>
+          <p>Ele some da busca. As conversas e os serviços que já aconteceram continuam no seu histórico.</p>
           <div className="row">
             <button className="btn ghost grow" onClick={() => setConfirmDelete(false)}>
               Voltar
@@ -781,11 +785,11 @@ Erro, botão de salvar e, na edição, o botão de excluir.
               className="btn danger grow"
               onClick={async () => {
                 await api(`/offers/${id}/status`, { method: 'PATCH', body: { status: 'removida' } })
-                showToast('Oferta excluída')
+                showToast('Anúncio apagado')
                 navigate('/painel', { replace: true })
               }}
             >
-              Excluir
+              Apagar
             </button>
           </div>
         </Modal>
@@ -809,13 +813,13 @@ Central de notificações (RF17).
 // RF17
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Bell, BellRing, CheckCheck, ClipboardList, MessageCircle, ShieldCheck, Sparkles, Star } from 'lucide-react'
+import { Bell, BellRing, CheckCheck, ClipboardList, Megaphone, MessageCircle, ShieldCheck, Star } from 'lucide-react'
 import { api } from '../api.js'
 import { Empty, ErrorBox, Loading, useLoad } from '../components/ui.jsx'
 import { relative } from '../format.js'
 import { useSession } from '../session.jsx'
 
-const ICONS = { mensagem: MessageCircle, conversa: MessageCircle, proposta: ClipboardList, contratacao: ClipboardList, avaliacao: Star, destaque: Sparkles, confirmacao: BellRing, moderacao: ShieldCheck }
+const ICONS = { mensagem: MessageCircle, conversa: MessageCircle, proposta: ClipboardList, contratacao: ClipboardList, avaliacao: Star, destaque: Megaphone, confirmacao: BellRing, moderacao: ShieldCheck }
 ```
 
 Comentário, importações e o ícone de cada tipo de notificação.
@@ -858,7 +862,7 @@ Ao tocar numa notificação: marca como lida e abre a tela ligada a ela.
   return (
     <div>
       <div className="row between">
-        <h1 style={{ margin: 0 }}>Notificações</h1>
+        <h1 style={{ margin: 0 }}>Avisos</h1>
         {data.unread > 0 && (
           <button
             className="btn ghost sm"
@@ -868,13 +872,13 @@ Ao tocar numa notificação: marca como lida e abre a tela ligada a ela.
               reload()
             }}
           >
-            <CheckCheck size={16} /> Marcar todas como lidas
+            <CheckCheck size={16} /> Já vi tudo
           </button>
         )}
       </div>
 ```
 
-Título e o botão "Marcar todas como lidas", quando há não lidas.
+Título ("Avisos") e o botão "Já vi tudo", quando há não lidas.
 
 **Linhas 49 a 57**
 
@@ -882,9 +886,9 @@ Título e o botão "Marcar todas como lidas", quando há não lidas.
       {'Notification' in window && Notification.permission === 'default' && (
         <div className="notice mt">
           <BellRing size={18} />
-          <span className="grow small">Receba um aviso no aparelho quando chegar mensagem ou proposta.</span>
+          <span className="grow small">Quer ser avisado no celular quando chegar mensagem ou orçamento?</span>
           <button className="btn sm" onClick={() => Notification.requestPermission().then(reload)}>
-            Ativar
+            Quero
           </button>
         </div>
       )}
@@ -897,7 +901,7 @@ Se o navegador permite notificações e a pessoa ainda não decidiu, oferece ati
 ```jsx
       <div className="mt">
         {data.notifications.length === 0 ? (
-          <Empty icon={Bell} title="Tudo em dia" />
+          <Empty icon={Bell} title="Nada novo por aqui" />
         ) : (
           <div className="list">
             {data.notifications.map((n) => {
@@ -944,7 +948,7 @@ import { Avatar, ErrorBox, Modal, StarInput } from '../components/ui.jsx'
 import { since } from '../format.js'
 import { useSession } from '../session.jsx'
 
-const ROLE = { usuario: null, agente: 'Agente de campo', moderador: 'Moderação', instituicao: 'Instituição parceira' }
+const ROLE = { usuario: null, agente: 'Agente de campo', moderador: 'Moderação', instituicao: 'Parceiro do projeto' }
 ```
 
 Importações e o nome de cada perfil especial.
@@ -960,18 +964,18 @@ function SatisfactionDialog({ group, onClose, onDone }) {
   const [comment, setComment] = useState('')
   const [error, setError] = useState(null)
   return (
-    <Modal title="Pesquisa de satisfação" onClose={onClose}>
-      <p className="small muted">Leva 30 segundos e ajuda o projeto a melhorar.</p>
+    <Modal title="O que você está achando?" onClose={onClose}>
+      <p className="small muted">São três perguntas. Sua resposta ajuda a gente a melhorar o projeto.</p>
       <div className="field">
-        <span>De modo geral, qual sua satisfação com o ConectaBairro?</span>
+        <span>No geral, está gostando?</span>
         <StarInput value={score} onChange={setScore} />
       </div>
       <div className="field">
-        <span>Foi fácil usar?</span>
+        <span>Foi fácil de usar?</span>
         <StarInput value={ease} onChange={setEase} />
       </div>
       <div className="field">
-        <span>Pretende continuar usando?</span>
+        <span>Vai continuar usando?</span>
         <div className="segmented">
           <button type="button" className={willContinue === true ? 'on' : ''} onClick={() => setWillContinue(true)}>
             Sim
@@ -982,7 +986,7 @@ function SatisfactionDialog({ group, onClose, onDone }) {
         </div>
       </div>
       <label className="field">
-        <span>Comentário (opcional)</span>
+        <span>Quer falar mais alguma coisa? (opcional)</span>
         <textarea className="input" value={comment} onChange={(e) => setComment(e.target.value)} maxLength={800} />
       </label>
       <ErrorBox error={error} />
@@ -998,7 +1002,7 @@ function SatisfactionDialog({ group, onClose, onDone }) {
           }
         }}
       >
-        Enviar respostas
+        Enviar
       </button>
     </Modal>
   )
@@ -1047,7 +1051,7 @@ Ao abrir, consulta se o questionário já foi respondido e escuta o evento `befo
     try {
       const r = await api('/me', { method: 'PATCH', body: patch })
       setUser(r.user)
-      showToast('Perfil atualizado', 'ok')
+      showToast('Salvo!', 'ok')
       return r.user
     } catch (err) {
       showToast(err.message, 'error')
@@ -1085,7 +1089,7 @@ Cabeçalho com iniciais, nome, celular, data de entrada e a etiqueta do perfil e
       <div className="list mb">
         {user.isProvider && user.role === 'usuario' && (
           <Link to="/painel" className="list-item">
-            <LayoutDashboard size={20} /> <span className="grow">Painel do prestador</span>
+            <LayoutDashboard size={20} /> <span className="grow">Seu painel de anúncios</span>
           </Link>
         )}
         {['agente', 'moderador'].includes(user.role) && (
@@ -1105,8 +1109,8 @@ Cabeçalho com iniciais, nome, celular, data de entrada e a etiqueta do perfil e
         )}
         <button className="list-item" onClick={() => setSurvey(true)}>
           <Smile size={20} />
-          <span className="grow">Pesquisa de satisfação</span>
-          {answeredAt ? <span className="badge ok">Respondida</span> : answeredAt === null && <span className="badge accent">Pendente</span>}
+          <span className="grow">O que você está achando?</span>
+          {answeredAt ? <span className="badge ok">Respondido, valeu!</span> : answeredAt === null && <span className="badge accent">3 perguntas</span>}
         </button>
         {installEvent && (
           <button
@@ -1117,13 +1121,13 @@ Cabeçalho com iniciais, nome, celular, data de entrada e a etiqueta do perfil e
               setInstallEvent(null)
             }}
           >
-            <Download size={20} /> <span className="grow">Instalar o aplicativo neste aparelho</span>
+            <Download size={20} /> <span className="grow">Instalar o app no celular</span>
           </button>
         )}
       </div>
 ```
 
-Atalhos conforme o perfil (painel, campo, moderação, indicadores), o questionário com a situação "Respondida" ou "Pendente" e, quando possível, "Instalar o aplicativo neste aparelho".
+Atalhos conforme o perfil (painel, campo, moderação, indicadores), o questionário com a situação ("Respondido, valeu!" ou "3 perguntas") e, quando possível, "Instalar o app no celular".
 
 **Linhas 151 a 172**
 
@@ -1135,15 +1139,15 @@ Atalhos conforme o perfil (painel, campo, moderação, indicadores), o question�
           save({ name, bio })
         }}
       >
-        <h2>Meus dados</h2>
+        <h2>Seus dados</h2>
         <label className="field">
           <span>Nome</span>
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
         </label>
         {user.isProvider && (
           <label className="field">
-            <span>Apresentação</span>
-            <textarea className="input" value={bio} onChange={(e) => setBio(e.target.value)} maxLength={400} placeholder="Conte aos vizinhos o que você faz" />
+            <span>Sobre você</span>
+            <textarea className="input" value={bio} onChange={(e) => setBio(e.target.value)} maxLength={400} placeholder="Há quanto tempo faz, o que mais gosta de fazer..." />
           </label>
         )}
         <button className="btn" disabled={busy}>
@@ -1159,7 +1163,7 @@ Edição do nome e, para prestadores, da apresentação.
 ```jsx
       {user.role === 'usuario' && (
         <div className="card">
-          <h2>Oferecer serviços</h2>
+          <h2>Anunciar no bairro</h2>
           <label className="checkbox">
             <input
               type="checkbox"
@@ -1171,9 +1175,9 @@ Edição do nome e, para prestadores, da apresentação.
               }}
             />
             <span>
-              Quero oferecer serviços ou produtos no bairro
+              Quero anunciar o que eu faço ou vendo
               <br />
-              <span className="small muted">Sem CNPJ e sem mostrar seu endereço: os vizinhos veem só a distância aproximada.</span>
+              <span className="small muted">Não precisa de CNPJ e ninguém vê seu endereço, só a que distância você está.</span>
             </span>
           </label>
         </div>
@@ -1202,7 +1206,7 @@ A opção de oferecer serviços. Ao ativar, a pessoa já é levada ao painel do 
           onDone={() => {
             setSurvey(false)
             setAnsweredAt(new Date().toISOString())
-            showToast('Obrigado pelas respostas!', 'ok')
+            showToast('Valeu por responder!', 'ok')
           }}
         />
       )}

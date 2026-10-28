@@ -27,7 +27,7 @@ export default function Receipt() {
           <img src="/icon.svg" alt="" width={40} height={40} style={{ borderRadius: 10 }} />
           <div>
             <div className="strong">ConectaBairro</div>
-            <div className="small muted">Comprovante de serviço concluído</div>
+            <div className="small muted">Comprovante de serviço</div>
           </div>
         </div>
         <div className="line">
@@ -51,7 +51,7 @@ export default function Receipt() {
           <span>{r.clientName}</span>
         </div>
         <div className="line">
-          <span className="muted">Prazo combinado</span>
+          <span className="muted">Combinado para</span>
           <span>{ymdToBr(r.deadline)}</span>
         </div>
         <div className="line">
@@ -63,16 +63,15 @@ export default function Receipt() {
           <span>{brl(r.grossCents)}</span>
         </div>
         <div className="line">
-          <span>Comissão da plataforma ({(r.rate * 100).toLocaleString('pt-BR')}%)</span>
+          <span>Taxa do ConectaBairro ({(r.rate * 100).toLocaleString('pt-BR')}%)</span>
           <span>- {brl(r.commissionCents)}</span>
         </div>
         <div className="line total">
-          <span>Valor líquido do prestador</span>
+          <span>Fica para quem fez</span>
           <span>{brl(r.netCents)}</span>
         </div>
         <p className="tiny muted mt">
-          Comprovante gerado automaticamente pelo ConectaBairro no encerramento da contratação nº {r.contractId}. Protótipo acadêmico: os valores não
-          representam cobrança real.
+          Contratação nº {r.contractId}. Este é um protótipo do projeto UPX IV da FACENS: nenhum valor foi cobrado de verdade.
         </p>
       </div>
     </div>

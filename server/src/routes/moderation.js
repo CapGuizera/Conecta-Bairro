@@ -103,16 +103,16 @@ r.post('/moderation/reports/:id/resolve', requireRole('moderador'), async (req, 
 
   if (decision === 'procedente') {
     if (action === 'remover_oferta') {
-      if (rep.target_type !== 'oferta') fail(400, 'Ação válida apenas para ofertas')
+      if (rep.target_type !== 'oferta') fail(400, 'Isso só vale para anúncios')
       await q("UPDATE offers SET status = 'removida' WHERE id = $1", [rep.target_id])
       await notify(target.ownerId, {
         kind: 'moderacao',
-        title: 'Oferta removida pela moderação',
+        title: 'Anúncio removido pela moderação',
         body: `"${target.title}" foi removida. ${resolution}`.trim(),
         link: '/painel',
       })
     } else if (action === 'ocultar_mensagem') {
-      if (rep.target_type !== 'mensagem') fail(400, 'Ação válida apenas para mensagens')
+      if (rep.target_type !== 'mensagem') fail(400, 'Isso só vale para mensagens')
       await q("UPDATE messages SET body = '[mensagem removida pela moderação]', masked = true WHERE id = $1", [rep.target_id])
     } else if (action === 'bloquear_usuario') {
       if (!target?.ownerId) fail(400, 'Usuário não identificado')

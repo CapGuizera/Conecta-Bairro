@@ -20,6 +20,8 @@ import Profile from './pages/Profile.jsx'
 import ProviderProfile from './pages/ProviderProfile.jsx'
 import Receipt from './pages/Receipt.jsx'
 import { SessionProvider, useSession } from './session.jsx'
+import '@fontsource-variable/figtree'
+import '@fontsource-variable/bricolage-grotesque'
 import './styles.css'
 
 function Private({ children, provider, roles }) {
@@ -33,13 +35,13 @@ function Private({ children, provider, roles }) {
 
 function App() {
   const { ready, meta } = useSession()
-  if (!ready) return <Loading label="Abrindo o ConectaBairro..." />
+  if (!ready) return <Loading label="Abrindo..." />
   if (!meta) {
     return (
       <div className="login">
         <div className="card center">
-          <h2>Sem conexão com o servidor</h2>
-          <p className="muted">Verifique se o ConectaBairro está rodando e tente de novo.</p>
+          <h2>Não consegui falar com o servidor</h2>
+          <p className="muted">Confere se a janela do ConectaBairro está aberta no computador e tenta de novo.</p>
           <button className="btn" onClick={() => window.location.reload()}>
             Tentar de novo
           </button>

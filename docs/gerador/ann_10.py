@@ -12,7 +12,7 @@ Moldura de todas as telas: barra superior, aviso de sem conexão, conteúdo, nav
 Importações, incluindo os ícones da navegação.
 '''),
 ('function navItems(user) {', '''
-Define os itens de navegação conforme quem está logado: visitante vê Início e Entrar; usuário vê Início, Conversas e Contratações, mais um item do seu perfil (Campo, Moderação, Indicadores ou, para prestadores, Painel) e Perfil.
+Define os itens de navegação conforme quem está logado: visitante vê Início e Entrar; usuário vê Início, Conversas e Serviços (as contratações), mais um item do seu perfil (Campo, Moderação, Indicadores ou, para prestadores, Painel) e Perfil.
 '''),
 ('export function Layout() {', '''
 Estados do layout: usuário, número de notificações, aviso rápido, se há conexão e o endereço atual.
@@ -27,7 +27,7 @@ Esconde o aviso rápido depois de 4,5 segundos.
 Volta ao topo a cada troca de tela. As chaves `{ }` são necessárias: no Chromium recente `window.scrollTo` devolve uma `Promise`, e um efeito do React só pode devolver uma função de limpeza.
 '''),
 ('  const items = navItems(user)', '''
-Barra superior com a marca e, em telas largas (computador), os itens de navegação no topo. O sino com o número de não lidas aparece para quem está logado.
+Barra superior com a marca em forma de **placa de rua** ("Sorocaba" em cima, "ConectaBairro" embaixo; o `aria-label` diz a leitores de tela que ela leva ao início) e, em telas largas (computador), os itens de navegação no topo. O sino com o número de não lidas aparece para quem está logado.
 '''),
 ('      {!online && (', '''
 Faixa amarela de sem conexão. Para o agente de campo, explica que os cadastros serão guardados e enviados depois.
@@ -58,7 +58,7 @@ Mensagem para listas vazias, com ícone, título e texto opcional.
 Janela sobreposta (diálogo). Fecha com a tecla Esc ou ao clicar fora (`e.target === e.currentTarget` confere que o clique foi no fundo, não dentro da janela). Os atributos `role` e `aria-modal` informam leitores de tela.
 '''),
 ('export function Avatar(', '''
-Círculo com as iniciais do nome (por exemplo, "CB" para Cleusa Batista). O sistema não pede foto de perfil.
+Círculo com as iniciais do nome (por exemplo, "CB" para Cleusa Batista), numa cor tirada do próprio nome (`avatarColors`): cada pessoa tem sempre a mesma cor, e a lista de conversas não fica toda igual. O sistema não pede foto de perfil.
 '''),
 ('export function Loading(', '''
 Indicador de carregamento, caixa de erro e cartão de número (estatística) dos painéis.
@@ -81,10 +81,10 @@ Cartão de oferta da lista de resultados.
 Importações.
 '''),
 ('export function Thumb(', '''
-Miniatura: a primeira foto da oferta ou, sem foto, um ícone de caixa (produto) ou ferramenta (serviço). `loading="lazy"` só baixa a imagem quando ela chega perto da tela.
+Miniatura: a primeira foto da oferta ou, sem foto, o ícone da categoria (bolo, tesoura, chave inglesa...). `loading="lazy"` só baixa a imagem quando ela chega perto da tela.
 '''),
 ('export function OfferCard(', '''
-O cartão inteiro é um link para a oferta. Mostra categoria, a etiqueta Destaque (com borda laranja), título, **distância aproximada**, nome do prestador, preço, estrelas e quantidade de serviços concluídos.
+O cartão inteiro é um link para a oferta. Mostra categoria, a etiqueta Destaque com megafone (e borda amarela), título, **distância aproximada**, nome do prestador, preço, estrelas e quantidade de serviços concluídos.
 '''),
 ]),
 ('web/src/components/Maps.jsx', '''
@@ -106,7 +106,7 @@ Componente invisível que move o mapa quando o ponto ou o zoom mudam. `useMap()`
 Componente invisível que avisa onde a pessoa clicou no mapa.
 '''),
 ('export function RadiusMap(', '''
-Mapa da busca: o círculo do raio e o ponto laranja do **próprio morador**. Mais nada. A rolagem do mouse fica desligada para não atrapalhar a rolagem da página.
+Mapa da busca: o círculo do raio e o ponto do **próprio morador**. Mais nada. A rolagem do mouse fica desligada para não atrapalhar a rolagem da página.
 '''),
 ('export function PickPointMap(', '''
 Mapa para escolher um ponto (morador escolhendo de onde busca, prestador marcando onde atende). Mostra o ponto escolhido e, se informado, o raio de atendimento.

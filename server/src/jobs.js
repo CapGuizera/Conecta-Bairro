@@ -15,8 +15,8 @@ export async function runActivityCheck() {
   for (const o of stale) {
     await notify(o.provider_id, {
       kind: 'confirmacao',
-      title: 'Sua oferta continua ativa?',
-      body: `Confirme "${o.title}" para que ela continue aparecendo para os vizinhos.`,
+      title: 'Seu anúncio continua valendo?',
+      body: `Confirma "${o.title}" pra ele continuar aparecendo pros vizinhos.`,
       link: '/painel',
     })
     await q('UPDATE offers SET confirm_notified_at = now() WHERE id = $1', [o.id])

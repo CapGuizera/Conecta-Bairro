@@ -31,7 +31,7 @@ Comentário e importações. `const r = Router()` cria o roteador.
 ```js
 r.post('/auth/request-code', async (req, res) => {
   const phone = normalizePhone(req.body?.phone)
-  if (!phone) fail(400, 'Informe um celular válido com DDD, por exemplo (15) 99876-5432')
+  if (!phone) fail(400, 'Esse celular não parece certo. Coloque com DDD, tipo (15) 99876-5432')
 ```
 
 **Pedir código.** Normaliza o telefone e recusa formatos inválidos.
@@ -43,7 +43,7 @@ r.post('/auth/request-code', async (req, res) => {
     "SELECT count(*)::int AS n FROM otp_codes WHERE phone = $1 AND created_at > now() - interval '1 hour'",
     [phone],
   )
-  if (recent.n >= 6) fail(429, 'Muitos códigos solicitados. Aguarde alguns minutos e tente de novo')
+  if (recent.n >= 6) fail(429, 'Você pediu muitos códigos. Espera uns minutinhos e tenta de novo')
 ```
 
 Limite de 6 códigos por hora para o mesmo número (resposta 429, "muitas requisições"). Isso impede usar o sistema para disparar SMS em massa para um número.
@@ -93,11 +93,11 @@ r.post('/auth/verify', async (req, res) => {
     'SELECT * FROM otp_codes WHERE phone = $1 AND NOT used AND expires_at > now() ORDER BY id DESC LIMIT 1',
     [phone],
   )
-  if (!otp) fail(400, 'Código expirado. Peça um novo código')
-  if (otp.attempts >= 5) fail(429, 'Tentativas esgotadas. Peça um novo código')
+  if (!otp) fail(400, 'Esse código expirou. Pede outro')
+  if (otp.attempts >= 5) fail(429, 'Muitas tentativas erradas. Pede um código novo')
   if (otp.code_hash !== hashCode(phone, code)) {
     await q('UPDATE otp_codes SET attempts = attempts + 1 WHERE id = $1', [otp.id])
-    fail(400, 'Código incorreto')
+    fail(400, 'Código errado. Confere e tenta de novo')
   }
 ```
 
@@ -127,7 +127,7 @@ Só então cria o usuário, sem pedir CNPJ, CPF ou endereço (o artigo aponta a 
 **Linhas 60 a 63**
 
 ```js
-  if (user.blocked) fail(403, 'Esta conta foi suspensa pela moderação')
+  if (user.blocked) fail(403, 'Essa conta foi suspensa pela moderação')
   await q('UPDATE otp_codes SET used = true WHERE id = $1', [otp.id])
   res.json({ token: signToken(user), user: selfUser(user) })
 })
@@ -403,7 +403,7 @@ r.get('/offers/:id', async (req, res) => {
     params,
   )
   const isOwner = req.user && req.user.id === row?.provider_id
-  if (!row || (row.status === 'pausada' && !isOwner)) fail(404, 'Oferta não encontrada')
+  if (!row || (row.status === 'pausada' && !isOwner)) fail(404, 'Esse anúncio não existe mais')
 ```
 
 Busca a oferta com prestador, destaque e reputação. Ofertas removidas e prestadores bloqueados não aparecem; ofertas pausadas só para o próprio dono.
@@ -435,7 +435,7 @@ O `ON CONFLICT DO NOTHING` ignora a segunda visita do mesmo visitante no mesmo d
 })
 ```
 
-Se o usuário logado já conversou sobre esta oferta, devolve o id da conversa: a tela mostra "Abrir conversa" em vez de criar outra.
+Se o usuário logado já conversou sobre esta oferta, devolve o id da conversa: a tela mostra "Continuar a conversa" em vez de criar outra.
 
 **Linhas 111 a 117**
 
@@ -496,7 +496,7 @@ function readOfferBody(b) {
   const priceMin = parseMoneyToCents(b.priceMin)
   const priceMax = parseMoneyToCents(b.priceMax)
   if (priceMin !== null && priceMin < 0) fail(400, 'Preço inválido')
-  if (priceMin !== null && priceMax !== null && priceMax < priceMin) fail(400, 'O preço máximo deve ser maior que o mínimo')
+  if (priceMin !== null && priceMax !== null && priceMax < priceMin) fail(400, 'O preço máximo tem que ser maior que o mínimo')
   const priceUnit = str(b.priceUnit, { max: 30, name: 'unidade de preço' }) || 'a combinar'
   return { title, description, category: b.category, kind, priceMin, priceMax, priceUnit }
 }
@@ -558,7 +558,7 @@ async function ownOffer(req) {
     Number(req.params.id) || 0,
     req.user.id,
   ])
-  if (!row) fail(404, 'Oferta não encontrada')
+  if (!row) fail(404, 'Esse anúncio não existe mais')
   return row
 }
 ```

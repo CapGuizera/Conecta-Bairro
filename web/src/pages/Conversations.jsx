@@ -16,13 +16,13 @@ export default function Conversations() {
       <h1>Conversas</h1>
       {data.conversations.length === 0 ? (
         <Empty icon={MessageCircle} title="Nenhuma conversa ainda">
-          Encontre um serviço na busca e toque em "Conversar com o prestador".
+          Quando você chamar alguém (ou alguém te chamar), a conversa aparece aqui.
         </Empty>
       ) : (
         <div className="list">
           {data.conversations.map((c) => (
             <Link key={c.id} to={`/conversas/${c.id}`} className={`list-item ${c.unread ? 'unread' : ''}`}>
-              <Thumb offer={{ images: c.offerImage ? [c.offerImage] : [] }} size={48} />
+              <Thumb offer={{ images: c.offerImage ? [c.offerImage] : [], category: c.offerCategory }} size={48} />
               <div className="grow">
                 <div className="row between">
                   <span className="strong ellipsis">{c.otherName}</span>
@@ -30,7 +30,7 @@ export default function Conversations() {
                 </div>
                 <div className="small muted ellipsis">{c.offerTitle}</div>
                 <div className="row between">
-                  <span className="small ellipsis">{c.lastBody || 'Conversa iniciada'}</span>
+                  <span className="small ellipsis">{c.lastBody || 'Conversa começou'}</span>
                   {c.unread > 0 && <span className="badge accent">{c.unread}</span>}
                 </div>
               </div>

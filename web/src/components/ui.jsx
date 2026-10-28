@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Loader2, Star, X } from 'lucide-react'
+import { avatarColors } from '../categories.jsx'
 
 export function Stars({ value, count, size = 14 }) {
-  if (value === null || value === undefined) return <span className="muted small">Sem avaliações</span>
+  if (value === null || value === undefined) return <span className="muted small">Ainda sem nota</span>
   const full = Math.round(value)
   return (
     <span className="stars" title={`${value} de 5`}>
@@ -66,7 +67,12 @@ export function Avatar({ name = '', size }) {
     .map((p) => p[0])
     .join('')
     .toUpperCase()
-  return <div className={`avatar ${size || ''}`}>{initials || '?'}</div>
+  const [bg, fg] = avatarColors(name)
+  return (
+    <div className={`avatar ${size || ''}`} style={{ background: bg, color: fg }}>
+      {initials || '?'}
+    </div>
+  )
 }
 
 export function Loading({ label = 'Carregando...' }) {

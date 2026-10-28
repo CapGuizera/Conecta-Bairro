@@ -48,7 +48,7 @@ export default function OfferForm() {
     setError(null)
     try {
       const r = await api(editing ? `/offers/${id}` : '/offers', { method: editing ? 'PUT' : 'POST', body: form })
-      showToast(editing ? 'Oferta atualizada' : 'Oferta publicada para o bairro', 'ok')
+      showToast(editing ? 'Anúncio atualizado' : 'Seu anúncio já está no ar pro bairro!', 'ok')
       navigate(`/oferta/${r.offer.id}`, { replace: true })
     } catch (err) {
       setError(err)
@@ -63,7 +63,7 @@ export default function OfferForm() {
       <button className="btn ghost sm mb" onClick={() => navigate(-1)}>
         <ArrowLeft size={16} /> Voltar
       </button>
-      <h1>{editing ? 'Editar oferta' : 'Nova oferta'}</h1>
+      <h1>{editing ? 'Editar anúncio' : 'Novo anúncio'}</h1>
       <form onSubmit={submit} className="card">
         <div className="segmented mb">
           <button type="button" className={form.kind === 'servico' ? 'on' : ''} onClick={() => set('kind')('servico')}>
@@ -74,13 +74,13 @@ export default function OfferForm() {
           </button>
         </div>
         <label className="field">
-          <span>Título</span>
-          <input className="input" value={form.title} onChange={set('title')} maxLength={80} placeholder="Ex.: Bolos caseiros por encomenda" required />
+          <span>O que você faz ou vende</span>
+          <input className="input" value={form.title} onChange={set('title')} maxLength={80} placeholder="Bolos caseiros por encomenda" required />
         </label>
         <label className="field">
           <span>Categoria</span>
           <select className="input" value={form.category} onChange={set('category')} required>
-            <option value="">Escolha...</option>
+            <option value="">Escolha uma...</option>
             {meta.categories.map((c) => (
               <option key={c.slug} value={c.slug}>
                 {c.name}
@@ -89,14 +89,14 @@ export default function OfferForm() {
           </select>
         </label>
         <label className="field">
-          <span>Descrição</span>
-          <textarea className="input" value={form.description} onChange={set('description')} maxLength={1500} placeholder="O que você faz, como funciona, prazos..." />
-          <span className="hint">Não coloque telefone nem endereço: o contato acontece pelo chat.</span>
+          <span>Conta mais</span>
+          <textarea className="input" value={form.description} onChange={set('description')} maxLength={1500} placeholder="Sabores, como funciona, quanto tempo leva..." />
+          <span className="hint">Não precisa colocar telefone nem endereço: quem se interessar te chama no chat.</span>
         </label>
         <div className="grid two">
           <label className="field">
-            <span>Preço a partir de (R$)</span>
-            <input className="input" inputMode="decimal" value={form.priceMin} onChange={(e) => set('priceMin')(e.target.value.replace(/[^\d,.]/g, ''))} placeholder="opcional" />
+            <span>A partir de (R$)</span>
+            <input className="input" inputMode="decimal" value={form.priceMin} onChange={(e) => set('priceMin')(e.target.value.replace(/[^\d,.]/g, ''))} placeholder="se quiser" />
           </label>
           <label className="field">
             <span>Até (R$)</span>
@@ -104,7 +104,7 @@ export default function OfferForm() {
           </label>
         </div>
         <label className="field">
-          <span>Unidade</span>
+          <span>Cobrado</span>
           <select className="input" value={form.priceUnit} onChange={set('priceUnit')}>
             {UNITS.map((u) => (
               <option key={u}>{u}</option>
@@ -112,22 +112,22 @@ export default function OfferForm() {
           </select>
         </label>
         <div className="field">
-          <span>Fotos (opcional, até 4)</span>
+          <span>Fotos (até 4, se quiser)</span>
           <ImagePicker images={form.images} onChange={set('images')} />
         </div>
         <ErrorBox error={error} />
         <button className="btn block" disabled={busy}>
-          {busy && <Loader2 size={18} className="spin" />} {editing ? 'Salvar alterações' : 'Publicar oferta'}
+          {busy && <Loader2 size={18} className="spin" />} {editing ? 'Salvar' : 'Anunciar'}
         </button>
         {editing && (
           <button type="button" className="btn danger block mt" onClick={() => setConfirmDelete(true)}>
-            <Trash2 size={16} /> Excluir oferta
+            <Trash2 size={16} /> Apagar anúncio
           </button>
         )}
       </form>
       {confirmDelete && (
-        <Modal title="Excluir oferta?" onClose={() => setConfirmDelete(false)}>
-          <p>A oferta deixa de aparecer na busca. As conversas e contratações já registradas continuam no histórico.</p>
+        <Modal title="Apagar este anúncio?" onClose={() => setConfirmDelete(false)}>
+          <p>Ele some da busca. As conversas e os serviços que já aconteceram continuam no seu histórico.</p>
           <div className="row">
             <button className="btn ghost grow" onClick={() => setConfirmDelete(false)}>
               Voltar
@@ -136,11 +136,11 @@ export default function OfferForm() {
               className="btn danger grow"
               onClick={async () => {
                 await api(`/offers/${id}/status`, { method: 'PATCH', body: { status: 'removida' } })
-                showToast('Oferta excluída')
+                showToast('Anúncio apagado')
                 navigate('/painel', { replace: true })
               }}
             >
-              Excluir
+              Apagar
             </button>
           </div>
         </Modal>

@@ -17,7 +17,7 @@ export function ReportDialog({ targetType, targetId, onClose }) {
     setError('')
     try {
       await api('/reports', { method: 'POST', body: { targetType, targetId, reason, details } })
-      showToast('Denúncia enviada. A moderação vai analisar.', 'ok')
+      showToast('Recebemos. A moderação vai dar uma olhada.', 'ok')
       onClose()
     } catch (err) {
       setError(err.message)
@@ -26,7 +26,7 @@ export function ReportDialog({ targetType, targetId, onClose }) {
   }
 
   return (
-    <Modal title="Denunciar" onClose={onClose}>
+    <Modal title="O que aconteceu?" onClose={onClose}>
       <form onSubmit={submit}>
         {Object.entries(meta?.reportReasons || {}).map(([id, label]) => (
           <label className="checkbox" key={id}>
@@ -35,12 +35,12 @@ export function ReportDialog({ targetType, targetId, onClose }) {
           </label>
         ))}
         <label className="field mt">
-          <span>Detalhes (opcional)</span>
+          <span>Quer contar mais? (opcional)</span>
           <textarea className="input" value={details} onChange={(e) => setDetails(e.target.value)} maxLength={800} />
         </label>
         {error && <div className="error">{error}</div>}
         <button className="btn block" disabled={!reason || busy}>
-          Enviar denúncia
+          Enviar
         </button>
       </form>
     </Modal>

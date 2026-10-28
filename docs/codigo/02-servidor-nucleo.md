@@ -148,15 +148,74 @@ const schemaSql = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.me
 
 Comentário explicando os dois modos. Importações e leitura do arquivo `schema.sql`, que fica na mesma pasta.
 
-**Linha 12**
+**Linhas 12 a 13**
 
 ```js
 let impl = null
+let releaseLock = null
 ```
 
-Guarda a conexão aberta (padrão *singleton*): o banco é aberto uma vez e reaproveitado.
+Guarda a conexão aberta (padrão *singleton*: o banco é aberto uma vez e reaproveitado) e a função que libera a trava do banco.
 
-**Linhas 14 a 15**
+**Linhas 15 a 24**
+
+```js
+// O PGlite não aguenta dois processos no mesmo banco: o segundo atrapalha as gravações do primeiro
+// (aconteceu ao abrir o sistema duas vezes). A trava guarda o PID de quem está com o banco aberto.
+function processAlive(pid) {
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch (err) {
+    return err.code === 'EPERM'
+  }
+}
+```
+
+**A trava do banco embutido.** O PGlite não foi feito para dois processos abrirem a mesma pasta: o segundo atrapalha as gravações do primeiro e o banco pode corromper.
+Isso aconteceu de verdade durante o desenvolvimento, quando o sistema foi aberto duas vezes ao mesmo tempo (as páginas de oferta passaram a dar "erro interno").
+
+`processAlive` confere se um processo ainda existe: `process.kill(pid, 0)` não mata nada, só pergunta ao sistema operacional se o PID existe (funciona igual no Windows). O erro `EPERM` significa "existe, mas é de outro usuário".
+
+**Linhas 26 a 50**
+
+```js
+function acquireLock(dir) {
+  const file = path.join(path.dirname(dir), 'pglite.lock')
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      fs.writeFileSync(file, String(process.pid), { flag: 'wx' })
+      break
+    } catch (err) {
+      if (err.code !== 'EEXIST') throw err
+      const owner = Number(fs.readFileSync(file, 'utf8'))
+      if (owner && owner !== process.pid && processAlive(owner)) {
+        throw Object.assign(new Error(`O banco já está aberto por outro processo (PID ${owner})`), { code: 'DB_LOCKED', owner })
+      }
+      fs.rmSync(file, { force: true }) // trava esquecida por um processo que já terminou
+    }
+  }
+  const release = () => {
+    try {
+      if (Number(fs.readFileSync(file, 'utf8')) === process.pid) fs.rmSync(file, { force: true })
+    } catch {
+      /* já removida */
+    }
+  }
+  process.on('exit', release)
+  return release
+}
+```
+
+`acquireLock` cria o arquivo `server/data/pglite.lock` com o PID do processo:
+
+- a opção `flag: 'wx'` só cria se o arquivo **não existir**, numa operação única do sistema de arquivos. Dois processos tentando ao mesmo tempo nunca ganham os dois;
+- se já existir e o dono ainda estiver vivo, recusa com o erro `DB_LOCKED`;
+- se o dono já morreu (por exemplo, a janela foi fechada no X sem encerrar direito), a trava é considerada esquecida: apaga e tenta de novo.
+
+A liberação só apaga o arquivo se ele ainda for deste processo, e é registrada no evento `exit` para acontecer também quando o programa termina.
+
+**Linhas 52 a 53**
 
 ```js
 export async function initDb({ memory = false } = {}) {
@@ -165,7 +224,7 @@ export async function initDb({ memory = false } = {}) {
 
 Abre o banco. O parâmetro `memory` é usado pelos testes para criar um banco temporário só na memória.
 
-**Linhas 16 a 20**
+**Linhas 54 a 58**
 
 ```js
   if (config.databaseUrl && !memory) {
@@ -179,7 +238,7 @@ Abre o banco. O parâmetro `memory` é usado pelos testes para criar um banco te
 Os `setTypeParser` fazem números grandes (`bigint`) e decimais (`numeric`) virem números JavaScript, e não texto, igualando o comportamento ao do PGlite.
 O `Pool` mantém várias conexões abertas para atender requisições em paralelo.
 
-**Linhas 21 a 40**
+**Linhas 59 a 78**
 
 ```js
     impl = {
@@ -207,13 +266,16 @@ O `Pool` mantém várias conexões abertas para atender requisições em paralel
 `query` e `exec` repassam para o pool. A `transaction` pega uma conexão exclusiva, executa `BEGIN`, roda a função recebida e faz `COMMIT`;
 se algo der errado, faz `ROLLBACK` e nada fica gravado pela metade. O `finally` devolve a conexão ao pool em qualquer caso.
 
-**Linhas 41 a 53**
+**Linhas 79 a 94**
 
 ```js
   } else {
     const { PGlite } = await import('@electric-sql/pglite')
     const { postgis } = await import('@electric-sql/pglite-postgis')
-    if (!memory) fs.mkdirSync(config.pgliteDir, { recursive: true })
+    if (!memory) {
+      fs.mkdirSync(config.pgliteDir, { recursive: true })
+      releaseLock = acquireLock(config.pgliteDir)
+    }
     const db = await PGlite.create(memory ? undefined : config.pgliteDir, { extensions: { postgis } })
     impl = {
       kind: memory ? 'pglite-memory' : 'pglite',
@@ -225,10 +287,10 @@ se algo der errado, faz `ROLLBACK` e nada fica gravado pela metade. O `finally` 
   }
 ```
 
-**Modo PGlite**: carrega o PostgreSQL em WebAssembly com a extensão PostGIS e grava os dados na pasta `server/data/pglite` (ou só em memória nos testes).
+**Modo PGlite**: pega a trava (só quando grava em disco; o banco em memória dos testes não precisa), carrega o PostgreSQL em WebAssembly com a extensão PostGIS e grava os dados na pasta `server/data/pglite`.
 O PGlite já tem transação própria; aqui ela só é adaptada para o mesmo formato do modo PostgreSQL.
 
-**Linhas 54 a 56**
+**Linhas 95 a 97**
 
 ```js
   await impl.exec(schemaSql)
@@ -238,7 +300,7 @@ O PGlite já tem transação própria; aqui ela só é adaptada para o mesmo for
 
 Executa o `schema.sql` a cada inicialização. Ele usa `CREATE ... IF NOT EXISTS`, então só cria o que falta.
 
-**Linhas 58 a 61**
+**Linhas 99 a 102**
 
 ```js
 export function db() {
@@ -249,18 +311,20 @@ export function db() {
 
 Devolve o banco aberto, ou avisa claramente se alguém tentar usar antes de abrir.
 
-**Linhas 63 a 66**
+**Linhas 104 a 109**
 
 ```js
 export async function closeDb() {
   if (impl) await impl.close()
   impl = null
+  releaseLock?.()
+  releaseLock = null
 }
 ```
 
-Fecha o banco (usado no encerramento e nos testes).
+Fecha o banco e libera a trava (usado no encerramento, no seed e nos testes).
 
-**Linhas 68 a 70**
+**Linhas 111 a 113**
 
 ```js
 export const q = (sql, params = []) => db().query(sql, params)
@@ -293,20 +357,28 @@ import { seedIfEmpty } from './seed.js'
 
 Importações: o servidor HTTP nativo, `os` (para descobrir os IPs da máquina) e os módulos do próprio projeto.
 
-**Linhas 11 a 15**
+**Linhas 11 a 23**
 
 ```js
 const started = Date.now()
 console.log('Iniciando o ConectaBairro...')
-const db = await initDb()
+let db
+try {
+  db = await initDb()
+} catch (err) {
+  if (err.code !== 'DB_LOCKED') throw err
+  console.error(`\nO ConectaBairro já está aberto em outra janela (processo ${err.owner}).`)
+  console.error('Use a janela que já está aberta ou feche-a antes de abrir de novo.')
+  process.exit(1)
+}
 console.log(`Banco: ${db.kind === 'postgres' ? 'PostgreSQL + PostGIS (DATABASE_URL)' : `PGlite embutido em ${config.pgliteDir}`}`)
 await seedIfEmpty()
 ```
 
 Marca o horário de início para mostrar quanto tempo a inicialização levou. O `await` no nível do módulo é permitido em módulos ES.
-Abre o banco, mostra qual modo está em uso e roda o seed se for a primeira vez.
+Abre o banco. Se ele já estiver aberto por outra janela (erro `DB_LOCKED` da trava), explica isso e encerra **antes** de tocar no banco, em vez de mostrar um erro técnico. Depois mostra qual modo está em uso e roda o seed se for a primeira vez.
 
-**Linhas 17 a 20**
+**Linhas 25 a 28**
 
 ```js
 const app = createApp()
@@ -317,7 +389,7 @@ scheduleJobs()
 
 Cria o aplicativo Express e o servidor HTTP, liga o Socket.IO no mesmo servidor (mesma porta) e agenda a rotina do RF16.
 
-**Linhas 22 a 28**
+**Linhas 30 a 36**
 
 ```js
 server.on('error', (err) => {
@@ -331,7 +403,7 @@ server.on('error', (err) => {
 
 Trata o erro mais comum ao rodar no Windows: a porta já está em uso (por exemplo, o sistema já aberto em outra janela). Mostra como resolver em vez de um erro técnico.
 
-**Linha 30**
+**Linha 38**
 
 ```js
 server.listen(config.port, config.host, async () => {
@@ -339,7 +411,7 @@ server.listen(config.port, config.host, async () => {
 
 Começa a aceitar conexões. O código seguinte só roda quando o servidor está pronto.
 
-**Linhas 31 a 37**
+**Linhas 39 a 45**
 
 ```js
   // Endereços para abrir em outros aparelhos da mesma rede (ignora interfaces virtuais: Docker, WSL, VirtualBox).
@@ -353,7 +425,7 @@ Começa a aceitar conexões. O código seguinte só roda quando o servidor está
 
 Lista os IPs da máquina que outros aparelhos podem usar. Ignora interfaces virtuais (Docker, WSL, VirtualBox, VPNs), que confundiriam quem está apresentando, e fica só com IPv4 não internos.
 
-**Linha 38**
+**Linha 46**
 
 ```js
   const demo = await many("SELECT name, phone, role FROM users WHERE phone LIKE '+551590000%' ORDER BY phone")
@@ -361,7 +433,7 @@ Lista os IPs da máquina que outros aparelhos podem usar. Ignora interfaces virt
 
 Busca as contas de demonstração (telefones que começam com `+551590000`) para listar no terminal.
 
-**Linhas 39 a 41**
+**Linhas 47 a 49**
 
 ```js
   console.log(`\nConectaBairro pronto em ${((Date.now() - started) / 1000).toFixed(1)} s`)
@@ -371,7 +443,7 @@ Busca as contas de demonstração (telefones que começam com `+551590000`) para
 
 Mostra o tempo de inicialização, o endereço local e os da rede.
 
-**Linhas 42 a 50**
+**Linhas 50 a 58**
 
 ```js
   if (config.smsMode === 'dev') {
@@ -387,7 +459,7 @@ Mostra o tempo de inicialização, o endereço local e os da rede.
 
 No modo demonstração, lista as contas com o celular formatado. A expressão regular transforma `15900000001` em `(15) 90000-0001`.
 
-**Linhas 52 a 59**
+**Linhas 60 a 67**
 
 ```js
 const shutdown = async () => {
@@ -510,7 +582,7 @@ Sem a interface compilada, mostra uma mensagem orientando a rodar o build.
   app.use((err, _req, res, _next) => {
     const status = err.status || (err.type === 'entity.too.large' ? 413 : err.type === 'entity.parse.failed' ? 400 : 500)
     if (status >= 500) console.error(err)
-    res.status(status).json({ error: status >= 500 ? 'Erro interno. Tente novamente.' : err.message })
+    res.status(status).json({ error: status >= 500 ? 'Deu um problema aqui do nosso lado. Tenta de novo daqui a pouco.' : err.message })
   })
   return app
 }
@@ -614,8 +686,8 @@ Busca ofertas ativas confirmadas há mais de 30 dias que ainda não receberam av
   for (const o of stale) {
     await notify(o.provider_id, {
       kind: 'confirmacao',
-      title: 'Sua oferta continua ativa?',
-      body: `Confirme "${o.title}" para que ela continue aparecendo para os vizinhos.`,
+      title: 'Seu anúncio continua valendo?',
+      body: `Confirma "${o.title}" pra ele continuar aparecendo pros vizinhos.`,
       link: '/painel',
     })
     await q('UPDATE offers SET confirm_notified_at = now() WHERE id = $1', [o.id])

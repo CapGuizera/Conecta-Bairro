@@ -95,20 +95,22 @@ Pede o código ao servidor. No modo demonstração o código volta na resposta e
 
 Confirma o código. Se o servidor responder `needsName`, avança para o passo do nome; senão, guarda a sessão e volta para a tela de origem.
 
-**Linhas 59 a 64**
+**Linhas 59 a 66**
 
 ```jsx
   return (
     <div className="login">
       <div className="card">
-        <img src="/icon.svg" alt="" className="logo" />
-        <h1>ConectaBairro</h1>
-        <p className="muted">Serviços e comércio do seu bairro, sem expor o endereço de ninguém.</p>
+        <span className="sign login-sign">
+          <small>Sorocaba</small>
+          ConectaBairro
+        </span>
+        <p className="muted mt">Quem faz, vende e conserta pertinho da sua casa.</p>
 ```
 
-Cartão central com a marca e a frase da proposta de valor.
+Cartão central com a placa de rua grande e a frase do projeto, escrita do jeito que se fala.
 
-**Linhas 66 a 84**
+**Linhas 68 a 86**
 
 ```jsx
         {step === 'phone' && (
@@ -124,23 +126,23 @@ Cartão central com a marca e a frase da proposta de valor.
                 onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
                 autoFocus
               />
-              <span className="hint">Enviamos um código para confirmar que o número é seu. Não pedimos CNPJ nem documentos.</span>
+              <span className="hint">A gente manda um código pra confirmar que o número é seu. Não pedimos CNPJ nem documento.</span>
             </label>
             {error && <div className="error">{error}</div>}
             <button className="btn block" disabled={busy || phone.replace(/\D/g, '').length < 10}>
-              {busy && <Loader2 size={18} className="spin" />} Receber código
+              {busy && <Loader2 size={18} className="spin" />} Mandar código
             </button>
 ```
 
 **Passo 1**: campo de celular com formatação automática e `inputMode="tel"` (abre o teclado numérico no celular). O texto de ajuda reforça que não há pedido de CNPJ nem de documentos. O botão só é liberado com pelo menos 10 dígitos.
 
-**Linhas 85 a 106**
+**Linhas 87 a 108**
 
 ```jsx
             {meta?.demoAccounts?.length > 0 && (
               <div className="mt-lg">
-                <div className="small strong">Contas de demonstração</div>
-                <div className="tiny muted">Modo de teste: o código aparece na tela, sem SMS.</div>
+                <div className="small strong">Entrar como alguém do bairro de teste</div>
+                <div className="tiny muted">Pra apresentação: o código aparece aqui mesmo, sem SMS.</div>
                 <div className="demo-accounts">
                   {meta.demoAccounts.map((a) => (
                     <button
@@ -163,7 +165,7 @@ Cartão central com a marca e a frase da proposta de valor.
 
 No modo demonstração, os atalhos das personas: um toque preenche o celular e já pede o código.
 
-**Linhas 108 a 138**
+**Linhas 110 a 140**
 
 ```jsx
         {step === 'code' && (
@@ -175,12 +177,12 @@ No modo demonstração, os atalhos das personas: um toque preenche o celular e j
               <div className="notice mb">
                 <ShieldCheck size={18} />
                 <span>
-                  Modo demonstração: seu código é <strong>{devCode}</strong>. Em produção ele chega por SMS.
+                  Seu código é <strong>{devCode}</strong>. Na versão de verdade ele chega por SMS.
                 </span>
               </div>
             )}
             <label className="field">
-              <span>Código de 6 dígitos</span>
+              <span>Código que chegou no celular</span>
               <input
                 className="input code"
                 inputMode="numeric"
@@ -193,7 +195,7 @@ No modo demonstração, os atalhos das personas: um toque preenche o celular e j
             </label>
             {error && <div className="error">{error}</div>}
             <button className="btn block" disabled={busy || code.length !== 6}>
-              {busy && <Loader2 size={18} className="spin" />} Confirmar
+              {busy && <Loader2 size={18} className="spin" />} Entrar
             </button>
           </form>
         )}
@@ -201,27 +203,27 @@ No modo demonstração, os atalhos das personas: um toque preenche o celular e j
 
 **Passo 2**: botão para voltar e corrigir o número, aviso com o código no modo demonstração e campo de 6 dígitos. `autoComplete="one-time-code"` permite que o celular sugira o código recebido por SMS automaticamente.
 
-**Linhas 140 a 164**
+**Linhas 142 a 166**
 
 ```jsx
         {step === 'name' && (
           <form onSubmit={verify}>
-            <h2>Bem-vindo ao bairro</h2>
+            <h2>Primeira vez por aqui?</h2>
             <label className="field">
-              <span>Como podemos te chamar?</span>
+              <span>Como você quer ser chamado?</span>
               <input className="input" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} autoFocus autoComplete="name" />
             </label>
             <label className="checkbox">
               <input type="checkbox" checked={isProvider} onChange={(e) => setIsProvider(e.target.checked)} />
               <span>
-                <strong>Também quero oferecer serviços ou produtos</strong>
+                <strong>Também quero anunciar meu trabalho</strong>
                 <br />
-                <span className="small muted">Você aparece para os vizinhos só pela distância aproximada. Seu endereço nunca é mostrado.</span>
+                <span className="small muted">Os vizinhos só veem a que distância você está. Seu endereço fica com a gente.</span>
               </span>
             </label>
             {error && <div className="error">{error}</div>}
             <button className="btn block mt" disabled={busy || !name.trim()}>
-              {busy && <Loader2 size={18} className="spin" />} Criar minha conta
+              {busy && <Loader2 size={18} className="spin" />} Criar conta
             </button>
           </form>
         )}
@@ -373,8 +375,8 @@ Opções de raio vindas do servidor, a posição do controle deslizante e o tít
 
   return (
     <div>
-      <h1>{user ? `Olá, ${user.name.split(' ')[0]}` : 'O que você precisa hoje?'}</h1>
-      <p className="muted small">Encontre quem atende a poucos minutos de caminhada.</p>
+      <h1>{user ? `Oi, ${user.name.split(' ')[0]}! Do que você precisa?` : 'Do que você precisa hoje?'}</h1>
+      <p className="muted small">Gente do bairro que faz, vende e conserta. Tudo a uma caminhada de você.</p>
 ```
 
 Saudação com o primeiro nome quando logado.
@@ -393,7 +395,7 @@ Saudação com o primeiro nome quando logado.
         <input
           className="input"
           type="search"
-          placeholder="Ex.: bolo de aniversário, conserto de chuveiro"
+          placeholder="Bolo de aniversário, chuveiro queimado, barra de calça..."
           value={text}
           onChange={(e) => {
             setText(e.target.value)
@@ -431,7 +433,7 @@ As categorias como botões roláveis na horizontal. Tocar de novo na categoria e
           <MapPin size={18} color="var(--accent)" />
           <div className="grow">
             <div className="small strong">{SOURCE_LABEL[position.source] || 'Ponto de busca'}</div>
-            <div className="tiny muted">Raio de busca: até {String(radius).replace('.', ',')} km</div>
+            <div className="tiny muted">Até {String(radius).replace('.', ',')} km daqui</div>
           </div>
           <button className="btn ghost sm" onClick={() => setShowLocation(true)}>
             Alterar
@@ -473,7 +475,7 @@ Controle deslizante do raio (RF06). Ele trabalha com a posição na lista (0 a 5
           <div className="mt">
             <RadiusMap position={position} radiusKm={radius} onPick={(p) => setPosition({ ...p, source: 'mapa' })} />
             <div className="row tiny muted mt">
-              <Lock size={12} /> Por privacidade, o mapa não mostra onde os prestadores moram. Você vê só a distância aproximada.
+              <Lock size={12} /> O mapa mostra só você. Onde cada pessoa mora fica guardado; aqui aparece apenas a distância.
             </div>
           </div>
         )}
@@ -487,7 +489,7 @@ O mapa do raio com o aviso: "o mapa não mostra onde os prestadores moram". Clic
 ```jsx
       <div className="section-title">
         <h2>{heading}</h2>
-        {results && !loading && <span className="small muted">{results.length} encontrados</span>}
+        {results && !loading && <span className="small muted">{results.length === 1 ? '1 resultado' : `${results.length} resultados`}</span>}
       </div>
 ```
 
@@ -512,12 +514,12 @@ Erro e os blocos cinza animados (*skeleton*) enquanto a primeira busca carrega.
 
 ```jsx
       {results && results.length === 0 && (
-        <Empty icon={SearchX} title="Nada encontrado neste raio">
-          Tente aumentar o raio de busca ou usar outras palavras.
+        <Empty icon={SearchX} title="Ninguém por perto com isso ainda">
+          Tenta aumentar a distância ou escrever de outro jeito.
           {radius < 10 && (
             <div className="mt">
               <button className="btn outline sm" onClick={() => update({ raio: radiusOptions[Math.min(radiusOptions.length - 1, radiusIndex + 1)] })}>
-                Ampliar para {String(radiusOptions[Math.min(radiusOptions.length - 1, radiusIndex + 1)]).replace('.', ',')} km
+                Procurar até {String(radiusOptions[Math.min(radiusOptions.length - 1, radiusIndex + 1)]).replace('.', ',')} km
               </button>
             </div>
           )}
@@ -566,14 +568,15 @@ O diálogo de escolha do ponto de busca.
 
 ## `web/src/pages/OfferDetail.jsx`
 
-Detalhe da oferta, com o botão de conversar.
+Detalhe da oferta (o "anúncio", como aparece na tela), com o botão de chamar no chat.
 
-**Linhas 1 a 9**
+**Linhas 1 a 10**
 
 ```jsx
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Flag, Lock, MapPin, MessageCircle, Package, Pencil, Sparkles, Wrench } from 'lucide-react'
+import { ArrowLeft, Flag, Lock, MapPin, Megaphone, MessageCircle, Pencil } from 'lucide-react'
+import { categoryIcon } from '../categories.jsx'
 import { api, qs } from '../api.js'
 import { ReportDialog } from '../components/ReportDialog.jsx'
 import { Avatar, ErrorBox, Loading, Stars, useLoad } from '../components/ui.jsx'
@@ -584,7 +587,7 @@ import { useSession } from '../session.jsx'
 
 Importações.
 
-**Linhas 11 a 22**
+**Linhas 12 a 23**
 
 ```jsx
 export default function OfferDetail() {
@@ -603,18 +606,18 @@ export default function OfferDetail() {
 
 Carrega a oferta enviando o ponto de busca do morador, para o servidor calcular a distância.
 
-**Linhas 24 a 27**
+**Linhas 25 a 28**
 
 ```jsx
   if (loading && !data) return <Loading />
   if (loadError) return <ErrorBox error={loadError} />
   const { offer, isOwner, conversationId } = data
-  const Icon = offer.kind === 'produto' ? Package : Wrench
+  const Icon = categoryIcon(offer.category)
 ```
 
 Carregando, erro e os dados recebidos. O ícone muda entre produto e serviço.
 
-**Linhas 29 a 40**
+**Linhas 30 a 41**
 
 ```jsx
   async function contact() {
@@ -631,9 +634,9 @@ Carregando, erro e os dados recebidos. O ícone muda entre produto e serviço.
   }
 ```
 
-**Conversar com o prestador**: sem login, vai para a entrada e volta para cá depois; com conversa já existente, abre a conversa; senão, cria e abre.
+**Chamar no chat**: sem login, vai para a entrada e volta para cá depois; com conversa já existente, abre a conversa; senão, cria e abre.
 
-**Linhas 42 a 46**
+**Linhas 43 a 47**
 
 ```jsx
   return (
@@ -645,7 +648,7 @@ Carregando, erro e os dados recebidos. O ícone muda entre produto e serviço.
 
 Botão de voltar.
 
-**Linhas 48 a 77**
+**Linhas 49 a 78**
 
 ```jsx
       {offer.images.length > 0 ? (
@@ -665,7 +668,7 @@ Botão de voltar.
         <span className="badge">{offer.kind === 'produto' ? 'Produto' : 'Serviço'}</span>
         {offer.highlighted && (
           <span className="badge accent">
-            <Sparkles size={12} /> Destaque
+            <Megaphone size={12} /> Destaque
           </span>
         )}
       </div>
@@ -673,7 +676,7 @@ Botão de voltar.
       <div className="row wrap gap-lg mb">
         {offer.distance && (
           <span className="distance">
-            <MapPin size={16} /> {offer.distance.label} de você
+            <MapPin size={16} /> a {offer.distance.label} de você
           </span>
         )}
         <span className="strong">{priceRange(offer)}</span>
@@ -682,20 +685,20 @@ Botão de voltar.
 
 Galeria de fotos rolável (ou um fundo com ícone, sem fotos), as etiquetas (categoria, tipo, destaque), o título, a **distância aproximada** e o preço.
 
-**Linhas 79 a 84**
+**Linhas 80 a 85**
 
 ```jsx
       {offer.outsideServiceArea && (
         <div className="notice warn mb">
           <MapPin size={18} />
-          <span>Você está além do raio de atendimento informado pelo prestador ({String(offer.serviceRadiusKm).replace('.', ',')} km). Combine pelo chat.</span>
+          <span>Você está um pouco longe: {offer.provider.name.split(' ')[0]} atende até {String(offer.serviceRadiusKm).replace('.', ',')} km. Vale perguntar no chat.</span>
         </div>
       )}
 ```
 
 Aviso quando o morador está além do raio de atendimento do prestador, sugerindo combinar pelo chat.
 
-**Linhas 86 a 94**
+**Linhas 87 a 95**
 
 ```jsx
       {offer.description && <p style={{ whiteSpace: 'pre-wrap' }}>{offer.description}</p>}
@@ -703,22 +706,22 @@ Aviso quando o morador está além do raio de atendimento do prestador, sugerind
       <div className="notice mb">
         <Lock size={18} />
         <span className="small">
-          O endereço do prestador não é divulgado. A negociação acontece pelo chat do ConectaBairro, sem troca de telefone, e fica registrada para a
-          segurança dos dois lados.
+          O endereço de {offer.provider.name.split(' ')[0]} não aparece aqui. Vocês combinam tudo pelo chat, sem precisar trocar telefone, e fica
+          tudo registrado se der algum problema.
         </span>
       </div>
 ```
 
 A descrição, preservando as quebras de linha, e o aviso de privacidade: endereço não divulgado, negociação pelo chat, sem troca de telefone.
 
-**Linhas 96 a 106**
+**Linhas 97 a 107**
 
 ```jsx
       <Link to={`/prestador/${offer.provider.id}`} className="card row" style={{ color: 'inherit' }}>
         <Avatar name={offer.provider.name} />
         <div className="grow">
           <div className="strong">{offer.provider.name}</div>
-          <div className="small muted">No ConectaBairro desde {since(offer.provider.memberSince)}</div>
+          <div className="small muted">Está no ConectaBairro desde {since(offer.provider.memberSince)}</div>
           <div className="row wrap small mt" style={{ marginTop: 4 }}>
             <Stars value={offer.reputation.avgRating} count={offer.reputation.reviews} />
             <span className="muted">· {plural(offer.reputation.concluded, 'serviço concluído', 'serviços concluídos')}</span>
@@ -729,32 +732,32 @@ A descrição, preservando as quebras de linha, e o aviso de privacidade: endere
 
 Cartão do prestador com link para o perfil: nome, desde quando está na plataforma, estrelas e serviços concluídos (RF12).
 
-**Linhas 108 a 119**
+**Linhas 109 a 120**
 
 ```jsx
       <ErrorBox error={error} />
       <div className="row mt-lg">
         {isOwner ? (
           <Link to={`/painel/ofertas/${offer.id}`} className="btn block">
-            <Pencil size={18} /> Editar minha oferta
+            <Pencil size={18} /> Editar meu anúncio
           </Link>
         ) : (
           <button className="btn block" onClick={contact} disabled={busy}>
-            <MessageCircle size={18} /> {conversationId ? 'Abrir conversa' : 'Conversar com o prestador'}
+            <MessageCircle size={18} /> {conversationId ? 'Continuar a conversa' : `Chamar ${offer.provider.name.split(' ')[0]} no chat`}
           </button>
         )}
       </div>
 ```
 
-O botão principal: "Editar minha oferta" para o dono, "Conversar" ou "Abrir conversa" para os demais.
+O botão principal: "Editar meu anúncio" para o dono, "Chamar <nome> no chat" ou "Continuar a conversa" para os demais.
 
-**Linhas 120 a 130**
+**Linhas 121 a 131**
 
 ```jsx
       {user && !isOwner && (
         <div className="center mt">
           <button className="btn ghost sm" onClick={() => setReport(true)}>
-            <Flag size={14} /> Denunciar esta oferta
+            <Flag size={14} /> Tem algo errado neste anúncio?
           </button>
         </div>
       )}
@@ -817,7 +820,7 @@ Carrega o perfil pelo id da URL.
         <Avatar name={provider.name} size="lg" />
         <div className="grow">
           <h1 style={{ marginBottom: 2 }}>{provider.name}</h1>
-          <div className="small muted">No ConectaBairro desde {since(provider.memberSince)}</div>
+          <div className="small muted">Está no ConectaBairro desde {since(provider.memberSince)}</div>
         </div>
       </div>
       {provider.bio && <p>{provider.bio}</p>}
@@ -829,12 +832,12 @@ Cabeçalho com iniciais, nome e data de entrada, e a apresentação escrita pelo
 
 ```jsx
       <div className="grid stats">
-        <Stat label="Serviços concluídos" value={reputation.concluded} />
-        <Stat label="Avaliação média" value={reputation.avgRating !== null ? String(reputation.avgRating).replace('.', ',') : '-'} sub={`${reputation.reviews} avaliações`} />
+        <Stat label="Serviços feitos pela plataforma" value={reputation.concluded} />
+        <Stat label="Nota dos clientes" value={reputation.avgRating !== null ? String(reputation.avgRating).replace('.', ',') : '-'} sub={`${reputation.reviews} avaliações`} />
       </div>
 
       <div className="section-title">
-        <h2>Ofertas</h2>
+        <h2>Anúncios</h2>
       </div>
 ```
 
@@ -850,11 +853,11 @@ Os dois números da reputação: serviços concluídos e avaliação média, com
           ))}
         </div>
       ) : (
-        <p className="muted">Nenhuma oferta ativa no momento.</p>
+        <p className="muted">Nenhum anúncio no ar agora.</p>
       )}
 
       <div className="section-title">
-        <h2>Avaliações de clientes</h2>
+        <h2>O que os clientes falaram</h2>
       </div>
 ```
 
@@ -864,7 +867,7 @@ As ofertas ativas do prestador.
 
 ```jsx
       {reviews.length === 0 ? (
-        <Empty icon={MessageSquareQuote} title="Ainda sem avaliações" />
+        <Empty icon={MessageSquareQuote} title="Ainda ninguém avaliou" />
       ) : (
         <div className="stack">
           {reviews.map((r, i) => (
@@ -875,7 +878,7 @@ As ofertas ativas do prestador.
               </div>
               {r.comment && <p className="mt" style={{ marginBottom: 4 }}>{r.comment}</p>}
               <div className="tiny muted row">
-                <CheckCircle2 size={12} /> {r.reviewerName} contratou "{r.offerTitle}" pela plataforma
+                <CheckCircle2 size={12} /> {r.reviewerName} contratou "{r.offerTitle}" por aqui
               </div>
             </div>
           ))}
@@ -891,7 +894,7 @@ As avaliações, cada uma com nota, data, comentário e o selo "contratou pela p
       {user && user.id !== provider.id && (
         <div className="center mt-lg">
           <button className="btn ghost sm" onClick={() => setReport(true)}>
-            <Flag size={14} /> Denunciar perfil
+            <Flag size={14} /> Denunciar este perfil
           </button>
         </div>
       )}
@@ -943,13 +946,13 @@ Carrega a lista e recarrega quando chega uma mensagem nova em tempo real.
       <h1>Conversas</h1>
       {data.conversations.length === 0 ? (
         <Empty icon={MessageCircle} title="Nenhuma conversa ainda">
-          Encontre um serviço na busca e toque em "Conversar com o prestador".
+          Quando você chamar alguém (ou alguém te chamar), a conversa aparece aqui.
         </Empty>
       ) : (
         <div className="list">
           {data.conversations.map((c) => (
             <Link key={c.id} to={`/conversas/${c.id}`} className={`list-item ${c.unread ? 'unread' : ''}`}>
-              <Thumb offer={{ images: c.offerImage ? [c.offerImage] : [] }} size={48} />
+              <Thumb offer={{ images: c.offerImage ? [c.offerImage] : [], category: c.offerCategory }} size={48} />
               <div className="grow">
                 <div className="row between">
                   <span className="strong ellipsis">{c.otherName}</span>
@@ -957,7 +960,7 @@ Carrega a lista e recarrega quando chega uma mensagem nova em tempo real.
                 </div>
                 <div className="small muted ellipsis">{c.offerTitle}</div>
                 <div className="row between">
-                  <span className="small ellipsis">{c.lastBody || 'Conversa iniciada'}</span>
+                  <span className="small ellipsis">{c.lastBody || 'Conversa começou'}</span>
                   {c.unread > 0 && <span className="badge accent">{c.unread}</span>}
                 </div>
               </div>
@@ -1025,7 +1028,7 @@ function ProposalForm({ onSubmit, onClose }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   return (
-    <Modal title="Enviar proposta" onClose={onClose}>
+    <Modal title="Mandar orçamento" onClose={onClose}>
       <form
         onSubmit={async (e) => {
           e.preventDefault()
@@ -1044,16 +1047,16 @@ function ProposalForm({ onSubmit, onClose }) {
           <input className="input" inputMode="decimal" placeholder="150,00" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d,.]/g, ''))} autoFocus />
         </label>
         <label className="field">
-          <span>Prazo de entrega</span>
+          <span>Fica pronto até</span>
           <input className="input" type="date" value={deadline} min={localYmd()} onChange={(e) => setDeadline(e.target.value)} />
         </label>
         <label className="field">
           <span>Observações (opcional)</span>
-          <textarea className="input" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} placeholder="O que está incluído, forma de entrega..." />
+          <textarea className="input" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} placeholder="O que está incluso, se entrega ou busca..." />
         </label>
         <ErrorBox error={error} />
         <button className="btn block" disabled={busy || !amount}>
-          Enviar proposta
+          Mandar orçamento
         </button>
       </form>
     </Modal>
@@ -1072,7 +1075,7 @@ function RequestForm({ offerTitle, onSubmit, onClose }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   return (
-    <Modal title="Solicitar serviço" onClose={onClose}>
+    <Modal title="Pedir orçamento" onClose={onClose}>
       <form
         onSubmit={async (e) => {
           e.preventDefault()
@@ -1086,14 +1089,14 @@ function RequestForm({ offerTitle, onSubmit, onClose }) {
           }
         }}
       >
-        <p className="small muted">Descreva o que você precisa em "{offerTitle}". O prestador responde com valor e prazo.</p>
+        <p className="small muted">Conta o que você precisa de "{offerTitle}". A resposta vem com preço e prazo.</p>
         <label className="field">
-          <span>Pedido</span>
-          <textarea className="input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} placeholder="Ex.: bolo de chocolate para 20 pessoas no sábado" autoFocus />
+          <span>O que você precisa</span>
+          <textarea className="input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} placeholder="Bolo de chocolate pra 20 pessoas, sábado de manhã" autoFocus />
         </label>
         <ErrorBox error={error} />
         <button className="btn block" disabled={busy}>
-          Solicitar
+          Pedir orçamento
         </button>
       </form>
     </Modal>
@@ -1113,12 +1116,12 @@ function ReviewBox({ contract, onDone }) {
   const [error, setError] = useState(null)
   return (
     <div className="card mt">
-      <h3>Avalie {firstName(contract.counterpart.name)}</h3>
+      <h3>Como foi com {firstName(contract.counterpart.name)}?</h3>
       <p className="small muted">
-        {contract.side === 'client' ? 'Como foi o serviço?' : 'Como foi atender este cliente?'} A avaliação é recíproca e ajuda o bairro a confiar.
+        Os dois se avaliam. É isso que ajuda os vizinhos a saber em quem confiar.
       </p>
       <StarInput value={rating} onChange={setRating} />
-      <textarea className="input mt" placeholder="Comentário (opcional)" value={comment} onChange={(e) => setComment(e.target.value)} maxLength={500} />
+      <textarea className="input mt" placeholder="Quer deixar um comentário? (opcional)" value={comment} onChange={(e) => setComment(e.target.value)} maxLength={500} />
       <ErrorBox error={error} />
       <button
         className="btn block mt"
@@ -1134,7 +1137,7 @@ function ReviewBox({ contract, onDone }) {
           }
         }}
       >
-        Enviar avaliação
+        Avaliar
       </button>
     </div>
   )
@@ -1256,7 +1259,7 @@ Executa uma ação da contratação. Ações sérias (concluir, cancelar) passam
   const can = (a) => contract?.actions?.includes(a)
 ```
 
-A proposta pendente (que pode receber "Aceitar" ou "Recusar") e o atalho `can`, que consulta as ações liberadas pelo servidor.
+A proposta pendente (que pode receber "Fechar negócio" ou "Recusar") e o atalho `can`, que consulta as ações liberadas pelo servidor.
 
 **Linhas 201 a 219**
 
@@ -1290,7 +1293,7 @@ Cabeçalho: voltar, iniciais e nome da outra pessoa (com link para o perfil, se 
       {contract && (
         <div className="contract-bar">
           <div className="row between">
-            <span className="strong small">Contratação: {contract.statusLabel}</span>
+            <span className="strong small">{contract.statusLabel}</span>
             {contract.amountCents && (
               <span className="small">
                 {brl(contract.amountCents)} · até {ymdToBr(contract.deadline)}
@@ -1301,17 +1304,17 @@ Cabeçalho: voltar, iniciais e nome da outra pessoa (com link para o perfil, se 
           <div className="row wrap" style={{ marginTop: 8 }}>
             {can('propor') && (
               <button className="btn sm" onClick={() => setModal({ type: 'proposal' })}>
-                {contract.status === 'proposta_enviada' ? 'Nova proposta' : 'Enviar proposta'}
+                {contract.status === 'proposta_enviada' ? 'Refazer orçamento' : 'Mandar orçamento'}
               </button>
             )}
             {can('iniciar') && (
               <button className="btn sm" onClick={() => act('iniciar')} disabled={!!acting}>
-                <Play size={14} /> Iniciar serviço
+                <Play size={14} /> Comecei o serviço
               </button>
             )}
             {can('concluir') && (
-              <button className="btn sm" onClick={() => act('concluir', 'Confirmar a conclusão do serviço? A comissão de 6% será apurada.')} disabled={!!acting}>
-                <Check size={14} /> Marcar como concluído
+              <button className="btn sm" onClick={() => act('concluir', 'Marcar como concluído? A taxa da plataforma é de 6% e o comprovante sai na hora.')} disabled={!!acting}>
+                <Check size={14} /> Terminei
               </button>
             )}
             {contract.status === 'concluida' && (
@@ -1320,13 +1323,13 @@ Cabeçalho: voltar, iniciais e nome da outra pessoa (com link para o perfil, se 
               </Link>
             )}
             {can('cancelar') && (
-              <button className="btn sm ghost" onClick={() => act('cancelar', 'Cancelar esta contratação?')} disabled={!!acting}>
+              <button className="btn sm ghost" onClick={() => act('cancelar', 'Cancelar? A outra pessoa vai ser avisada.')} disabled={!!acting}>
                 Cancelar
               </button>
             )}
             {canRequest && contract && (
               <button className="btn sm outline" onClick={() => setModal({ type: 'request' })}>
-                Nova solicitação
+                Pedir outro orçamento
               </button>
             )}
             {acting && <Loader2 size={16} className="spin" />}
@@ -1343,7 +1346,7 @@ Os botões dependem da lista `actions` calculada pelo servidor, então a tela nu
 ```jsx
       <div className="chat-body" ref={bodyRef}>
         <div className="sys-msg">
-          Conversa protegida: telefones, e-mails e links são removidos automaticamente. Combine tudo por aqui.
+          Por segurança, telefone, e-mail e links somem das mensagens. Combinem tudo por aqui.
         </div>
         {messages.map((m) => {
           if (m.kind === 'sistema') return <div key={m.id} className="sys-msg">{m.body}</div>
@@ -1360,18 +1363,18 @@ Os botões dependem da lista `actions` calculada pelo servidor, então a tela nu
             return (
               <div key={m.id} className="proposal-card">
                 <div className="row between">
-                  <span className="small strong">{m.senderId === conv.me ? 'Sua proposta' : `Proposta de ${firstName(conv.other.name)}`}</span>
+                  <span className="small strong">{m.senderId === conv.me ? 'Seu orçamento' : `Orçamento de ${firstName(conv.other.name)}`}</span>
                   <span className={`badge ${p.status === 'aceita' ? 'ok' : p.status === 'pendente' ? 'accent' : ''}`}>
-                    {{ pendente: 'Aguardando resposta', aceita: 'Aceita', recusada: 'Recusada', substituida: 'Substituída' }[p.status]}
+                    {{ pendente: 'Esperando resposta', aceita: 'Aceito', recusada: 'Recusado', substituida: 'Trocado por outro' }[p.status]}
                   </span>
                 </div>
                 <div className="amount">{brl(p.amountCents)}</div>
-                <div className="small">Prazo: {ymdToBr(p.deadline)}</div>
+                <div className="small">Pronto até {ymdToBr(p.deadline)}</div>
                 {p.notes && <div className="small mt" style={{ marginTop: 4 }}>{p.notes}</div>}
                 {live && conv.side === 'client' && (
                   <div className="row mt">
                     <button className="btn sm" onClick={() => act('aceitar')} disabled={!!acting}>
-                      <Check size={14} /> Aceitar
+                      <Check size={14} /> Fechar negócio
                     </button>
                     <button className="btn sm ghost" onClick={() => act('recusar')} disabled={!!acting}>
                       <X size={14} /> Recusar
@@ -1383,7 +1386,7 @@ Os botões dependem da lista `actions` calculada pelo servidor, então a tela nu
           }
 ```
 
-**Cartão de proposta**: quem propôs, situação, valor, prazo e observações. Os botões "Aceitar" e "Recusar" só aparecem para o contratante e só na proposta pendente.
+**Cartão de proposta**: quem propôs, situação, valor, prazo e observações. Os botões "Fechar negócio" (aceitar) e "Recusar" só aparecem para o contratante e só na proposta pendente.
 
 **Linhas 301 a 308**
 
@@ -1398,14 +1401,14 @@ Os botões dependem da lista `actions` calculada pelo servidor, então a tela nu
         })}
 ```
 
-Balões de mensagem: os próprios à direita, em verde; os da outra pessoa à esquerda. Mensagens que tiveram contato removido ganham contorno tracejado.
+Balões de mensagem: os próprios à direita, em azul; os da outra pessoa à esquerda. Mensagens que tiveram contato removido ganham contorno tracejado.
 
 **Linhas 309 a 313**
 
 ```jsx
-        {contract?.canReview && <ReviewBox contract={contract} onDone={() => { showToast('Avaliação enviada. Obrigado!', 'ok'); reload() }} />}
+        {contract?.canReview && <ReviewBox contract={contract} onDone={() => { showToast('Valeu pela avaliação!', 'ok'); reload() }} />}
         {contract?.status === 'concluida' && contract.myReview && (
-          <div className="sys-msg">Você avaliou com nota {contract.myReview.rating}.</div>
+          <div className="sys-msg">Você deu {contract.myReview.rating} {contract.myReview.rating === 1 ? 'estrela' : 'estrelas'}.</div>
         )}
       </div>
 ```
@@ -1419,7 +1422,7 @@ A caixa de avaliação, quando liberada, e a confirmação da nota já dada.
         <div className="notice warn" style={{ marginTop: 8 }}>
           <ShieldAlert size={18} />
           <span className="small grow">
-            Removemos dados de contato da sua mensagem. Negociar pela plataforma garante o registro, a avaliação e a sua segurança.
+            Tiramos o contato da sua mensagem. Negociando por aqui fica tudo registrado e vocês podem se avaliar depois.
           </span>
           <button className="icon-btn" onClick={() => setMaskedNotice(false)} aria-label="Fechar aviso">
             <X size={16} />
@@ -1435,18 +1438,18 @@ Aviso de que dados de contato foram removidos, explicando a vantagem de negociar
 ```jsx
       {canRequest && !contract && (
         <button className="btn accent block" style={{ marginTop: 8 }} onClick={() => setModal({ type: 'request' })}>
-          Solicitar este serviço
+          Pedir orçamento
         </button>
       )}
 ```
 
-O botão "Solicitar este serviço", em destaque, quando ainda não há contratação.
+O botão "Pedir orçamento", em destaque, quando ainda não há contratação.
 
 **Linhas 333 a 338**
 
 ```jsx
       <form className="chat-input" onSubmit={send}>
-        <input className="input" placeholder="Escreva uma mensagem" value={text} onChange={(e) => setText(e.target.value)} maxLength={1000} />
+        <input className="input" placeholder="Escreve aqui..." value={text} onChange={(e) => setText(e.target.value)} maxLength={1000} />
         <button className="btn" disabled={sending || !text.trim()} aria-label="Enviar">
           <Send size={18} />
         </button>
@@ -1478,7 +1481,7 @@ Campo de mensagem e botão de enviar.
         />
       )}
       {modal?.type === 'confirm' && (
-        <Modal title="Confirmar" onClose={() => setModal(null)}>
+        <Modal title="Tem certeza?" onClose={() => setModal(null)}>
           <p>{modal.text}</p>
           <div className="row">
             <button className="btn ghost grow" onClick={() => setModal(null)}>
@@ -1492,7 +1495,7 @@ Campo de mensagem e botão de enviar.
                 act(action)
               }}
             >
-              Confirmar
+              Sim
             </button>
           </div>
         </Modal>

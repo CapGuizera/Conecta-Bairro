@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom'
-import { MapPin, Package, Sparkles, Wrench } from 'lucide-react'
+import { MapPin, Megaphone } from 'lucide-react'
+import { categoryIcon } from '../categories.jsx'
 import { plural, priceRange } from '../format.js'
 import { Stars } from './ui.jsx'
 
 export function Thumb({ offer, size }) {
   const img = offer.images?.[0]
-  const Icon = offer.kind === 'produto' ? Package : Wrench
+  const Icon = categoryIcon(offer.category)
   return (
     <div className="thumb" style={size ? { width: size, height: size } : undefined}>
       {img ? <img src={img} alt="" loading="lazy" /> : <Icon size={30} strokeWidth={1.6} />}
@@ -22,7 +23,7 @@ export function OfferCard({ offer }) {
           <span className="badge">{offer.categoryName}</span>
           {offer.highlighted && (
             <span className="badge accent">
-              <Sparkles size={12} /> Destaque
+              <Megaphone size={12} /> Destaque
             </span>
           )}
         </div>

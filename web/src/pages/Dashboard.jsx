@@ -1,7 +1,7 @@
 // RF14 (painel do prestador), RF13 (plano de destaque) e RF16 (confirmação de atividade).
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, BadgeCheck, Eye, MapPin, Pause, Pencil, Play, Plus, Sparkles } from 'lucide-react'
+import { AlertTriangle, BadgeCheck, ClipboardList, Eye, MapPin, Megaphone, Pause, Pencil, Play, Plus, QrCode } from 'lucide-react'
 import { api } from '../api.js'
 import { Thumb } from '../components/OfferCard.jsx'
 import { ProviderLocation } from '../components/ProviderLocation.jsx'
@@ -16,10 +16,10 @@ function HighlightDialog({ offer, onClose, onDone }) {
   const [error, setError] = useState(null)
   const chosen = meta.highlightPlans.find((p) => p.id === plan)
   return (
-    <Modal title="Destacar oferta" onClose={onClose}>
+    <Modal title="Destacar anúncio" onClose={onClose}>
       <p className="small muted">
-        "{offer.title}" aparece no topo das buscas da categoria <strong>{offer.categoryName}</strong>, com a etiqueta Destaque, durante o período
-        contratado.
+        "{offer.title}" aparece em primeiro pra quem procura <strong>{offer.categoryName}</strong>, com a etiqueta Destaque, pelo tempo que você
+        escolher.
       </p>
       <div className="stack">
         {meta.highlightPlans.map((p) => (
@@ -33,7 +33,7 @@ function HighlightDialog({ offer, onClose, onDone }) {
           </label>
         ))}
       </div>
-      {offer.highlightUntil && <p className="small mt">Já em destaque até {date(offer.highlightUntil)}. O novo período começa depois.</p>}
+      {offer.highlightUntil && <p className="small mt">Já está em destaque até {date(offer.highlightUntil)}. O tempo novo é somado depois disso.</p>}
       <ErrorBox error={error} />
       <button
         className="btn accent block mt"
@@ -49,9 +49,9 @@ function HighlightDialog({ offer, onClose, onDone }) {
           }
         }}
       >
-        <Sparkles size={18} /> Pagar {brl(chosen.priceCents)} com PIX (simulado)
+        <QrCode size={18} /> Pagar {brl(chosen.priceCents)} no PIX (simulado)
       </button>
-      <p className="tiny muted center mt">Protótipo: o pagamento é simulado e confirmado na hora.</p>
+      <p className="tiny muted center mt">No protótipo o PIX é de mentirinha e aprova na hora.</p>
     </Modal>
   )
 }
@@ -67,8 +67,8 @@ export default function Dashboard() {
   if (!location.hasLocation || editingLocation) {
     return (
       <div>
-        <h1>Painel do prestador</h1>
-        {!location.hasLocation && <p className="muted">Antes de publicar, informe de onde você atende.</p>}
+        <h1>Seu painel</h1>
+        {!location.hasLocation && <p className="muted">Antes de anunciar, marca de onde você atende.</p>}
         <ProviderLocation onSaved={() => setEditingLocation(false)} onCancel={location.hasLocation ? () => setEditingLocation(false) : undefined} />
       </div>
     )
@@ -91,7 +91,7 @@ export default function Dashboard() {
 
   async function confirmAll() {
     await api('/my/offers/confirm-all', { method: 'POST' })
-    showToast('Ofertas confirmadas. Obrigado por manter o bairro atualizado!', 'ok')
+    showToast('Pronto! Seus anúncios continuam no ar.', 'ok')
     offers.reload()
   }
 
@@ -100,9 +100,9 @@ export default function Dashboard() {
   return (
     <div>
       <div className="row between wrap">
-        <h1 style={{ margin: 0 }}>Painel do prestador</h1>
+        <h1 style={{ margin: 0 }}>Seu painel</h1>
         <Link to="/painel/ofertas/nova" className="btn">
-          <Plus size={18} /> Nova oferta
+          <Plus size={18} /> Novo anúncio
         </Link>
       </div>
 
@@ -110,28 +110,28 @@ export default function Dashboard() {
         <div className="notice warn mt">
           <AlertTriangle size={18} />
           <div className="grow small">
-            <strong>{stale.length === 1 ? 'Uma oferta precisa' : `${stale.length} ofertas precisam`} de confirmação.</strong> Ofertas sem confirmação há 45 dias
-            saem da busca.
+            <strong>{stale.length === 1 ? 'Um anúncio está' : `${stale.length} anúncios estão`} há um tempo sem confirmação.</strong> Sem confirmar, ele sai
+            da busca em 45 dias, pra ninguém chamar quem já parou.
           </div>
           <button className="btn sm" onClick={confirmAll}>
-            <BadgeCheck size={14} /> Continuam ativas
+            <BadgeCheck size={14} /> Ainda estou atendendo
           </button>
         </div>
       )}
 
       {(d.pending.awaitingProposal > 0 || d.pending.inProgress > 0) && (
         <Link to="/contratacoes" className="notice accent mt" style={{ color: 'inherit' }}>
-          <Sparkles size={18} />
+          <ClipboardList size={18} />
           <span className="small">
-            {d.pending.awaitingProposal > 0 && <strong>{d.pending.awaitingProposal} pedido(s) aguardando sua proposta. </strong>}
-            {d.pending.inProgress > 0 && <span>{d.pending.inProgress} serviço(s) em andamento.</span>}
+            {d.pending.awaitingProposal > 0 && <strong>{plural(d.pending.awaitingProposal, 'pessoa esperando', 'pessoas esperando')} seu orçamento. </strong>}
+            {d.pending.inProgress > 0 && <span>{plural(d.pending.inProgress, 'serviço em andamento', 'serviços em andamento')}.</span>}
           </span>
         </Link>
       )}
 
-      <div className="row between mt-lg mb">
-        <h2 style={{ margin: 0 }}>Desempenho</h2>
-        <div className="segmented" style={{ width: 240 }}>
+      <div className="row between wrap mt-lg mb">
+        <h2 style={{ margin: 0 }}>Como você está indo</h2>
+        <div className="segmented">
           {[7, 30, 90].map((n) => (
             <button key={n} className={days === n ? 'on' : ''} onClick={() => setDays(n)}>
               {n} dias
@@ -140,29 +140,33 @@ export default function Dashboard() {
         </div>
       </div>
       <div className="grid stats">
-        <Stat label="Visualizações do perfil" value={d.totals.views} />
-        <Stat label="Contatos iniciados" value={d.totals.contacts} sub={plural(d.totals.requests, 'pedido de serviço', 'pedidos de serviço')} />
-        <Stat label="Contratações concluídas" value={d.totals.concluded} sub={`${String(d.totals.conversion).replace('.', ',')}% dos contatos`} />
-        <Stat label="Receita líquida" value={brl(d.revenue.net)} sub={`bruto ${brl(d.revenue.gross)} · comissão ${brl(d.revenue.commission)}`} />
+        <Stat label="Pessoas que viram" value={d.totals.views} />
+        <Stat label="Te chamaram no chat" value={d.totals.contacts} sub={plural(d.totals.requests, 'pediu orçamento', 'pediram orçamento')} />
+        <Stat
+          label="Serviços feitos"
+          value={d.totals.concluded}
+          sub={d.totals.conversion <= 100 ? `${String(d.totals.conversion).replace('.', ',')}% de quem chamou` : 'tem cliente voltando!'}
+        />
+        <Stat label="Você recebeu" value={brl(d.revenue.net)} sub={`de ${brl(d.revenue.gross)}, já tirando ${brl(d.revenue.commission)} de taxa`} />
       </div>
       <div className="card mt">
         <div className="row between">
-          <h3 style={{ margin: 0 }}>Visualizações e contatos por dia</h3>
+          <h3 style={{ margin: 0 }}>Dia a dia</h3>
           <Stars value={d.rating.avg} count={d.rating.count} />
         </div>
-        <Bars data={series} a="views" b="contacts" labelA="Visualizações" labelB="Contatos" />
+        <Bars data={series} a="views" b="contacts" labelA="Viram o anúncio" labelB="Chamaram" />
       </div>
 
       <div className="section-title">
-        <h2>Minhas ofertas</h2>
+        <h2>Seus anúncios</h2>
         <button className="btn ghost sm" onClick={() => setEditingLocation(true)}>
           <MapPin size={14} /> Atendo até {String(location.serviceRadiusKm).replace('.', ',')} km
         </button>
       </div>
       {myOffers.length === 0 ? (
-        <Empty icon={Plus} title="Publique sua primeira oferta">
+        <Empty icon={Plus} title="Que tal colocar o primeiro anúncio?">
           <Link to="/painel/ofertas/nova" className="btn mt">
-            Criar oferta
+            Anunciar
           </Link>
         </Empty>
       ) : (
@@ -175,13 +179,13 @@ export default function Dashboard() {
                   <Thumb offer={o} size={64} />
                   <div className="grow">
                     <div className="row wrap">
-                      {o.status === 'pausada' ? <span className="badge">Pausada</span> : <span className="badge ok">Ativa</span>}
+                      {o.status === 'pausada' ? <span className="badge">Pausada</span> : <span className="badge ok">No ar</span>}
                       {o.highlighted && (
                         <span className="badge accent">
-                          <Sparkles size={12} /> Destaque até {date(o.highlightUntil)}
+                          <Megaphone size={12} /> Destaque até {date(o.highlightUntil)}
                         </span>
                       )}
-                      {o.needsConfirmation && o.status === 'ativa' && <span className="badge warn">Confirmar atividade</span>}
+                      {o.needsConfirmation && o.status === 'ativa' && <span className="badge warn">Falta confirmar</span>}
                     </div>
                     <Link to={`/oferta/${o.id}`} className="strong" style={{ color: 'var(--ink)', display: 'block', marginTop: 4 }}>
                       {o.title}
@@ -189,7 +193,7 @@ export default function Dashboard() {
                     <div className="small muted">{priceRange(o)}</div>
                     {stats && (
                       <div className="tiny muted row wrap" style={{ marginTop: 4 }}>
-                        <Eye size={12} /> {stats.views} visualizações · {stats.contacts} contatos · {stats.concluded} concluídas · {brl(stats.gross)}
+                        <Eye size={12} /> {stats.views} viram · {stats.contacts} chamaram · {stats.concluded} feitos · {brl(stats.gross)}
                       </div>
                     )}
                   </div>
@@ -215,12 +219,12 @@ export default function Dashboard() {
                         offers.reload()
                       }}
                     >
-                      <BadgeCheck size={14} /> Confirmar
+                      <BadgeCheck size={14} /> Ainda atendo
                     </button>
                   )}
                   {o.status === 'ativa' && (
                     <button className="btn sm accent" onClick={() => setHighlight(o)}>
-                      <Sparkles size={14} /> Destacar
+                      <Megaphone size={14} /> Destacar
                     </button>
                   )}
                 </div>
@@ -236,7 +240,7 @@ export default function Dashboard() {
           onClose={() => setHighlight(null)}
           onDone={() => {
             setHighlight(null)
-            showToast('Destaque ativado!', 'ok')
+            showToast('Pronto, seu anúncio está em destaque!', 'ok')
             offers.reload()
           }}
         />

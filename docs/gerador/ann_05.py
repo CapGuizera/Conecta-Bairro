@@ -120,7 +120,7 @@ Registra uma visualização para o painel do prestador, sem contar o próprio do
 O `ON CONFLICT DO NOTHING` ignora a segunda visita do mesmo visitante no mesmo dia.
 '''),
 ('  let conversationId = null', '''
-Se o usuário logado já conversou sobre esta oferta, devolve o id da conversa: a tela mostra "Abrir conversa" em vez de criar outra.
+Se o usuário logado já conversou sobre esta oferta, devolve o id da conversa: a tela mostra "Continuar a conversa" em vez de criar outra.
 '''),
 ('// RF12: perfil público', '''
 **Perfil público do prestador**: dados públicos e reputação.

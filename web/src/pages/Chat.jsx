@@ -29,7 +29,7 @@ function ProposalForm({ onSubmit, onClose }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   return (
-    <Modal title="Enviar proposta" onClose={onClose}>
+    <Modal title="Mandar orçamento" onClose={onClose}>
       <form
         onSubmit={async (e) => {
           e.preventDefault()
@@ -48,16 +48,16 @@ function ProposalForm({ onSubmit, onClose }) {
           <input className="input" inputMode="decimal" placeholder="150,00" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d,.]/g, ''))} autoFocus />
         </label>
         <label className="field">
-          <span>Prazo de entrega</span>
+          <span>Fica pronto até</span>
           <input className="input" type="date" value={deadline} min={localYmd()} onChange={(e) => setDeadline(e.target.value)} />
         </label>
         <label className="field">
           <span>Observações (opcional)</span>
-          <textarea className="input" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} placeholder="O que está incluído, forma de entrega..." />
+          <textarea className="input" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={500} placeholder="O que está incluso, se entrega ou busca..." />
         </label>
         <ErrorBox error={error} />
         <button className="btn block" disabled={busy || !amount}>
-          Enviar proposta
+          Mandar orçamento
         </button>
       </form>
     </Modal>
@@ -69,7 +69,7 @@ function RequestForm({ offerTitle, onSubmit, onClose }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   return (
-    <Modal title="Solicitar serviço" onClose={onClose}>
+    <Modal title="Pedir orçamento" onClose={onClose}>
       <form
         onSubmit={async (e) => {
           e.preventDefault()
@@ -83,14 +83,14 @@ function RequestForm({ offerTitle, onSubmit, onClose }) {
           }
         }}
       >
-        <p className="small muted">Descreva o que você precisa em "{offerTitle}". O prestador responde com valor e prazo.</p>
+        <p className="small muted">Conta o que você precisa de "{offerTitle}". A resposta vem com preço e prazo.</p>
         <label className="field">
-          <span>Pedido</span>
-          <textarea className="input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} placeholder="Ex.: bolo de chocolate para 20 pessoas no sábado" autoFocus />
+          <span>O que você precisa</span>
+          <textarea className="input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} placeholder="Bolo de chocolate pra 20 pessoas, sábado de manhã" autoFocus />
         </label>
         <ErrorBox error={error} />
         <button className="btn block" disabled={busy}>
-          Solicitar
+          Pedir orçamento
         </button>
       </form>
     </Modal>
@@ -104,12 +104,12 @@ function ReviewBox({ contract, onDone }) {
   const [error, setError] = useState(null)
   return (
     <div className="card mt">
-      <h3>Avalie {firstName(contract.counterpart.name)}</h3>
+      <h3>Como foi com {firstName(contract.counterpart.name)}?</h3>
       <p className="small muted">
-        {contract.side === 'client' ? 'Como foi o serviço?' : 'Como foi atender este cliente?'} A avaliação é recíproca e ajuda o bairro a confiar.
+        Os dois se avaliam. É isso que ajuda os vizinhos a saber em quem confiar.
       </p>
       <StarInput value={rating} onChange={setRating} />
-      <textarea className="input mt" placeholder="Comentário (opcional)" value={comment} onChange={(e) => setComment(e.target.value)} maxLength={500} />
+      <textarea className="input mt" placeholder="Quer deixar um comentário? (opcional)" value={comment} onChange={(e) => setComment(e.target.value)} maxLength={500} />
       <ErrorBox error={error} />
       <button
         className="btn block mt"
@@ -125,7 +125,7 @@ function ReviewBox({ contract, onDone }) {
           }
         }}
       >
-        Enviar avaliação
+        Avaliar
       </button>
     </div>
   )
@@ -221,7 +221,7 @@ export default function Chat() {
       {contract && (
         <div className="contract-bar">
           <div className="row between">
-            <span className="strong small">Contratação: {contract.statusLabel}</span>
+            <span className="strong small">{contract.statusLabel}</span>
             {contract.amountCents && (
               <span className="small">
                 {brl(contract.amountCents)} · até {ymdToBr(contract.deadline)}
@@ -232,17 +232,17 @@ export default function Chat() {
           <div className="row wrap" style={{ marginTop: 8 }}>
             {can('propor') && (
               <button className="btn sm" onClick={() => setModal({ type: 'proposal' })}>
-                {contract.status === 'proposta_enviada' ? 'Nova proposta' : 'Enviar proposta'}
+                {contract.status === 'proposta_enviada' ? 'Refazer orçamento' : 'Mandar orçamento'}
               </button>
             )}
             {can('iniciar') && (
               <button className="btn sm" onClick={() => act('iniciar')} disabled={!!acting}>
-                <Play size={14} /> Iniciar serviço
+                <Play size={14} /> Comecei o serviço
               </button>
             )}
             {can('concluir') && (
-              <button className="btn sm" onClick={() => act('concluir', 'Confirmar a conclusão do serviço? A comissão de 6% será apurada.')} disabled={!!acting}>
-                <Check size={14} /> Marcar como concluído
+              <button className="btn sm" onClick={() => act('concluir', 'Marcar como concluído? A taxa da plataforma é de 6% e o comprovante sai na hora.')} disabled={!!acting}>
+                <Check size={14} /> Terminei
               </button>
             )}
             {contract.status === 'concluida' && (
@@ -251,13 +251,13 @@ export default function Chat() {
               </Link>
             )}
             {can('cancelar') && (
-              <button className="btn sm ghost" onClick={() => act('cancelar', 'Cancelar esta contratação?')} disabled={!!acting}>
+              <button className="btn sm ghost" onClick={() => act('cancelar', 'Cancelar? A outra pessoa vai ser avisada.')} disabled={!!acting}>
                 Cancelar
               </button>
             )}
             {canRequest && contract && (
               <button className="btn sm outline" onClick={() => setModal({ type: 'request' })}>
-                Nova solicitação
+                Pedir outro orçamento
               </button>
             )}
             {acting && <Loader2 size={16} className="spin" />}
@@ -267,7 +267,7 @@ export default function Chat() {
 
       <div className="chat-body" ref={bodyRef}>
         <div className="sys-msg">
-          Conversa protegida: telefones, e-mails e links são removidos automaticamente. Combine tudo por aqui.
+          Por segurança, telefone, e-mail e links somem das mensagens. Combinem tudo por aqui.
         </div>
         {messages.map((m) => {
           if (m.kind === 'sistema') return <div key={m.id} className="sys-msg">{m.body}</div>
@@ -277,18 +277,18 @@ export default function Chat() {
             return (
               <div key={m.id} className="proposal-card">
                 <div className="row between">
-                  <span className="small strong">{m.senderId === conv.me ? 'Sua proposta' : `Proposta de ${firstName(conv.other.name)}`}</span>
+                  <span className="small strong">{m.senderId === conv.me ? 'Seu orçamento' : `Orçamento de ${firstName(conv.other.name)}`}</span>
                   <span className={`badge ${p.status === 'aceita' ? 'ok' : p.status === 'pendente' ? 'accent' : ''}`}>
-                    {{ pendente: 'Aguardando resposta', aceita: 'Aceita', recusada: 'Recusada', substituida: 'Substituída' }[p.status]}
+                    {{ pendente: 'Esperando resposta', aceita: 'Aceito', recusada: 'Recusado', substituida: 'Trocado por outro' }[p.status]}
                   </span>
                 </div>
                 <div className="amount">{brl(p.amountCents)}</div>
-                <div className="small">Prazo: {ymdToBr(p.deadline)}</div>
+                <div className="small">Pronto até {ymdToBr(p.deadline)}</div>
                 {p.notes && <div className="small mt" style={{ marginTop: 4 }}>{p.notes}</div>}
                 {live && conv.side === 'client' && (
                   <div className="row mt">
                     <button className="btn sm" onClick={() => act('aceitar')} disabled={!!acting}>
-                      <Check size={14} /> Aceitar
+                      <Check size={14} /> Fechar negócio
                     </button>
                     <button className="btn sm ghost" onClick={() => act('recusar')} disabled={!!acting}>
                       <X size={14} /> Recusar
@@ -306,9 +306,9 @@ export default function Chat() {
             </div>
           )
         })}
-        {contract?.canReview && <ReviewBox contract={contract} onDone={() => { showToast('Avaliação enviada. Obrigado!', 'ok'); reload() }} />}
+        {contract?.canReview && <ReviewBox contract={contract} onDone={() => { showToast('Valeu pela avaliação!', 'ok'); reload() }} />}
         {contract?.status === 'concluida' && contract.myReview && (
-          <div className="sys-msg">Você avaliou com nota {contract.myReview.rating}.</div>
+          <div className="sys-msg">Você deu {contract.myReview.rating} {contract.myReview.rating === 1 ? 'estrela' : 'estrelas'}.</div>
         )}
       </div>
 
@@ -316,7 +316,7 @@ export default function Chat() {
         <div className="notice warn" style={{ marginTop: 8 }}>
           <ShieldAlert size={18} />
           <span className="small grow">
-            Removemos dados de contato da sua mensagem. Negociar pela plataforma garante o registro, a avaliação e a sua segurança.
+            Tiramos o contato da sua mensagem. Negociando por aqui fica tudo registrado e vocês podem se avaliar depois.
           </span>
           <button className="icon-btn" onClick={() => setMaskedNotice(false)} aria-label="Fechar aviso">
             <X size={16} />
@@ -326,12 +326,12 @@ export default function Chat() {
 
       {canRequest && !contract && (
         <button className="btn accent block" style={{ marginTop: 8 }} onClick={() => setModal({ type: 'request' })}>
-          Solicitar este serviço
+          Pedir orçamento
         </button>
       )}
 
       <form className="chat-input" onSubmit={send}>
-        <input className="input" placeholder="Escreva uma mensagem" value={text} onChange={(e) => setText(e.target.value)} maxLength={1000} />
+        <input className="input" placeholder="Escreve aqui..." value={text} onChange={(e) => setText(e.target.value)} maxLength={1000} />
         <button className="btn" disabled={sending || !text.trim()} aria-label="Enviar">
           <Send size={18} />
         </button>
@@ -357,7 +357,7 @@ export default function Chat() {
         />
       )}
       {modal?.type === 'confirm' && (
-        <Modal title="Confirmar" onClose={() => setModal(null)}>
+        <Modal title="Tem certeza?" onClose={() => setModal(null)}>
           <p>{modal.text}</p>
           <div className="row">
             <button className="btn ghost grow" onClick={() => setModal(null)}>
@@ -371,7 +371,7 @@ export default function Chat() {
                 act(action)
               }}
             >
-              Confirmar
+              Sim
             </button>
           </div>
         </Modal>

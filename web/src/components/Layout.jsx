@@ -13,7 +13,7 @@ function navItems(user) {
   const items = [
     { to: '/', label: 'Início', icon: Home, end: true },
     { to: '/conversas', label: 'Conversas', icon: MessageCircle },
-    { to: '/contratacoes', label: 'Contratações', icon: ClipboardList },
+    { to: '/contratacoes', label: 'Serviços', icon: ClipboardList },
   ]
   if (user.role === 'agente') items.push({ to: '/campo', label: 'Campo', icon: ClipboardList })
   else if (user.role === 'moderador') items.push({ to: '/moderacao', label: 'Moderação', icon: ShieldCheck })
@@ -53,9 +53,11 @@ export function Layout() {
   return (
     <div className="app">
       <header className="topbar">
-        <NavLink to="/" className="brand">
-          <img src="/icon.svg" alt="" />
-          ConectaBairro
+        <NavLink to="/" className="brand" aria-label="ConectaBairro, início">
+          <span className="sign">
+            <small>Sorocaba</small>
+            ConectaBairro
+          </span>
         </NavLink>
         <nav className="topnav" aria-label="Principal">
           {items.map((i) => (
@@ -74,7 +76,7 @@ export function Layout() {
       </header>
       {!online && (
         <div className="offline-bar">
-          <WifiOff size={14} style={{ verticalAlign: -2 }} /> Sem conexão. {user?.role === 'agente' ? 'Os cadastros de campo serão guardados e enviados depois.' : 'Algumas funções ficam indisponíveis.'}
+          <WifiOff size={14} style={{ verticalAlign: -2 }} /> Sem internet. {user?.role === 'agente' ? 'Pode continuar cadastrando: tudo fica guardado e sobe quando a internet voltar.' : 'Algumas coisas só funcionam com internet.'}
         </div>
       )}
       <main className="main">

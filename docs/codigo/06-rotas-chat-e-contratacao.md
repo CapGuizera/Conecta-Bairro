@@ -261,8 +261,8 @@ r.post('/conversations', async (req, res) => {
     "SELECT o.* FROM offers o JOIN users u ON u.id = o.provider_id WHERE o.id = $1 AND o.status = 'ativa' AND NOT u.blocked",
     [Number(req.body?.offerId) || 0],
   )
-  if (!offer) fail(404, 'Oferta não encontrada')
-  if (offer.provider_id === req.user.id) fail(400, 'Você não pode iniciar conversa com a sua própria oferta')
+  if (!offer) fail(404, 'Esse anúncio não existe mais')
+  if (offer.provider_id === req.user.id) fail(400, 'Esse anúncio é seu')
 ```
 
 **Iniciar conversa** sobre uma oferta. Recusa oferta inexistente, inativa ou de prestador bloqueado, e impede conversar com a própria oferta.
@@ -278,8 +278,8 @@ r.post('/conversations', async (req, res) => {
     )
     await notify(offer.provider_id, {
       kind: 'conversa',
-      title: 'Novo contato',
-      body: `${req.user.name.split(' ')[0]} quer conversar sobre "${offer.title}"`,
+      title: `${req.user.name.split(' ')[0]} te chamou`,
+      body: `Sobre "${offer.title}"`,
       link: `/conversas/${conv.id}`,
     })
   }
@@ -290,12 +290,12 @@ r.post('/conversations', async (req, res) => {
 Se já existe conversa entre essa pessoa e essa oferta, reaproveita (a tabela também garante isso com `UNIQUE`). Se é nova, cria e notifica o prestador.
 Cada conversa nova conta como "contato iniciado" no painel do prestador (RF14).
 
-**Linhas 179 a 211**
+**Linhas 179 a 212**
 
 ```js
 r.get('/conversations', async (req, res) => {
   const rows = await many(
-    `SELECT c.id, c.offer_id, c.client_id, c.provider_id, c.last_message_at, o.title AS offer_title, o.images AS offer_images,
+    `SELECT c.id, c.offer_id, c.client_id, c.provider_id, c.last_message_at, o.title AS offer_title, o.images AS offer_images, o.category AS offer_category,
             CASE WHEN c.client_id = $1 THEN pu.name ELSE cu.name END AS other_name,
             CASE WHEN c.client_id = $1 THEN 'client' ELSE 'provider' END AS side,
             (SELECT m.body FROM messages m WHERE m.conversation_id = c.id ORDER BY m.id DESC LIMIT 1) AS last_body,
@@ -316,6 +316,7 @@ r.get('/conversations', async (req, res) => {
       offerId: c.offer_id,
       offerTitle: c.offer_title,
       offerImage: (c.offer_images || [])[0] || null,
+      offerCategory: c.offer_category,
       otherName: c.other_name,
       side: c.side,
       lastBody: c.last_body,
@@ -330,7 +331,7 @@ r.get('/conversations', async (req, res) => {
 
 **Lista de conversas** do usuário, como contratante ou como prestador. Para cada uma: o nome da outra parte (o `CASE` escolhe qual), a última mensagem, quantas não foram lidas (mensagens da outra parte com id maior que o último lido) e o estado da contratação mais recente. Ordenada pela mensagem mais recente.
 
-**Linhas 213 a 232**
+**Linhas 214 a 233**
 
 ```js
 r.get('/conversations/:id', async (req, res) => {
@@ -357,7 +358,7 @@ r.get('/conversations/:id', async (req, res) => {
 
 **Abrir conversa**: dados da conversa, todas as mensagens em ordem, a contratação mais recente com todos os detalhes e `canRequest`, que diz se o contratante pode solicitar o serviço (não há outra contratação em aberto).
 
-**Linhas 234 a 238**
+**Linhas 235 a 239**
 
 ```js
 r.post('/conversations/:id/messages', async (req, res) => {
@@ -369,7 +370,7 @@ r.post('/conversations/:id/messages', async (req, res) => {
 
 **Enviar mensagem** (RF07). O texto é validado (até 1.000 caracteres) e passa pelo `maskContacts` **antes de ser gravado**: o telefone nunca chega ao banco nem ao destinatário.
 
-**Linhas 239 a 245**
+**Linhas 240 a 246**
 
 ```js
   if (masked) {
@@ -383,7 +384,7 @@ r.post('/conversations/:id/messages', async (req, res) => {
 
 Se algo foi removido, cria uma **denúncia automática** (sem denunciante, motivo "negociação externa") para a moderação acompanhar (RF15).
 
-**Linhas 246 a 250**
+**Linhas 247 a 251**
 
 ```js
   await q(
@@ -395,14 +396,14 @@ Se algo foi removido, cria uma **denúncia automática** (sem denunciante, motiv
 
 Marca a própria mensagem como lida para quem enviou.
 
-**Linhas 251 a 260**
+**Linhas 252 a 261**
 
 ```js
   const message = await broadcastMessage(conv, id)
   const otherId = conv.client_id === req.user.id ? conv.provider_id : conv.client_id
   await notify(otherId, {
     kind: 'mensagem',
-    title: `Mensagem de ${req.user.name.split(' ')[0]}`,
+    title: req.user.name.split(' ')[0],
     body: text.length > 90 ? `${text.slice(0, 90)}...` : text,
     link: `/conversas/${conv.id}`,
   })
@@ -412,7 +413,7 @@ Marca a própria mensagem como lida para quem enviou.
 
 Envia a mensagem em tempo real e cria a notificação para a outra parte, com uma prévia de até 90 caracteres.
 
-**Linhas 262 a 276**
+**Linhas 263 a 277**
 
 ```js
 r.post('/conversations/:id/read', async (req, res) => {
@@ -434,7 +435,7 @@ r.post('/conversations/:id/read', async (req, res) => {
 
 Marca a conversa como lida até a última mensagem e também as notificações que apontam para ela, zerando o número no sino.
 
-**Linha 278**
+**Linha 279**
 
 ```js
 // ---------- contratação ----------
@@ -442,24 +443,24 @@ Marca a conversa como lida até a última mensagem e também as notificações q
 
 Separador das rotas de contratação.
 
-**Linhas 280 a 289**
+**Linhas 281 a 290**
 
 ```js
 // O contratante solicita o serviço; o prestador responde com proposta.
 r.post('/conversations/:id/contracts', async (req, res) => {
   const conv = await loadConversation(req.params.id, req.user.id)
-  if (conv.client_id !== req.user.id) fail(403, 'Somente o contratante pode solicitar o serviço')
+  if (conv.client_id !== req.user.id) fail(403, 'Só quem está contratando pode pedir orçamento')
   const note = maskContacts(str(req.body?.note, { max: 500, name: 'descrição do pedido' })).text
   const open = await one(
     "SELECT id FROM contracts WHERE conversation_id = $1 AND status NOT IN ('concluida', 'cancelada')",
     [conv.id],
   )
-  if (open) fail(409, 'Já existe uma contratação em aberto nesta conversa')
+  if (open) fail(409, 'Já tem um orçamento em andamento nesta conversa')
 ```
 
-**Solicitar serviço.** Só o contratante pode, e só se não houver outra contratação em aberto na conversa (409 se houver). A descrição do pedido também passa pelo filtro de contatos.
+**Pedir orçamento.** Só o contratante pode, e só se não houver outra contratação em aberto na conversa (409 se houver). A descrição do pedido também passa pelo filtro de contatos.
 
-**Linhas 290 a 313**
+**Linhas 291 a 314**
 
 ```js
   const { contractId, messageId } = await db().transaction(async (tx) => {
@@ -472,14 +473,14 @@ r.post('/conversations/:id/contracts', async (req, res) => {
       req.user.id,
       note,
     ])
-    const messageId = await insertMessage(tx.query, conv.id, null, 'sistema', `Serviço solicitado${note ? `: ${note}` : ''}`)
+    const messageId = await insertMessage(tx.query, conv.id, null, 'sistema', `Pedido de orçamento${note ? `: "${note}"` : ''}`)
     return { contractId: rows[0].id, messageId }
   })
   await broadcastMessage(conv, messageId)
   await notify(conv.provider_id, {
     kind: 'contratacao',
-    title: 'Nova solicitação de serviço',
-    body: `${req.user.name.split(' ')[0]} solicitou "${conv.offer_title}". Envie sua proposta.`,
+    title: 'Pedido de orçamento',
+    body: `${req.user.name.split(' ')[0]} quer um orçamento de "${conv.offer_title}"`,
     link: `/conversas/${conv.id}`,
   })
   const c = await loadContract(contractId, req.user.id)
@@ -491,7 +492,7 @@ r.post('/conversations/:id/contracts', async (req, res) => {
 Numa única transação: cria a contratação no estado `solicitada`, registra o primeiro evento do histórico e grava a mensagem de sistema no chat.
 Fora da transação (depois que tudo foi confirmado no banco), envia a mensagem em tempo real, notifica o prestador e avisa as duas telas.
 
-**Linhas 315 a 327**
+**Linhas 316 a 328**
 
 ```js
 // RF08: proposta com valor e prazo enviada pelo prestador.
@@ -500,22 +501,22 @@ r.post('/contracts/:id/proposals', async (req, res) => {
   const side = c.client_id === req.user.id ? 'client' : 'provider'
   const to = nextStatus(c.status, 'propor', side)
   const amount = parseMoneyToCents(req.body?.amount)
-  if (!amount || amount < 100) fail(400, 'Informe um valor de pelo menos R$ 1,00')
-  if (amount > 10_000_000) fail(400, 'Valor acima do permitido')
+  if (!amount || amount < 100) fail(400, 'Coloque um valor de pelo menos R$ 1,00')
+  if (amount > 10_000_000) fail(400, 'Esse valor passa do limite da plataforma')
   const deadline = String(req.body?.deadline || '')
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(deadline) || Number.isNaN(Date.parse(deadline))) fail(400, 'Informe o prazo')
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(deadline) || Number.isNaN(Date.parse(deadline))) fail(400, 'Escolha a data de entrega')
   const today = localYmd(new Date())
-  if (deadline < today) fail(400, 'O prazo não pode estar no passado')
+  if (deadline < today) fail(400, 'A data de entrega já passou')
   const notes = maskContacts(str(req.body?.notes, { max: 500, name: 'observações' })).text
 ```
 
-**Enviar proposta.** `nextStatus(c.status, 'propor', side)` já recusa quem não é o prestador ou um estado inválido. Depois valida:
+**Mandar orçamento** (a proposta). `nextStatus(c.status, 'propor', side)` já recusa quem não é o prestador ou um estado inválido. Depois valida:
 
 - valor de pelo menos R$ 1,00 e no máximo R$ 100.000,00;
 - prazo em formato de data válido e não anterior a hoje;
 - observações passando pelo filtro de contatos.
 
-**Linhas 329 a 356**
+**Linhas 330 a 357**
 
 ```js
   const messageId = await db().transaction(async (tx) => {
@@ -532,14 +533,14 @@ r.post('/contracts/:id/proposals', async (req, res) => {
       req.user.id,
       `${formatBRL(amount)} até ${deadline.split('-').reverse().join('/')}`,
     ])
-    return insertMessage(tx.query, c.conversation_id, req.user.id, 'proposta', `Proposta: ${formatBRL(amount)}`, { proposalId: rows[0].id })
+    return insertMessage(tx.query, c.conversation_id, req.user.id, 'proposta', `Orçamento: ${formatBRL(amount)}`, { proposalId: rows[0].id })
   })
   const conv = { id: c.conversation_id, client_id: c.client_id, provider_id: c.provider_id }
   await broadcastMessage(conv, messageId)
   await notify(c.client_id, {
     kind: 'proposta',
-    title: 'Proposta recebida',
-    body: `${c.provider_name.split(' ')[0]} enviou uma proposta de ${formatBRL(amount)} para "${c.offer_title}"`,
+    title: 'Chegou o orçamento',
+    body: `${c.provider_name.split(' ')[0]} pediu ${formatBRL(amount)} por "${c.offer_title}"`,
     link: `/conversas/${c.conversation_id}`,
   })
   const updated = await loadContract(c.id, req.user.id)
@@ -551,7 +552,7 @@ r.post('/contracts/:id/proposals', async (req, res) => {
 Na transação: marca como "substituída" a proposta anterior ainda pendente, grava a nova, muda o estado, registra o evento com valor e prazo e cria a mensagem do tipo `proposta`, que aparece como cartão no chat.
 Depois notifica o contratante e atualiza as telas.
 
-**Linhas 358 a 361**
+**Linhas 359 a 362**
 
 ```js
 function receiptCode() {
@@ -562,21 +563,21 @@ function receiptCode() {
 
 Código do comprovante: `CB-` + data local + 6 caracteres aleatórios, por exemplo `CB-20261027-1F26CF`.
 
-**Linhas 363 a 369**
+**Linhas 364 a 370**
 
 ```js
 const ACTION_MESSAGES = {
-  aceitar: 'Proposta aceita pelo contratante',
-  recusar: 'Proposta recusada pelo contratante',
-  iniciar: 'Serviço iniciado pelo prestador',
+  aceitar: 'Orçamento aceito. Negócio fechado!',
+  recusar: 'Orçamento recusado',
+  iniciar: 'Serviço começou',
   concluir: 'Serviço concluído',
-  cancelar: 'Contratação cancelada',
+  cancelar: 'Cancelado',
 }
 ```
 
 Texto da mensagem de sistema de cada ação.
 
-**Linhas 371 a 375**
+**Linhas 372 a 376**
 
 ```js
 // RF09: aceitar, recusar, iniciar, concluir, cancelar.
@@ -588,7 +589,7 @@ r.post('/contracts/:id/actions', async (req, res) => {
 
 **Ações da contratação**: aceitar, recusar, iniciar, concluir e cancelar. Propor tem rota própria.
 
-**Linhas 377 a 383**
+**Linhas 378 a 384**
 
 ```js
   const result = await db().transaction(async (tx) => {
@@ -603,12 +604,12 @@ r.post('/contracts/:id/actions', async (req, res) => {
 Tudo numa transação. O `SELECT ... FOR UPDATE` **trava a linha** da contratação até o fim: se as duas partes clicarem ao mesmo tempo (por exemplo, um cancela enquanto o outro conclui), a segunda espera a primeira terminar e então é validada sobre o estado já atualizado.
 Em seguida confere o acesso, descobre o lado da pessoa e valida a ação com `nextStatus`.
 
-**Linhas 385 a 392**
+**Linhas 386 a 393**
 
 ```js
     if (action === 'aceitar' || action === 'recusar') {
       const p = (await tx.query("SELECT * FROM proposals WHERE contract_id = $1 AND status = 'pendente' ORDER BY id DESC LIMIT 1", [c.id])).rows[0]
-      if (!p) fail(409, 'Não há proposta pendente')
+      if (!p) fail(409, 'Não tem orçamento esperando resposta')
       await tx.query('UPDATE proposals SET status = $2 WHERE id = $1', [p.id, action === 'aceitar' ? 'aceita' : 'recusada'])
       if (action === 'aceitar') {
         await tx.query('UPDATE contracts SET amount_cents = $2, deadline = $3 WHERE id = $1', [c.id, p.amount_cents, p.deadline])
@@ -618,7 +619,7 @@ Em seguida confere o acesso, descobre o lado da pessoa e valida a ação com `ne
 
 Aceitar ou recusar exige uma proposta pendente. Ao aceitar, o valor e o prazo da proposta passam a ser os da contratação.
 
-**Linhas 393 a 395**
+**Linhas 394 a 396**
 
 ```js
     if (action === 'cancelar') {
@@ -628,7 +629,7 @@ Aceitar ou recusar exige uma proposta pendente. Ao aceitar, o valor e o prazo da
 
 Ao cancelar, a proposta pendente (se houver) é encerrada como recusada.
 
-**Linhas 396 a 416**
+**Linhas 397 a 417**
 
 ```js
     if (action === 'concluir') {
@@ -658,11 +659,11 @@ Ao cancelar, a proposta pendente (se houver) é encerrada como recusada.
 
 Depois, para qualquer ação: atualiza o estado (e a data de conclusão, se for o caso) e registra o evento no histórico.
 
-**Linhas 417 a 422**
+**Linhas 418 a 423**
 
 ```js
     let body = ACTION_MESSAGES[action]
-    if (action === 'concluir') body += `. Valor ${formatBRL(extra.commission.grossCents)}, comissão da plataforma ${formatBRL(extra.commission.commissionCents)}. Avaliem um ao outro.`
+    if (action === 'concluir') body += ` por ${formatBRL(extra.commission.grossCents)} (taxa da plataforma: ${formatBRL(extra.commission.commissionCents)}). Agora é só um avaliar o outro.`
     if (note) body += ` (${note})`
     const messageId = await insertMessage(tx.query, c.conversation_id, null, 'sistema', body)
     return { c, to, messageId, extra }
@@ -671,7 +672,7 @@ Depois, para qualquer ação: atualiza o estado (e a data de conclusão, se for 
 
 Monta a mensagem de sistema do chat. Na conclusão, ela informa valor e comissão e convida os dois a se avaliarem.
 
-**Linhas 424 a 433**
+**Linhas 425 a 434**
 
 ```js
   const { c, to, messageId } = result
@@ -680,7 +681,7 @@ Monta a mensagem de sistema do chat. Na conclusão, ela informa valor e comissã
   const otherId = c.client_id === req.user.id ? c.provider_id : c.client_id
   await notify(otherId, {
     kind: 'contratacao',
-    title: `Contratação: ${STATUS_LABELS[to]}`,
+    title: STATUS_LABELS[to],
     body: ACTION_MESSAGES[action],
     link: `/conversas/${c.conversation_id}`,
   })
@@ -688,15 +689,15 @@ Monta a mensagem de sistema do chat. Na conclusão, ela informa valor e comissã
 
 Depois da transação: envia a mensagem em tempo real e notifica a outra parte da mudança.
 
-**Linhas 434 a 447**
+**Linhas 435 a 448**
 
 ```js
   if (to === 'concluida') {
     for (const userId of [c.client_id, c.provider_id]) {
       await notify(userId, {
         kind: 'avaliacao',
-        title: 'Avalie a contratação',
-        body: 'Sua avaliação ajuda os vizinhos a contratar com segurança.',
+        title: 'Como foi?',
+        body: 'Dá uma nota rapidinho. Isso ajuda os vizinhos a saber em quem confiar.',
         link: `/conversas/${c.conversation_id}`,
       })
     }
@@ -709,7 +710,7 @@ Depois da transação: envia a mensagem em tempo real e notifica a outra parte d
 
 Na conclusão, as duas partes recebem a notificação pedindo a avaliação. Por fim, recarrega a contratação, avisa as telas e devolve o detalhe atualizado.
 
-**Linhas 449 a 455**
+**Linhas 450 a 456**
 
 ```js
 r.get('/contracts', async (req, res) => {
@@ -723,7 +724,7 @@ r.get('/contracts', async (req, res) => {
 
 Lista de contratações do usuário, dos dois lados, da mais recente para a mais antiga.
 
-**Linhas 457 a 460**
+**Linhas 458 a 461**
 
 ```js
 r.get('/contracts/:id', async (req, res) => {
@@ -734,14 +735,14 @@ r.get('/contracts/:id', async (req, res) => {
 
 Detalhe de uma contratação.
 
-**Linhas 462 a 483**
+**Linhas 463 a 484**
 
 ```js
 // RF10: comprovante da contratação concluída.
 r.get('/contracts/:id/receipt', async (req, res) => {
   const c = await loadContract(req.params.id, req.user.id)
   const k = await one('SELECT * FROM commissions WHERE contract_id = $1', [c.id])
-  if (!k) fail(404, 'O comprovante é gerado quando o serviço é concluído')
+  if (!k) fail(404, 'O comprovante sai quando o serviço é concluído')
   res.json({
     receipt: {
       receiptCode: k.receipt_code,
@@ -763,19 +764,19 @@ r.get('/contracts/:id/receipt', async (req, res) => {
 
 **Comprovante.** Só existe depois da conclusão (antes, responde 404 explicando). Disponível para as duas partes.
 
-**Linhas 485 a 510**
+**Linhas 486 a 511**
 
 ```js
 // RF11: avaliação recíproca após a conclusão.
 r.post('/contracts/:id/review', async (req, res) => {
   const c = await loadContract(req.params.id, req.user.id)
-  if (c.status !== 'concluida') fail(409, 'A avaliação fica disponível após a conclusão do serviço')
+  if (c.status !== 'concluida') fail(409, 'Dá pra avaliar depois que o serviço for concluído')
   const rating = Number(req.body?.rating)
-  if (!Number.isInteger(rating) || rating < 1 || rating > 5) fail(400, 'Escolha uma nota de 1 a 5')
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) fail(400, 'Escolha de 1 a 5 estrelas')
   const comment = maskContacts(str(req.body?.comment, { max: 500, name: 'comentário' })).text
   const revieweeId = c.client_id === req.user.id ? c.provider_id : c.client_id
   const exists = await one('SELECT id FROM reviews WHERE contract_id = $1 AND reviewer_id = $2', [c.id, req.user.id])
-  if (exists) fail(409, 'Você já avaliou esta contratação')
+  if (exists) fail(409, 'Você já avaliou este serviço')
   await q('INSERT INTO reviews (contract_id, reviewer_id, reviewee_id, rating, comment) VALUES ($1, $2, $3, $4, $5)', [
     c.id,
     req.user.id,
@@ -785,8 +786,8 @@ r.post('/contracts/:id/review', async (req, res) => {
   ])
   await notify(revieweeId, {
     kind: 'avaliacao',
-    title: 'Você recebeu uma avaliação',
-    body: `Nota ${rating} de 5 em "${c.offer_title}"`,
+    title: `Você ganhou ${rating} ${rating === 1 ? 'estrela' : 'estrelas'}`,
+    body: `Em "${c.offer_title}"`,
     link: `/conversas/${c.conversation_id}`,
   })
   await pushContractUpdate(c)
@@ -797,7 +798,7 @@ r.post('/contracts/:id/review', async (req, res) => {
 **Avaliação mútua.** Exige contratação concluída, nota inteira de 1 a 5 e uma única avaliação por pessoa. O comentário passa pelo filtro de contatos.
 O avaliado é sempre a outra parte; ele recebe uma notificação com a nota.
 
-**Linha 512**
+**Linha 513**
 
 ```js
 export default r

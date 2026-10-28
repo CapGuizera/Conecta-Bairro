@@ -263,7 +263,13 @@ export async function resetDatabase() {
 
 // Execução direta: node server/src/seed.js --reset
 if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
-  await initDb()
+  try {
+    await initDb()
+  } catch (err) {
+    if (err.code !== 'DB_LOCKED') throw err
+    console.error('\nFeche o ConectaBairro (Ctrl+C na janela dele) antes de recriar os dados.')
+    process.exit(1)
+  }
   if (process.argv.includes('--reset')) {
     console.log('Apagando todos os dados...')
     await resetDatabase()

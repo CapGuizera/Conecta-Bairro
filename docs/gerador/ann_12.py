@@ -12,7 +12,7 @@ Lista de contratações, em abas.
 Importações e a cor da etiqueta de cada estado.
 '''),
 ('export default function Contracts() {', '''
-Carrega a lista (e recarrega a cada mudança em tempo real) e filtra pela aba escolhida: em aberto, concluídas ou canceladas.
+Carrega a lista (e recarrega a cada mudança em tempo real) e filtra pela aba escolhida: rolando (em aberto), concluídas ou canceladas. Na navegação esta tela se chama "Serviços".
 '''),
 ('  return (', '''
 As abas e a lista. Cada item mostra a oferta, o estado, a outra parte (prestador ou cliente, conforme o lado), valor e prazo ou "Aguardando proposta", e há quanto tempo mudou. Tocar abre a conversa.
@@ -60,19 +60,20 @@ Pausar ou reativar uma oferta, e confirmar todas as ofertas de uma vez.
 Prepara as datas do gráfico no formato dia/mês.
 '''),
 ('  return (', '''
-Título e botão "Nova oferta".
+Título e botão "Novo anúncio".
 '''),
 ('      {stale.length > 0 && (', '''
-**Alerta de confirmação** (RF16): quantas ofertas precisam ser confirmadas e o aviso de que saem da busca aos 45 dias, com o botão "Continuam ativas".
+**Alerta de confirmação** (RF16): quantas ofertas precisam ser confirmadas e o aviso de que saem da busca aos 45 dias, com o botão "Ainda estou atendendo".
 '''),
 ('      {(d.pending.awaitingProposal > 0', '''
 Alerta de pedidos aguardando proposta e serviços em andamento, com link para as contratações.
 '''),
-('      <div className="row between mt-lg mb">', '''
+('      <div className="row between wrap mt-lg mb">', '''
 Seletor de período: 7, 30 ou 90 dias.
 '''),
 ('      <div className="grid stats">', '''
-Os quatro números do RF14: visualizações, contatos iniciados (com os pedidos de serviço), contratações concluídas (com a taxa de conversão) e receita líquida (com bruto e comissão).
+Os quatro números do RF14, com nomes do dia a dia: "Pessoas que viram" (visualizações), "Te chamaram no chat" (contatos, com quantos pediram orçamento), "Serviços feitos" e "Você recebeu" (o líquido, com o bruto e a taxa).
+A porcentagem de conversão só aparece até 100%: ela passa disso quando o mesmo cliente volta a contratar na mesma conversa, e aí a tela comemora ("tem cliente voltando!") em vez de mostrar um número que confunde.
 '''),
 ('      <div className="card mt">', '''
 O gráfico diário de visualizações e contatos e a avaliação média.
@@ -143,7 +144,7 @@ Carrega a lista e recarrega quando chega uma notificação nova (o número de n�
 Ao tocar numa notificação: marca como lida e abre a tela ligada a ela.
 '''),
 ('  return (', '''
-Título e o botão "Marcar todas como lidas", quando há não lidas.
+Título ("Avisos") e o botão "Já vi tudo", quando há não lidas.
 '''),
 ("      {'Notification' in window", '''
 Se o navegador permite notificações e a pessoa ainda não decidiu, oferece ativar os avisos do sistema operacional. O pedido de permissão só acontece com o toque no botão, pois os navegadores bloqueiam pedidos automáticos.
@@ -174,7 +175,7 @@ Salva alterações do perfil e atualiza a sessão.
 Cabeçalho com iniciais, nome, celular, data de entrada e a etiqueta do perfil especial.
 '''),
 ('      <div className="list mb">', '''
-Atalhos conforme o perfil (painel, campo, moderação, indicadores), o questionário com a situação "Respondida" ou "Pendente" e, quando possível, "Instalar o aplicativo neste aparelho".
+Atalhos conforme o perfil (painel, campo, moderação, indicadores), o questionário com a situação ("Respondido, valeu!" ou "3 perguntas") e, quando possível, "Instalar o app no celular".
 '''),
 ('      <form', '''
 Edição do nome e, para prestadores, da apresentação.

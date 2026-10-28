@@ -24,14 +24,14 @@ export const geolocationAvailable = () => 'geolocation' in navigator && window.i
 
 export function getCurrentPosition() {
   return new Promise((resolve, reject) => {
-    if (!('geolocation' in navigator)) return reject(new Error('Este navegador não informa localização'))
+    if (!('geolocation' in navigator)) return reject(new Error('Este navegador não informa a localização'))
     if (!window.isSecureContext) {
-      return reject(new Error('O navegador só libera a localização em https ou em localhost. Escolha o ponto no mapa.'))
+      return reject(new Error('Por este endereço o navegador não libera o GPS. Marca o ponto no mapa.'))
     }
     navigator.geolocation.getCurrentPosition(
       (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: Math.round(p.coords.accuracy) }),
       (err) =>
-        reject(new Error(err.code === 1 ? 'Permissão de localização negada. Escolha o ponto no mapa.' : 'Não foi possível obter sua localização')),
+        reject(new Error(err.code === 1 ? 'Sem permissão pra usar a localização. Marca o ponto no mapa.' : 'Não deu pra achar sua localização agora')),
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
     )
   })
@@ -53,7 +53,7 @@ export function usePosition(pilot) {
 }
 
 export const SOURCE_LABEL = {
-  gps: 'Sua localização atual',
-  mapa: 'Ponto escolhido no mapa',
-  piloto: 'Centro do bairro piloto',
+  gps: 'Você está aqui',
+  mapa: 'Ponto que você marcou no mapa',
+  piloto: 'Centro do bairro',
 }

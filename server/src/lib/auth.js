@@ -48,7 +48,7 @@ export const requireRole = (...roles) => (req, _res, next) => {
 
 export function requireProvider(req, _res, next) {
   if (!req.user) throw new HttpError(401, 'Entre com seu telefone para continuar')
-  if (!req.user.is_provider) throw new HttpError(403, 'Ative o perfil de prestador para usar esta função')
+  if (!req.user.is_provider) throw new HttpError(403, 'Ative "quero anunciar" no seu perfil pra usar isso')
   next()
 }
 

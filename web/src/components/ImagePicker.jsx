@@ -15,7 +15,7 @@ function resize(file, maxSide = 1280, quality = 0.82) {
       URL.revokeObjectURL(url)
       resolve(canvas.toDataURL('image/jpeg', quality))
     }
-    img.onerror = () => reject(new Error('Não foi possível ler a imagem'))
+    img.onerror = () => reject(new Error('Não deu pra abrir essa imagem'))
     img.src = url
   })
 }
