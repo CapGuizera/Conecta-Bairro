@@ -6,6 +6,7 @@ import { api, qs } from '../api.js'
 import { LocationDialog } from '../components/LocationDialog.jsx'
 import { RadiusMap } from '../components/Maps.jsx'
 import { OfferCard } from '../components/OfferCard.jsx'
+import { catStyle, categoryIcon } from '../categories.jsx'
 import { Empty, ErrorBox } from '../components/ui.jsx'
 import { SOURCE_LABEL, geolocationAvailable, getCurrentPosition, usePosition } from '../position.js'
 import { useSession } from '../session.jsx'
@@ -111,11 +112,20 @@ export default function Home() {
         <button className={`chip ${!category ? 'on' : ''}`} onClick={() => update({ categoria: '' })}>
           Todas
         </button>
-        {meta?.categories.map((c) => (
-          <button key={c.slug} className={`chip ${category === c.slug ? 'on' : ''}`} onClick={() => update({ categoria: category === c.slug ? '' : c.slug })}>
-            {c.name}
-          </button>
-        ))}
+        {meta?.categories.map((c) => {
+          const Icon = categoryIcon(c.slug)
+          return (
+            <button
+              key={c.slug}
+              className={`chip cat ${category === c.slug ? 'on' : ''}`}
+              style={catStyle(c.slug)}
+              onClick={() => update({ categoria: category === c.slug ? '' : c.slug })}
+            >
+              <Icon size={15} />
+              {c.name}
+            </button>
+          )
+        })}
       </div>
 
       <div className="card tight">

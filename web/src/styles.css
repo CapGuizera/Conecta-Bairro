@@ -10,6 +10,9 @@
   --primary-hover: #163c6c;
   --primary-ink: #ffffff;
   --primary-soft: #dfe8f4;
+  /* barra do topo: azul de placa nos dois modos (no escuro, mais fechado) */
+  --bar: #1c4b86;
+  --bar-ink: #ffffff;
   --accent: #e9a800;
   --accent-ink: #2a2000;
   --accent-soft: #fbefc9;
@@ -21,6 +24,10 @@
   --warn: #8a5a00;
   --warn-soft: #fbefd5;
   --star: #e0a100;
+  --orange: #c2410c;
+  --orange-soft: #fbe3d6;
+  --plum: #8a3a72;
+  --plum-soft: #f4e1ee;
   --shadow: 0 1px 0 rgba(29, 35, 48, 0.06);
   --radius: 10px;
   --radius-sm: 8px;
@@ -42,6 +49,8 @@
     --primary-hover: #9cc2ef;
     --primary-ink: #0c1a2c;
     --primary-soft: #1e2f47;
+    --bar: #18304f;
+    --bar-ink: #e8eef7;
     --accent: #f2c14e;
     --accent-ink: #231a00;
     --accent-soft: #3a3016;
@@ -52,6 +61,10 @@
     --ok-soft: #173525;
     --warn: #f0b860;
     --warn-soft: #3a2b12;
+    --orange: #f59a6b;
+    --orange-soft: #3d2216;
+    --plum: #e09ccd;
+    --plum-soft: #352032;
     --shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
     color-scheme: dark;
   }
@@ -117,8 +130,8 @@ img {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: var(--primary);
-  color: var(--primary-ink);
+  background: var(--bar);
+  color: var(--bar-ink);
   padding: calc(env(safe-area-inset-top) + 10px) 16px 10px;
   display: flex;
   align-items: center;
@@ -135,7 +148,7 @@ img {
   padding: 3px 12px 4px;
   border: 2px solid currentColor;
   border-radius: 5px;
-  box-shadow: inset 0 0 0 2px var(--primary);
+  box-shadow: inset 0 0 0 2px var(--bar);
   font-family: var(--font-title);
   font-weight: 700;
   font-size: 1.05rem;
@@ -626,6 +639,35 @@ input[type='range'] {
   border-color: var(--primary);
   color: var(--primary-ink);
 }
+.chip.cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.chip.cat svg {
+  color: var(--cat-ink);
+}
+.chip.cat.on {
+  background: var(--cat-ink);
+  border-color: var(--cat-ink);
+  color: var(--surface);
+}
+.chip.cat.on svg {
+  color: inherit;
+}
+
+/* Cor da categoria: o componente põe --cat (categories.jsx) e daqui saem o fundo
+   clarinho e o tom do texto. No modo escuro o texto clareia para continuar legível. */
+.cat {
+  --cat-ink: var(--cat);
+  --cat-soft: color-mix(in srgb, var(--cat) 13%, var(--surface));
+}
+@media (prefers-color-scheme: dark) {
+  .cat {
+    --cat-ink: color-mix(in srgb, var(--cat) 45%, #ffffff);
+    --cat-soft: color-mix(in srgb, var(--cat) 26%, var(--surface));
+  }
+}
 
 .badge {
   display: inline-flex;
@@ -658,6 +700,10 @@ input[type='range'] {
 .badge.danger {
   background: var(--danger-soft);
   color: var(--danger);
+}
+.badge.cat {
+  background: var(--cat-soft);
+  color: var(--cat-ink);
 }
 
 .distance {
@@ -733,8 +779,8 @@ input[type='range'] {
   width: 84px;
   height: 84px;
   border-radius: var(--radius-sm);
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: var(--cat-soft, var(--primary-soft));
+  color: var(--cat-ink, var(--primary));
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -776,10 +822,10 @@ input[type='range'] {
 .hero-placeholder {
   height: 140px;
   border-radius: var(--radius);
-  background: linear-gradient(135deg, var(--primary-soft), var(--surface-2));
+  background: linear-gradient(135deg, var(--cat-soft, var(--primary-soft)), var(--surface-2));
   display: grid;
   place-items: center;
-  color: var(--primary);
+  color: var(--cat-ink, var(--primary));
   margin-bottom: 16px;
 }
 
@@ -1015,9 +1061,40 @@ input[type='range'] {
   box-shadow: var(--shadow);
 }
 .stat .label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.8rem;
   color: var(--muted);
   font-weight: 500;
+}
+.stat-ico {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+}
+.stat-ico.blue {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.stat-ico.yellow {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.stat-ico.green {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.stat-ico.orange {
+  background: var(--orange-soft);
+  color: var(--orange);
+}
+.stat-ico.plum {
+  background: var(--plum-soft);
+  color: var(--plum);
 }
 .stat .value {
   font-family: var(--font-title);
@@ -1251,8 +1328,8 @@ input[type='range'] {
   padding: 24px;
 }
 .login-sign {
-  background: var(--primary);
-  color: #fff;
+  background: var(--bar);
+  color: var(--bar-ink);
   font-size: 1.6rem;
   padding: 6px 18px 8px;
 }

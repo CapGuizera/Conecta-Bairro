@@ -72,7 +72,7 @@ Alerta de pedidos aguardando proposta e serviços em andamento, com link para as
 Seletor de período: 7, 30 ou 90 dias.
 '''),
 ('      <div className="grid stats">', '''
-Os quatro números do RF14, com nomes do dia a dia: "Pessoas que viram" (visualizações), "Te chamaram no chat" (contatos, com quantos pediram orçamento), "Serviços feitos" e "Você recebeu" (o líquido, com o bruto e a taxa).
+Os quatro números do RF14, cada um com ícone e cor próprios, com nomes do dia a dia: "Pessoas que viram" (visualizações), "Te chamaram no chat" (contatos, com quantos pediram orçamento), "Serviços feitos" e "Você recebeu" (o líquido, com o bruto e a taxa).
 A porcentagem de conversão só aparece até 100%: ela passa disso quando o mesmo cliente volta a contratar na mesma conversa, e aí a tela comemora ("tem cliente voltando!") em vez de mostrar um número que confunde.
 '''),
 ('      <div className="card mt">', '''

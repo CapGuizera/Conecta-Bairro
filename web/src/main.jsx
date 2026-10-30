@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { registerSW } from 'virtual:pwa-register'
 import { Layout } from './components/Layout.jsx'
 import { Loading } from './components/ui.jsx'
 import Chat from './pages/Chat.jsx'
@@ -23,6 +24,10 @@ import { SessionProvider, useSession } from './session.jsx'
 import '@fontsource-variable/figtree'
 import '@fontsource-variable/bricolage-grotesque'
 import './styles.css'
+
+// Quando sai uma versão nova, o service worker troca a antiga e a página recarrega sozinha.
+// Sem isso o navegador seguia mostrando a interface guardada até alguém recarregar na mão.
+registerSW({ immediate: true })
 
 function Private({ children, provider, roles }) {
   const { user } = useSession()

@@ -89,10 +89,18 @@ export function ErrorBox({ error }) {
   return <div className="error">{error.message || String(error)}</div>
 }
 
-export function Stat({ label, value, sub }) {
+// tone: blue, yellow, green, orange ou plum (a cor do ícone ao lado do rótulo).
+export function Stat({ label, value, sub, icon: Icon, tone = 'blue' }) {
   return (
     <div className="stat">
-      <div className="label">{label}</div>
+      <div className="label">
+        {Icon && (
+          <span className={`stat-ico ${tone}`}>
+            <Icon size={15} />
+          </span>
+        )}
+        {label}
+      </div>
       <div className="value">{value}</div>
       {sub && <div className="sub">{sub}</div>}
     </div>

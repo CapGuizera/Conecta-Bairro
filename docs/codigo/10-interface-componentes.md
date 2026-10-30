@@ -290,7 +290,7 @@ export function Avatar({ name = '', size }) {
 
 Círculo com as iniciais do nome (por exemplo, "CB" para Cleusa Batista), numa cor tirada do próprio nome (`avatarColors`): cada pessoa tem sempre a mesma cor, e a lista de conversas não fica toda igual. O sistema não pede foto de perfil.
 
-**Linhas 78 a 100**
+**Linhas 78 a 90**
 
 ```jsx
 export function Loading({ label = 'Carregando...' }) {
@@ -306,11 +306,25 @@ export function ErrorBox({ error }) {
   if (!error) return null
   return <div className="error">{error.message || String(error)}</div>
 }
+```
 
-export function Stat({ label, value, sub }) {
+Indicador de carregamento e caixa de erro.
+
+**Linhas 92 a 108**
+
+```jsx
+// tone: blue, yellow, green, orange ou plum (a cor do ícone ao lado do rótulo).
+export function Stat({ label, value, sub, icon: Icon, tone = 'blue' }) {
   return (
     <div className="stat">
-      <div className="label">{label}</div>
+      <div className="label">
+        {Icon && (
+          <span className={`stat-ico ${tone}`}>
+            <Icon size={15} />
+          </span>
+        )}
+        {label}
+      </div>
       <div className="value">{value}</div>
       {sub && <div className="sub">{sub}</div>}
     </div>
@@ -318,9 +332,9 @@ export function Stat({ label, value, sub }) {
 }
 ```
 
-Indicador de carregamento, caixa de erro e cartão de número (estatística) dos painéis.
+Cartão de número (estatística) dos painéis. Opcionalmente leva um ícone ao lado do rótulo, num quadradinho colorido (`tone`: azul, amarelo, verde, laranja ou ameixa). Cada número do painel tem uma cor diferente, o que ajuda a achar o que se procura sem ler tudo.
 
-**Linhas 102 a 129**
+**Linhas 110 a 137**
 
 ```jsx
 // Gráfico de barras simples (sem biblioteca), com até duas séries.
@@ -355,7 +369,7 @@ export function Bars({ data, a, b, labelA, labelB }) {
 
 Gráfico de barras feito só com CSS, sem biblioteca: cada barra tem altura proporcional ao maior valor da série (`max`). Mostra até duas séries lado a lado, com legenda e o valor no `title` (aparece ao passar o mouse).
 
-**Linhas 131 a 143**
+**Linhas 139 a 151**
 
 ```jsx
 export function HBar({ label, value, max, display, accent }) {
@@ -375,7 +389,7 @@ export function HBar({ label, value, max, display, accent }) {
 
 Barra horizontal de proporção, usada no painel de indicadores.
 
-**Linhas 145 a 162**
+**Linhas 153 a 170**
 
 ```jsx
 // Carrega dados assíncronos com estado de carregamento, erro e recarga.
@@ -412,7 +426,7 @@ Cartão de oferta da lista de resultados.
 ```jsx
 import { Link } from 'react-router-dom'
 import { MapPin, Megaphone } from 'lucide-react'
-import { categoryIcon } from '../categories.jsx'
+import { catStyle, categoryIcon } from '../categories.jsx'
 import { plural, priceRange } from '../format.js'
 import { Stars } from './ui.jsx'
 ```
@@ -426,16 +440,16 @@ export function Thumb({ offer, size }) {
   const img = offer.images?.[0]
   const Icon = categoryIcon(offer.category)
   return (
-    <div className="thumb" style={size ? { width: size, height: size } : undefined}>
+    <div className="thumb cat" style={{ ...catStyle(offer.category), ...(size && { width: size, height: size }) }}>
       {img ? <img src={img} alt="" loading="lazy" /> : <Icon size={30} strokeWidth={1.6} />}
     </div>
   )
 }
 ```
 
-Miniatura: a primeira foto da oferta ou, sem foto, o ícone da categoria (bolo, tesoura, chave inglesa...). `loading="lazy"` só baixa a imagem quando ela chega perto da tela.
+Miniatura: a primeira foto da oferta ou, sem foto, o ícone da categoria (bolo, tesoura, chave inglesa...) no fundo da cor da categoria (`catStyle`). Junta o estilo da cor com o tamanho, quando a tela pede um tamanho diferente. `loading="lazy"` só baixa a imagem quando ela chega perto da tela.
 
-**Linhas 17 a 50**
+**Linhas 17 a 52**
 
 ```jsx
 export function OfferCard({ offer }) {
@@ -444,7 +458,9 @@ export function OfferCard({ offer }) {
       <Thumb offer={offer} />
       <div className="grow">
         <div className="row between">
-          <span className="badge">{offer.categoryName}</span>
+          <span className="badge cat" style={catStyle(offer.category)}>
+            {offer.categoryName}
+          </span>
           {offer.highlighted && (
             <span className="badge accent">
               <Megaphone size={12} /> Destaque
@@ -474,7 +490,7 @@ export function OfferCard({ offer }) {
 }
 ```
 
-O cartão inteiro é um link para a oferta. Mostra categoria, a etiqueta Destaque com megafone (e borda amarela), título, **distância aproximada**, nome do prestador, preço, estrelas e quantidade de serviços concluídos.
+O cartão inteiro é um link para a oferta. Mostra a categoria (etiqueta na cor dela), a etiqueta Destaque com megafone (e borda amarela), título, **distância aproximada**, nome do prestador, preço, estrelas e quantidade de serviços concluídos.
 
 ---
 
@@ -551,8 +567,8 @@ export function RadiusMap({ position, radiusKm, onPick, tall }) {
     <MapContainer center={center} zoom={zoomForRadius(radiusKm)} className={`map ${tall ? 'tall' : ''}`} scrollWheelZoom={false} attributionControl>
       <TileLayer url={TILE} attribution={ATTR} />
       <Recenter center={center} zoom={zoomForRadius(radiusKm)} />
-      <Circle center={center} radius={radiusKm * 1000} pathOptions={{ color: '#0f5c4d', weight: 2, fillOpacity: 0.08 }} />
-      <CircleMarker center={center} radius={8} pathOptions={{ color: '#fff', weight: 3, fillColor: '#d9702b', fillOpacity: 1 }} />
+      <Circle center={center} radius={radiusKm * 1000} pathOptions={{ color: '#1c4b86', weight: 2, fillOpacity: 0.08 }} />
+      <CircleMarker center={center} radius={8} pathOptions={{ color: '#fff', weight: 3, fillColor: '#e9a800', fillOpacity: 1 }} />
       {onPick && <ClickToPick onPick={onPick} />}
     </MapContainer>
   )
@@ -571,8 +587,8 @@ export function PickPointMap({ value, onChange, fallback, radiusKm }) {
     <MapContainer center={center} zoom={16} className="map tall" scrollWheelZoom attributionControl>
       <TileLayer url={TILE} attribution={ATTR} />
       <Recenter center={center} />
-      {value && radiusKm && <Circle center={center} radius={radiusKm * 1000} pathOptions={{ color: '#0f5c4d', weight: 1, fillOpacity: 0.05 }} />}
-      {value && <CircleMarker center={center} radius={9} pathOptions={{ color: '#fff', weight: 3, fillColor: '#0f5c4d', fillOpacity: 1 }} />}
+      {value && radiusKm && <Circle center={center} radius={radiusKm * 1000} pathOptions={{ color: '#1c4b86', weight: 1, fillOpacity: 0.05 }} />}
+      {value && <CircleMarker center={center} radius={9} pathOptions={{ color: '#fff', weight: 3, fillColor: '#1c4b86', fillOpacity: 1 }} />}
       <ClickToPick onPick={onChange} />
     </MapContainer>
   )

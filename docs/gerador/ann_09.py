@@ -55,6 +55,10 @@ Entrada da interface: define as telas (rotas) e quem pode acessar cada uma.
 ("import { StrictMode }", '''
 Importa as telas, o layout, a sessão e o CSS global.
 '''),
+('// Quando sai uma versão nova', '''
+**Atualização automática.** O service worker guarda a interface no aparelho para ela abrir sem internet. O lado ruim: depois de uma versão nova, o navegador continuava mostrando a antiga até alguém recarregar na mão (foi assim que a versão verde do começo do projeto seguiu aparecendo depois da troca de cores).
+`registerSW({ immediate: true })` registra o service worker já na abertura; quando ele percebe uma versão nova, ela assume o lugar da antiga e a página recarrega sozinha uma vez.
+'''),
 ('function Private(', '''
 **Porteiro das telas.** Sem login, manda para "Entrar", lembrando de onde a pessoa veio (`state.from`) para voltar depois do login. Telas de prestador exigem o perfil de prestador; telas de equipe exigem o perfil certo.
 Isso é só conveniência de navegação: a proteção de verdade está no servidor, que recusa qualquer acesso indevido.
@@ -221,6 +225,10 @@ O ícone do aplicativo em formato vetorial (SVG), desenhado em código. A partir
 ''', [
 ('// Ícone de cada categoria', '''
 Cada categoria (o mesmo identificador usado no servidor) aponta para um ícone do lucide. `categoryIcon` devolve o ícone, ou uma lojinha para categorias desconhecidas.
+'''),
+('// Cor de cada categoria', '''
+**Cor de cada categoria**, para a tela não ficar toda de uma cor só: alimentação em laranja-tijolo, costura em ameixa, beleza em rosa, aulas em anil, manutenção em ocre, e assim por diante. Os tons foram escolhidos fortes o bastante para servir de texto sobre fundo claro.
+`catStyle` devolve a cor como variável CSS (`--cat`) para ser colocada no `style` do elemento. O CSS (classe `.cat`) tira dela o fundo clarinho e o tom do texto, inclusive no modo escuro, então aqui só existe uma cor por categoria.
 '''),
 ('// Cor do avatar', '''
 Seis pares de cor (fundo claro e letra escura, sempre com bom contraste). `avatarColors` transforma o nome num número (multiplica por 31 e soma o código de cada letra, a mesma ideia do `hashCode` do Java) e usa o resto da divisão por 6 para escolher o par.

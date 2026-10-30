@@ -74,7 +74,7 @@ Saudação com o primeiro nome quando logado.
 Caixa de busca por necessidade. A busca dispara ao enviar (Enter ou botão do teclado); apagar o texto limpa a busca.
 '''),
 ('      <div className="chips">', '''
-As categorias como botões roláveis na horizontal. Tocar de novo na categoria escolhida volta para "Todas".
+As categorias como botões roláveis na horizontal, cada uma com o seu ícone na cor da categoria. A escolhida fica preenchida com essa cor. Tocar de novo na categoria escolhida volta para "Todas".
 '''),
 ('      <div className="card tight">', '''
 Cartão da localização: de onde está buscando, raio atual, botão "Alterar" e botão para mostrar o mapa.

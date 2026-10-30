@@ -1,7 +1,7 @@
 // RF14 (painel do prestador), RF13 (plano de destaque) e RF16 (confirmação de atividade).
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, BadgeCheck, ClipboardList, Eye, MapPin, Megaphone, Pause, Pencil, Play, Plus, QrCode } from 'lucide-react'
+import { AlertTriangle, BadgeCheck, ClipboardList, Eye, HandCoins, MapPin, Megaphone, MessageCircle, Pause, Pencil, Play, Plus, QrCode } from 'lucide-react'
 import { api } from '../api.js'
 import { Thumb } from '../components/OfferCard.jsx'
 import { ProviderLocation } from '../components/ProviderLocation.jsx'
@@ -140,14 +140,16 @@ export default function Dashboard() {
         </div>
       </div>
       <div className="grid stats">
-        <Stat label="Pessoas que viram" value={d.totals.views} />
-        <Stat label="Te chamaram no chat" value={d.totals.contacts} sub={plural(d.totals.requests, 'pediu orçamento', 'pediram orçamento')} />
+        <Stat label="Pessoas que viram" value={d.totals.views} icon={Eye} />
+        <Stat label="Te chamaram no chat" icon={MessageCircle} tone="orange" value={d.totals.contacts} sub={plural(d.totals.requests, 'pediu orçamento', 'pediram orçamento')} />
         <Stat
           label="Serviços feitos"
+          icon={BadgeCheck}
+          tone="green"
           value={d.totals.concluded}
           sub={d.totals.conversion <= 100 ? `${String(d.totals.conversion).replace('.', ',')}% de quem chamou` : 'tem cliente voltando!'}
         />
-        <Stat label="Você recebeu" value={brl(d.revenue.net)} sub={`de ${brl(d.revenue.gross)}, já tirando ${brl(d.revenue.commission)} de taxa`} />
+        <Stat label="Você recebeu" icon={HandCoins} tone="yellow" value={brl(d.revenue.net)} sub={`de ${brl(d.revenue.gross)}, já tirando ${brl(d.revenue.commission)} de taxa`} />
       </div>
       <div className="card mt">
         <div className="row between">

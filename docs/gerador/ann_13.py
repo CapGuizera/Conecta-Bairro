@@ -13,6 +13,8 @@ Organizado em seções marcadas por comentários `/* ---------- nome ---------- 
 **Variáveis do tema claro.** A identidade parte de duas coisas da rua: o **azul das placas de rua** (`--primary`, com letra branca) e o **amarelo dos ipês** (`--accent`), sobre um fundo cor de papel (`--bg`).
 O amarelo é claro demais para texto branco, por isso tem `--accent-ink` (texto escuro por cima dele) e `--accent-text` (amarelo escurecido, legível sobre fundo claro). Há também as cores de erro, sucesso, alerta e estrelas, cada uma com uma versão clara (`-soft`) para fundos.
 
+`--bar` é a cor da barra do topo: no claro é o mesmo azul de placa; no escuro fica um azul fechado (se usasse o azul clarinho do modo escuro, a barra viraria uma faixa clara ofuscante). `--orange` e `--plum` são as cores extras dos ícones dos painéis.
+
 O resto: sombra quase imperceptível (só uma linha embaixo, sem o "cartão flutuando" típico de modelo pronto), cantos discretos de 8 a 10 px, altura da navegação inferior e as duas fontes:
 
 - **Figtree** no texto: simples, amigável e com números fáceis de ler nos preços;
@@ -34,7 +36,7 @@ Em seguida, estilos dos links, dos títulos (na fonte de título, com letras um 
 **Estrutura.** `.app` ocupa a altura toda da tela (`100dvh`, que considera a barra de endereço do celular).
 '''),
 ('=.topbar {', '''
-**Barra superior** fixa no topo ao rolar (`position: sticky`), azul. `env(safe-area-inset-top)` afasta o conteúdo do entalhe da câmera nos celulares.
+**Barra superior** fixa no topo ao rolar (`position: sticky`), na cor `--bar`. `env(safe-area-inset-top)` afasta o conteúdo do entalhe da câmera nos celulares.
 
 A marca `.sign` imita uma **placa de rua**: borda branca e, por dentro dela, um segundo filete na cor de fundo (`box-shadow: inset`), que dá o efeito de moldura dupla das placas. Em cima, "Sorocaba" em letras pequenas e espaçadas; embaixo, o nome.
 '''),
@@ -84,16 +86,19 @@ Caixas de seleção grandes (20 px) na cor principal (`accent-color`) e o contro
 Caixas de mensagem: erro (vermelho) e avisos (`.notice`) nas variações verde, amarela e laranja, com ícone à esquerda.
 '''),
 ('/* ---------- chips', '''
-**Chips de categoria**: faixa rolável na horizontal, sem barra de rolagem visível, que se estende até as bordas da tela (as margens negativas compensam o espaçamento da página). O chip escolhido fica azul.
+**Chips de categoria**: faixa rolável na horizontal, sem barra de rolagem visível, que se estende até as bordas da tela (as margens negativas compensam o espaçamento da página). O chip escolhido fica azul; os de categoria têm o ícone colorido e, quando escolhidos, ficam preenchidos com a cor da categoria.
+'''),
+('/* Cor da categoria', '''
+**Cor da categoria.** Cada elemento com a classe `.cat` recebe `--cat` do componente e daqui saem duas variáveis: `--cat-ink` (o tom para texto e ícone) e `--cat-soft` (o fundo clarinho, 13% da cor misturada ao fundo do cartão com `color-mix`). No modo escuro, o texto é clareado misturando com branco e o fundo fica um pouco mais forte, para continuar legível.
 '''),
 ('=.badge {', '''
-**Etiquetas** pequenas (categoria, estado, destaque) nas cores do tema, a distância em azul e negrito, as estrelas amarelas e as estrelas clicáveis da avaliação.
+**Etiquetas** pequenas (categoria, estado, destaque) nas cores do tema (a de categoria, `.badge.cat`, na cor da categoria), a distância em azul e negrito, as estrelas amarelas e as estrelas clicáveis da avaliação.
 '''),
 ('/* ---------- ofertas', '''
 **Ofertas**: a lista é uma coluna no celular e duas a partir de 720 px. O `minmax(0, 1fr)` é importante: sem ele, um título comprido alarga a coluna além da tela (aconteceu ao trocar a fonte). O cartão tem miniatura à esquerda e borda azul ao passar o mouse; o cartão em destaque ganha borda amarela.
 '''),
 ('=.thumb {', '''
-Miniatura quadrada; a foto preenche o quadrado sem distorcer (`object-fit: cover`).
+Miniatura quadrada no fundo e na cor da categoria (cai no azul se não houver categoria); a foto preenche o quadrado sem distorcer (`object-fit: cover`).
 '''),
 ('=.gallery {', '''
 Galeria de fotos da oferta, rolável na horizontal e "encaixando" em cada foto (`scroll-snap`). Sem fotos, um fundo em degradê com ícone. Também os quadrados do seletor de fotos com o botão de remover.
@@ -117,7 +122,7 @@ Cabeçalho do chat e a área de mensagens rolável, em coluna.
 Mensagens de sistema centralizadas e discretas, o cartão de orçamento amarelo com o valor em destaque, o campo de digitar, a barra da contratação e a barra de progresso dos estados (vermelha quando cancelada).
 '''),
 ('/* ---------- painéis', '''
-**Painéis**: cartão de número (rótulo, valor grande com algarismos de largura fixa e texto auxiliar).
+**Painéis**: cartão de número (rótulo, valor grande com algarismos de largura fixa e texto auxiliar). `.stat-ico` é o quadradinho colorido do ícone ao lado do rótulo, em cinco tons (azul, amarelo, verde, laranja, ameixa).
 '''),
 ('=.bars {', '''
 **Gráfico de barras**: cada barra é uma coluna flexível com as duas séries lado a lado, alinhadas na base; as alturas vêm do componente em porcentagem. Legenda com quadradinhos de cor.

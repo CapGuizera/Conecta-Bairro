@@ -1,7 +1,7 @@
 // RF12: histórico de reputação do prestador.
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CheckCircle2, Flag, MessageSquareQuote } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, CheckCircle2, Flag, MessageSquareQuote, Star } from 'lucide-react'
 import { api } from '../api.js'
 import { OfferCard } from '../components/OfferCard.jsx'
 import { ReportDialog } from '../components/ReportDialog.jsx'
@@ -34,8 +34,8 @@ export default function ProviderProfile() {
       {provider.bio && <p>{provider.bio}</p>}
 
       <div className="grid stats">
-        <Stat label="Serviços feitos pela plataforma" value={reputation.concluded} />
-        <Stat label="Nota dos clientes" value={reputation.avgRating !== null ? String(reputation.avgRating).replace('.', ',') : '-'} sub={`${reputation.reviews} avaliações`} />
+        <Stat icon={BadgeCheck} tone="green" label="Serviços feitos pela plataforma" value={reputation.concluded} />
+        <Stat icon={Star} tone="yellow" label="Nota dos clientes" value={reputation.avgRating !== null ? String(reputation.avgRating).replace('.', ',') : '-'} sub={`${reputation.reviews} avaliações`} />
       </div>
 
       <div className="section-title">

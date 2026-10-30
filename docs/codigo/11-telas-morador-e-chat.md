@@ -241,7 +241,7 @@ No modo demonstração, os atalhos das personas: um toque preenche o celular e j
 
 Tela inicial e busca (RF05 e RF06). Os filtros ficam no endereço (`?q=...&categoria=...&raio=...`), então dá para compartilhar ou voltar a uma busca.
 
-**Linhas 1 a 11**
+**Linhas 1 a 12**
 
 ```jsx
 // RF05 (busca por categoria e necessidade) e RF06 (filtro por raio), ordenados por distância.
@@ -252,6 +252,7 @@ import { api, qs } from '../api.js'
 import { LocationDialog } from '../components/LocationDialog.jsx'
 import { RadiusMap } from '../components/Maps.jsx'
 import { OfferCard } from '../components/OfferCard.jsx'
+import { catStyle, categoryIcon } from '../categories.jsx'
 import { Empty, ErrorBox } from '../components/ui.jsx'
 import { SOURCE_LABEL, geolocationAvailable, getCurrentPosition, usePosition } from '../position.js'
 import { useSession } from '../session.jsx'
@@ -259,7 +260,7 @@ import { useSession } from '../session.jsx'
 
 Comentário e importações.
 
-**Linhas 13 a 22**
+**Linhas 14 a 23**
 
 ```jsx
 export default function Home() {
@@ -276,7 +277,7 @@ export default function Home() {
 
 Estados: parâmetros da URL, ponto de busca, texto digitado, resultados, erro, carregando e quais painéis estão abertos.
 
-**Linhas 24 a 38**
+**Linhas 25 a 39**
 
 ```jsx
   // Na primeira visita tenta usar o GPS uma única vez; se negar, fica o centro do bairro.
@@ -298,7 +299,7 @@ Estados: parâmetros da URL, ponto de busca, texto digitado, resultados, erro, c
 
 Na primeira visita, tenta o GPS uma única vez (o navegador pergunta ao usuário). Uma marca no `localStorage` evita perguntar de novo; se a pessoa negar, fica o centro do bairro.
 
-**Linhas 40 a 42**
+**Linhas 41 a 43**
 
 ```jsx
   const category = params.get('categoria') || ''
@@ -308,7 +309,7 @@ Na primeira visita, tenta o GPS uma única vez (o navegador pergunta ao usuário
 
 Lê os filtros da URL; o raio padrão é 2 km.
 
-**Linhas 44 a 51**
+**Linhas 45 a 52**
 
 ```jsx
   const update = (changes) => {
@@ -323,7 +324,7 @@ Lê os filtros da URL; o raio padrão é 2 km.
 
 Muda os filtros na URL. `replace: true` evita encher o histórico do botão "voltar" a cada ajuste.
 
-**Linhas 53 a 72**
+**Linhas 54 a 73**
 
 ```jsx
   useEffect(() => {
@@ -354,7 +355,7 @@ Muda os filtros na URL. `replace: true` evita encher o histórico do botão "vol
 - o `AbortController` cancela a busca anterior se uma nova começar, evitando que um resultado antigo apareça depois do novo;
 - a limpeza do efeito cancela o temporizador e a requisição.
 
-**Linhas 74 a 80**
+**Linhas 75 a 81**
 
 ```jsx
   const radiusOptions = meta?.radiusOptionsKm || [0.5, 1, 2, 3, 5, 10]
@@ -368,7 +369,7 @@ Muda os filtros na URL. `replace: true` evita encher o histórico do botão "vol
 
 Opções de raio vindas do servidor, a posição do controle deslizante e o título da seção, que muda conforme a busca.
 
-**Linhas 82 a 87**
+**Linhas 83 a 88**
 
 ```jsx
   if (!position) return null
@@ -381,7 +382,7 @@ Opções de raio vindas do servidor, a posição do controle deslizante e o tít
 
 Saudação com o primeiro nome quando logado.
 
-**Linhas 89 a 108**
+**Linhas 90 a 109**
 
 ```jsx
       <form
@@ -408,24 +409,33 @@ Saudação com o primeiro nome quando logado.
 
 Caixa de busca por necessidade. A busca dispara ao enviar (Enter ou botão do teclado); apagar o texto limpa a busca.
 
-**Linhas 110 a 119**
+**Linhas 111 a 129**
 
 ```jsx
       <div className="chips">
         <button className={`chip ${!category ? 'on' : ''}`} onClick={() => update({ categoria: '' })}>
           Todas
         </button>
-        {meta?.categories.map((c) => (
-          <button key={c.slug} className={`chip ${category === c.slug ? 'on' : ''}`} onClick={() => update({ categoria: category === c.slug ? '' : c.slug })}>
-            {c.name}
-          </button>
-        ))}
+        {meta?.categories.map((c) => {
+          const Icon = categoryIcon(c.slug)
+          return (
+            <button
+              key={c.slug}
+              className={`chip cat ${category === c.slug ? 'on' : ''}`}
+              style={catStyle(c.slug)}
+              onClick={() => update({ categoria: category === c.slug ? '' : c.slug })}
+            >
+              <Icon size={15} />
+              {c.name}
+            </button>
+          )
+        })}
       </div>
 ```
 
-As categorias como botões roláveis na horizontal. Tocar de novo na categoria escolhida volta para "Todas".
+As categorias como botões roláveis na horizontal, cada uma com o seu ícone na cor da categoria. A escolhida fica preenchida com essa cor. Tocar de novo na categoria escolhida volta para "Todas".
 
-**Linhas 121 a 134**
+**Linhas 131 a 144**
 
 ```jsx
       <div className="card tight">
@@ -446,7 +456,7 @@ As categorias como botões roláveis na horizontal. Tocar de novo na categoria e
 
 Cartão da localização: de onde está buscando, raio atual, botão "Alterar" e botão para mostrar o mapa.
 
-**Linhas 135 a 149**
+**Linhas 145 a 159**
 
 ```jsx
         <input
@@ -468,7 +478,7 @@ Cartão da localização: de onde está buscando, raio atual, botão "Alterar" e
 
 Controle deslizante do raio (RF06). Ele trabalha com a posição na lista (0 a 5) e não com os quilômetros, para os passos ficarem uniformes (0,5, 1, 2, 3, 5 e 10 km). Abaixo, as marcas de cada opção.
 
-**Linhas 150 a 158**
+**Linhas 160 a 168**
 
 ```jsx
         {showMap && (
@@ -484,7 +494,7 @@ Controle deslizante do raio (RF06). Ele trabalha com a posição na lista (0 a 5
 
 O mapa do raio com o aviso: "o mapa não mostra onde os prestadores moram". Clicar no mapa muda o ponto de busca.
 
-**Linhas 160 a 163**
+**Linhas 170 a 173**
 
 ```jsx
       <div className="section-title">
@@ -495,7 +505,7 @@ O mapa do raio com o aviso: "o mapa não mostra onde os prestadores moram". Clic
 
 Título da lista e quantidade de resultados.
 
-**Linhas 165 a 172**
+**Linhas 175 a 182**
 
 ```jsx
       <ErrorBox error={error} />
@@ -510,7 +520,7 @@ Título da lista e quantidade de resultados.
 
 Erro e os blocos cinza animados (*skeleton*) enquanto a primeira busca carrega.
 
-**Linhas 173 a 184**
+**Linhas 183 a 194**
 
 ```jsx
       {results && results.length === 0 && (
@@ -529,7 +539,7 @@ Erro e os blocos cinza animados (*skeleton*) enquanto a primeira busca carrega.
 
 Nenhum resultado: sugere ampliar o raio com um botão que já passa para a próxima opção.
 
-**Linhas 185 a 191**
+**Linhas 195 a 201**
 
 ```jsx
       {results && results.length > 0 && (
@@ -543,7 +553,7 @@ Nenhum resultado: sugere ampliar o raio com um botão que já passa para a próx
 
 A lista de cartões. Durante uma nova busca, os resultados antigos ficam esmaecidos em vez de sumirem.
 
-**Linhas 193 a 206**
+**Linhas 203 a 216**
 
 ```jsx
       {showLocation && (
@@ -576,7 +586,7 @@ Detalhe da oferta (o "anúncio", como aparece na tela), com o botão de chamar n
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Flag, Lock, MapPin, Megaphone, MessageCircle, Pencil } from 'lucide-react'
-import { categoryIcon } from '../categories.jsx'
+import { catStyle, categoryIcon } from '../categories.jsx'
 import { api, qs } from '../api.js'
 import { ReportDialog } from '../components/ReportDialog.jsx'
 import { Avatar, ErrorBox, Loading, Stars, useLoad } from '../components/ui.jsx'
@@ -648,7 +658,7 @@ Carregando, erro e os dados recebidos. O ícone muda entre produto e serviço.
 
 Botão de voltar.
 
-**Linhas 49 a 78**
+**Linhas 49 a 80**
 
 ```jsx
       {offer.images.length > 0 ? (
@@ -658,13 +668,15 @@ Botão de voltar.
           ))}
         </div>
       ) : (
-        <div className="hero-placeholder">
+        <div className="hero-placeholder cat" style={catStyle(offer.category)}>
           <Icon size={48} strokeWidth={1.4} />
         </div>
       )}
 
       <div className="row wrap mb">
-        <span className="badge primary">{offer.categoryName}</span>
+        <span className="badge cat" style={catStyle(offer.category)}>
+          {offer.categoryName}
+        </span>
         <span className="badge">{offer.kind === 'produto' ? 'Produto' : 'Serviço'}</span>
         {offer.highlighted && (
           <span className="badge accent">
@@ -685,7 +697,7 @@ Botão de voltar.
 
 Galeria de fotos rolável (ou um fundo com ícone, sem fotos), as etiquetas (categoria, tipo, destaque), o título, a **distância aproximada** e o preço.
 
-**Linhas 80 a 85**
+**Linhas 82 a 87**
 
 ```jsx
       {offer.outsideServiceArea && (
@@ -698,7 +710,7 @@ Galeria de fotos rolável (ou um fundo com ícone, sem fotos), as etiquetas (cat
 
 Aviso quando o morador está além do raio de atendimento do prestador, sugerindo combinar pelo chat.
 
-**Linhas 87 a 95**
+**Linhas 89 a 97**
 
 ```jsx
       {offer.description && <p style={{ whiteSpace: 'pre-wrap' }}>{offer.description}</p>}
@@ -714,7 +726,7 @@ Aviso quando o morador está além do raio de atendimento do prestador, sugerind
 
 A descrição, preservando as quebras de linha, e o aviso de privacidade: endereço não divulgado, negociação pelo chat, sem troca de telefone.
 
-**Linhas 97 a 107**
+**Linhas 99 a 109**
 
 ```jsx
       <Link to={`/prestador/${offer.provider.id}`} className="card row" style={{ color: 'inherit' }}>
@@ -732,7 +744,7 @@ A descrição, preservando as quebras de linha, e o aviso de privacidade: endere
 
 Cartão do prestador com link para o perfil: nome, desde quando está na plataforma, estrelas e serviços concluídos (RF12).
 
-**Linhas 109 a 120**
+**Linhas 111 a 122**
 
 ```jsx
       <ErrorBox error={error} />
@@ -751,7 +763,7 @@ Cartão do prestador com link para o perfil: nome, desde quando está na platafo
 
 O botão principal: "Editar meu anúncio" para o dono, "Chamar <nome> no chat" ou "Continuar a conversa" para os demais.
 
-**Linhas 121 a 131**
+**Linhas 123 a 133**
 
 ```jsx
       {user && !isOwner && (
@@ -781,7 +793,7 @@ Perfil público do prestador (RF12).
 // RF12: histórico de reputação do prestador.
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, CheckCircle2, Flag, MessageSquareQuote } from 'lucide-react'
+import { ArrowLeft, BadgeCheck, CheckCircle2, Flag, MessageSquareQuote, Star } from 'lucide-react'
 import { api } from '../api.js'
 import { OfferCard } from '../components/OfferCard.jsx'
 import { ReportDialog } from '../components/ReportDialog.jsx'
@@ -832,8 +844,8 @@ Cabeçalho com iniciais, nome e data de entrada, e a apresentação escrita pelo
 
 ```jsx
       <div className="grid stats">
-        <Stat label="Serviços feitos pela plataforma" value={reputation.concluded} />
-        <Stat label="Nota dos clientes" value={reputation.avgRating !== null ? String(reputation.avgRating).replace('.', ',') : '-'} sub={`${reputation.reviews} avaliações`} />
+        <Stat icon={BadgeCheck} tone="green" label="Serviços feitos pela plataforma" value={reputation.concluded} />
+        <Stat icon={Star} tone="yellow" label="Nota dos clientes" value={reputation.avgRating !== null ? String(reputation.avgRating).replace('.', ',') : '-'} sub={`${reputation.reviews} avaliações`} />
       </div>
 
       <div className="section-title">

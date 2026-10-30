@@ -1,6 +1,6 @@
 // Painel para instituições parceiras (Business Intelligence): indicadores do Plano de Aplicação
 // (Tabela 5 do artigo) com dados apenas agregados.
-import { Download } from 'lucide-react'
+import { BadgeCheck, ClipboardList, Download, HandCoins, MapPinOff, Percent, Store, UserPlus, Users } from 'lucide-react'
 import { api, getToken } from '../api.js'
 import { Bars, ErrorBox, HBar, Loading, Stat, useLoad } from '../components/ui.jsx'
 import { brl } from '../format.js'
@@ -43,10 +43,10 @@ export default function Institution() {
         <h2>Etapa 1: validação do problema</h2>
       </div>
       <div className="grid stats">
-        <Stat label="Negócios levantados" value={field.approached} />
-        <Stat label="Ausentes de mapas digitais" value={pct(field.notOnMapsPct)} sub={`${field.notOnMaps} de ${field.approached}`} />
-        <Stat label="Cadastrados" value={field.accepted} />
-        <Stat label="Conversão abordados x cadastrados" value={pct(field.conversionPct)} />
+        <Stat icon={ClipboardList} label="Negócios levantados" value={field.approached} />
+        <Stat icon={MapPinOff} tone="orange" label="Ausentes de mapas digitais" value={pct(field.notOnMapsPct)} sub={`${field.notOnMaps} de ${field.approached}`} />
+        <Stat icon={UserPlus} tone="green" label="Cadastrados" value={field.accepted} />
+        <Stat icon={Percent} tone="plum" label="Conversão abordados x cadastrados" value={pct(field.conversionPct)} />
       </div>
       <div className="grid two mt">
         <div className="card">
@@ -82,10 +82,10 @@ export default function Institution() {
         <h2>Etapa 2: validação da solução</h2>
       </div>
       <div className="grid stats">
-        <Stat label="Prestadores com oferta ativa" value={platform.active_providers} sub={`${platform.assisted} via cadastro assistido`} />
-        <Stat label="Moradores que contataram" value={platform.active_clients} />
-        <Stat label="Contratações concluídas" value={platform.concluded} />
-        <Stat label="Volume movimentado" value={brl(platform.grossCents)} sub={`comissão apurada ${brl(platform.commissionCents)}`} />
+        <Stat icon={Store} label="Prestadores com oferta ativa" value={platform.active_providers} sub={`${platform.assisted} via cadastro assistido`} />
+        <Stat icon={Users} tone="orange" label="Moradores que contataram" value={platform.active_clients} />
+        <Stat icon={BadgeCheck} tone="green" label="Contratações concluídas" value={platform.concluded} />
+        <Stat icon={HandCoins} tone="yellow" label="Volume movimentado" value={brl(platform.grossCents)} sub={`comissão apurada ${brl(platform.commissionCents)}`} />
       </div>
       <div className="grid two mt">
         <div className="card">

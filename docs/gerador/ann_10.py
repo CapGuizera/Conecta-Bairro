@@ -61,7 +61,10 @@ Janela sobreposta (diálogo). Fecha com a tecla Esc ou ao clicar fora (`e.target
 Círculo com as iniciais do nome (por exemplo, "CB" para Cleusa Batista), numa cor tirada do próprio nome (`avatarColors`): cada pessoa tem sempre a mesma cor, e a lista de conversas não fica toda igual. O sistema não pede foto de perfil.
 '''),
 ('export function Loading(', '''
-Indicador de carregamento, caixa de erro e cartão de número (estatística) dos painéis.
+Indicador de carregamento e caixa de erro.
+'''),
+('// tone:', '''
+Cartão de número (estatística) dos painéis. Opcionalmente leva um ícone ao lado do rótulo, num quadradinho colorido (`tone`: azul, amarelo, verde, laranja ou ameixa). Cada número do painel tem uma cor diferente, o que ajuda a achar o que se procura sem ler tudo.
 '''),
 ('// Gráfico de barras simples', '''
 Gráfico de barras feito só com CSS, sem biblioteca: cada barra tem altura proporcional ao maior valor da série (`max`). Mostra até duas séries lado a lado, com legenda e o valor no `title` (aparece ao passar o mouse).
@@ -81,10 +84,10 @@ Cartão de oferta da lista de resultados.
 Importações.
 '''),
 ('export function Thumb(', '''
-Miniatura: a primeira foto da oferta ou, sem foto, o ícone da categoria (bolo, tesoura, chave inglesa...). `loading="lazy"` só baixa a imagem quando ela chega perto da tela.
+Miniatura: a primeira foto da oferta ou, sem foto, o ícone da categoria (bolo, tesoura, chave inglesa...) no fundo da cor da categoria (`catStyle`). Junta o estilo da cor com o tamanho, quando a tela pede um tamanho diferente. `loading="lazy"` só baixa a imagem quando ela chega perto da tela.
 '''),
 ('export function OfferCard(', '''
-O cartão inteiro é um link para a oferta. Mostra categoria, a etiqueta Destaque com megafone (e borda amarela), título, **distância aproximada**, nome do prestador, preço, estrelas e quantidade de serviços concluídos.
+O cartão inteiro é um link para a oferta. Mostra a categoria (etiqueta na cor dela), a etiqueta Destaque com megafone (e borda amarela), título, **distância aproximada**, nome do prestador, preço, estrelas e quantidade de serviços concluídos.
 '''),
 ]),
 ('web/src/components/Maps.jsx', '''

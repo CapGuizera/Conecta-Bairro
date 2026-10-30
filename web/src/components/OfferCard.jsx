@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { MapPin, Megaphone } from 'lucide-react'
-import { categoryIcon } from '../categories.jsx'
+import { catStyle, categoryIcon } from '../categories.jsx'
 import { plural, priceRange } from '../format.js'
 import { Stars } from './ui.jsx'
 
@@ -8,7 +8,7 @@ export function Thumb({ offer, size }) {
   const img = offer.images?.[0]
   const Icon = categoryIcon(offer.category)
   return (
-    <div className="thumb" style={size ? { width: size, height: size } : undefined}>
+    <div className="thumb cat" style={{ ...catStyle(offer.category), ...(size && { width: size, height: size }) }}>
       {img ? <img src={img} alt="" loading="lazy" /> : <Icon size={30} strokeWidth={1.6} />}
     </div>
   )
@@ -20,7 +20,9 @@ export function OfferCard({ offer }) {
       <Thumb offer={offer} />
       <div className="grow">
         <div className="row between">
-          <span className="badge">{offer.categoryName}</span>
+          <span className="badge cat" style={catStyle(offer.category)}>
+            {offer.categoryName}
+          </span>
           {offer.highlighted && (
             <span className="badge accent">
               <Megaphone size={12} /> Destaque

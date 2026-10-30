@@ -8,7 +8,7 @@ o que também permite o tema escuro trocando só os valores das variáveis.
 
 Organizado em seções marcadas por comentários `/* ---------- nome ---------- */`.
 
-**Linhas 1 a 31**
+**Linhas 1 a 38**
 
 ```css
 :root {
@@ -23,6 +23,9 @@ Organizado em seções marcadas por comentários `/* ---------- nome ---------- 
   --primary-hover: #163c6c;
   --primary-ink: #ffffff;
   --primary-soft: #dfe8f4;
+  /* barra do topo: azul de placa nos dois modos (no escuro, mais fechado) */
+  --bar: #1c4b86;
+  --bar-ink: #ffffff;
   --accent: #e9a800;
   --accent-ink: #2a2000;
   --accent-soft: #fbefc9;
@@ -34,6 +37,10 @@ Organizado em seções marcadas por comentários `/* ---------- nome ---------- 
   --warn: #8a5a00;
   --warn-soft: #fbefd5;
   --star: #e0a100;
+  --orange: #c2410c;
+  --orange-soft: #fbe3d6;
+  --plum: #8a3a72;
+  --plum-soft: #f4e1ee;
   --shadow: 0 1px 0 rgba(29, 35, 48, 0.06);
   --radius: 10px;
   --radius-sm: 8px;
@@ -47,6 +54,8 @@ Organizado em seções marcadas por comentários `/* ---------- nome ---------- 
 **Variáveis do tema claro.** A identidade parte de duas coisas da rua: o **azul das placas de rua** (`--primary`, com letra branca) e o **amarelo dos ipês** (`--accent`), sobre um fundo cor de papel (`--bg`).
 O amarelo é claro demais para texto branco, por isso tem `--accent-ink` (texto escuro por cima dele) e `--accent-text` (amarelo escurecido, legível sobre fundo claro). Há também as cores de erro, sucesso, alerta e estrelas, cada uma com uma versão clara (`-soft`) para fundos.
 
+`--bar` é a cor da barra do topo: no claro é o mesmo azul de placa; no escuro fica um azul fechado (se usasse o azul clarinho do modo escuro, a barra viraria uma faixa clara ofuscante). `--orange` e `--plum` são as cores extras dos ícones dos painéis.
+
 O resto: sombra quase imperceptível (só uma linha embaixo, sem o "cartão flutuando" típico de modelo pronto), cantos discretos de 8 a 10 px, altura da navegação inferior e as duas fontes:
 
 - **Figtree** no texto: simples, amigável e com números fáceis de ler nos preços;
@@ -54,7 +63,7 @@ O resto: sombra quase imperceptível (só uma linha embaixo, sem o "cartão flut
 
 As duas vêm instaladas pelo npm (`@fontsource-variable/...`) e são servidas pelo próprio sistema, então funcionam sem internet. `color-scheme` avisa o navegador para desenhar campos e barras de rolagem no tema certo.
 
-**Linhas 33 a 58**
+**Linhas 40 a 71**
 
 ```css
 @media (prefers-color-scheme: dark) {
@@ -69,6 +78,8 @@ As duas vêm instaladas pelo npm (`@fontsource-variable/...`) e são servidas pe
     --primary-hover: #9cc2ef;
     --primary-ink: #0c1a2c;
     --primary-soft: #1e2f47;
+    --bar: #18304f;
+    --bar-ink: #e8eef7;
     --accent: #f2c14e;
     --accent-ink: #231a00;
     --accent-soft: #3a3016;
@@ -79,6 +90,10 @@ As duas vêm instaladas pelo npm (`@fontsource-variable/...`) e são servidas pe
     --ok-soft: #173525;
     --warn: #f0b860;
     --warn-soft: #3a2b12;
+    --orange: #f59a6b;
+    --orange-soft: #3d2216;
+    --plum: #e09ccd;
+    --plum-soft: #352032;
     --shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
     color-scheme: dark;
   }
@@ -87,7 +102,7 @@ As duas vêm instaladas pelo npm (`@fontsource-variable/...`) e são servidas pe
 
 **Tema escuro automático**: se o aparelho estiver em modo escuro, as mesmas variáveis recebem tons escuros, e o azul e o amarelo ficam mais claros para manter o contraste. Nenhuma outra regra precisa mudar.
 
-**Linhas 60 a 62**
+**Linhas 73 a 75**
 
 ```css
 * {
@@ -97,7 +112,7 @@ As duas vêm instaladas pelo npm (`@fontsource-variable/...`) e são servidas pe
 
 `box-sizing: border-box` faz largura e altura incluírem borda e espaçamento interno, o que torna o layout previsível.
 
-**Linhas 64 a 106**
+**Linhas 77 a 119**
 
 ```css
 html,
@@ -148,7 +163,7 @@ img {
 Base da página: fundo e texto pelas variáveis, a fonte do texto (se ela não carregar, cai na do sistema: Segoe UI no Windows, Roboto no Android), tamanho 16 px (abaixo disso o iPhone dá zoom ao tocar nos campos) e remoção do realce azul ao tocar em links no celular.
 Em seguida, estilos dos links, dos títulos (na fonte de título, com letras um pouco mais juntas), parágrafos e imagens (que nunca passam da largura disponível).
 
-**Linhas 108 a 114**
+**Linhas 121 a 127**
 
 ```css
 /* ---------- estrutura ---------- */
@@ -162,15 +177,15 @@ Em seguida, estilos dos links, dos títulos (na fonte de título, com letras um 
 
 **Estrutura.** `.app` ocupa a altura toda da tela (`100dvh`, que considera a barra de endereço do celular).
 
-**Linhas 116 a 158**
+**Linhas 129 a 171**
 
 ```css
 .topbar {
   position: sticky;
   top: 0;
   z-index: 40;
-  background: var(--primary);
-  color: var(--primary-ink);
+  background: var(--bar);
+  color: var(--bar-ink);
   padding: calc(env(safe-area-inset-top) + 10px) 16px 10px;
   display: flex;
   align-items: center;
@@ -187,7 +202,7 @@ Em seguida, estilos dos links, dos títulos (na fonte de título, com letras um 
   padding: 3px 12px 4px;
   border: 2px solid currentColor;
   border-radius: 5px;
-  box-shadow: inset 0 0 0 2px var(--primary);
+  box-shadow: inset 0 0 0 2px var(--bar);
   font-family: var(--font-title);
   font-weight: 700;
   font-size: 1.05rem;
@@ -210,11 +225,11 @@ Em seguida, estilos dos links, dos títulos (na fonte de título, com letras um 
 }
 ```
 
-**Barra superior** fixa no topo ao rolar (`position: sticky`), azul. `env(safe-area-inset-top)` afasta o conteúdo do entalhe da câmera nos celulares.
+**Barra superior** fixa no topo ao rolar (`position: sticky`), na cor `--bar`. `env(safe-area-inset-top)` afasta o conteúdo do entalhe da câmera nos celulares.
 
 A marca `.sign` imita uma **placa de rua**: borda branca e, por dentro dela, um segundo filete na cor de fundo (`box-shadow: inset`), que dá o efeito de moldura dupla das placas. Em cima, "Sorocaba" em letras pequenas e espaçadas; embaixo, o nome.
 
-**Linhas 159 a 175**
+**Linhas 172 a 188**
 
 ```css
 .topnav {
@@ -238,7 +253,7 @@ A marca `.sign` imita uma **placa de rua**: borda branca e, por dentro dela, um 
 
 Navegação no topo, escondida no celular e mostrada no computador, com o item atual destacado.
 
-**Linhas 177 a 206**
+**Linhas 190 a 219**
 
 ```css
 .icon-btn {
@@ -275,7 +290,7 @@ Navegação no topo, escondida no celular e mostrada no computador, com o item a
 
 Botão redondo só com ícone (sino, voltar, fechar) e a bolinha amarela com o número de notificações (`.dot`), com texto escuro para dar contraste.
 
-**Linhas 208 a 214**
+**Linhas 221 a 227**
 
 ```css
 .main {
@@ -289,7 +304,7 @@ Botão redondo só com ícone (sino, voltar, fechar) e a bolinha amarela com o n
 
 Área de conteúdo: largura máxima de 980 px centralizada e espaço inferior para a navegação fixa não cobrir o fim da página.
 
-**Linhas 216 a 255**
+**Linhas 229 a 268**
 
 ```css
 .bottomnav {
@@ -336,7 +351,7 @@ Botão redondo só com ícone (sino, voltar, fechar) e a bolinha amarela com o n
 
 **Navegação inferior** do celular, fixa embaixo, com espaço para a barra de gestos (`safe-area-inset-bottom`). O item ativo fica azul, com um traço em cima (`::before`).
 
-**Linhas 257 a 268**
+**Linhas 270 a 281**
 
 ```css
 @media (min-width: 900px) {
@@ -355,7 +370,7 @@ Botão redondo só com ícone (sino, voltar, fechar) e a bolinha amarela com o n
 
 Em telas a partir de 900 px (computador), a navegação vai para o topo e a inferior some.
 
-**Linhas 270 a 277**
+**Linhas 283 a 290**
 
 ```css
 .offline-bar {
@@ -370,7 +385,7 @@ Em telas a partir de 900 px (computador), a navegação vai para o topo e a infe
 
 Faixa amarela de sem conexão.
 
-**Linhas 279 a 297**
+**Linhas 292 a 310**
 
 ```css
 /* ---------- blocos ---------- */
@@ -396,7 +411,7 @@ Faixa amarela de sem conexão.
 
 **Blocos**: o cartão (`.card`) com borda, raio e sombra, e o espaçamento automático entre cartões seguidos (`.card + .card`).
 
-**Linhas 299 a 308**
+**Linhas 312 a 321**
 
 ```css
 .section-title {
@@ -413,7 +428,7 @@ Faixa amarela de sem conexão.
 
 Título de seção com elemento à direita (por exemplo, "16 encontrados").
 
-**Linhas 310 a 359**
+**Linhas 323 a 372**
 
 ```css
 .row {
@@ -470,7 +485,7 @@ Título de seção com elemento à direita (por exemplo, "16 encontrados").
 
 **Utilitários**: linha flexível com espaçamento (`.row`), variações de quebra e distribuição, `.grow` (ocupa o espaço restante), tamanhos e pesos de texto, centralização, texto em uma linha com reticências (`.ellipsis`) e margens.
 
-**Linhas 361 a 379**
+**Linhas 374 a 392**
 
 ```css
 .grid {
@@ -496,7 +511,7 @@ Título de seção com elemento à direita (por exemplo, "16 encontrados").
 
 **Grades**: no celular, uma coluna; a partir de 640 px, `.grid.two` vira duas colunas e `.grid.stats` vira quatro (os números dos painéis). `align-items: start` evita que um cartão curto estique para acompanhar o vizinho.
 
-**Linhas 381 a 449**
+**Linhas 394 a 462**
 
 ```css
 /* ---------- botões e formulários ---------- */
@@ -572,7 +587,7 @@ Título de seção com elemento à direita (por exemplo, "16 encontrados").
 
 **Botões**: retangulares com cantos discretos (as "pílulas" totalmente redondas ficaram só nos chips e etiquetas), altura mínima de 44 px (tamanho recomendado para o dedo), texto em negrito, transição suave e leve afundamento ao pressionar. Variações: contorno (`outline`), transparente (`ghost`), amarelo com texto escuro (`accent`), perigo (`danger`), pequeno (`sm`) e largura total (`block`). Desabilitado fica translúcido.
 
-**Linhas 451 a 494**
+**Linhas 464 a 507**
 
 ```css
 .field {
@@ -623,7 +638,7 @@ textarea.input {
 
 **Campos de formulário**: rótulo em negrito, texto de ajuda e o estilo comum de campos de texto, listas e áreas de texto. Ao receber o foco, a borda fica azul com um halo. O campo de código usa letras espaçadas e números de largura fixa.
 
-**Linhas 496 a 512**
+**Linhas 509 a 525**
 
 ```css
 .search-box {
@@ -647,7 +662,7 @@ textarea.input {
 
 Caixa de busca com borda mais grossa (2 px), para ficar claro onde digitar, e o ícone de lupa dentro do campo.
 
-**Linhas 514 a 559**
+**Linhas 527 a 572**
 
 ```css
 .checkbox {
@@ -700,7 +715,7 @@ input[type='range'] {
 
 Caixas de seleção grandes (20 px) na cor principal (`accent-color`) e o controle segmentado (botões lado a lado, como "Sim / Não / Não sabe"), com a opção escolhida em destaque. Também o controle deslizante na cor principal.
 
-**Linhas 561 a 595**
+**Linhas 574 a 608**
 
 ```css
 .error {
@@ -742,7 +757,7 @@ Caixas de seleção grandes (20 px) na cor principal (`accent-color`) e o contro
 
 Caixas de mensagem: erro (vermelho) e avisos (`.notice`) nas variações verde, amarela e laranja, com ícone à esquerda.
 
-**Linhas 597 a 628**
+**Linhas 610 a 657**
 
 ```css
 /* ---------- chips e etiquetas ---------- */
@@ -777,11 +792,46 @@ Caixas de mensagem: erro (vermelho) e avisos (`.notice`) nas variações verde, 
   border-color: var(--primary);
   color: var(--primary-ink);
 }
+.chip.cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.chip.cat svg {
+  color: var(--cat-ink);
+}
+.chip.cat.on {
+  background: var(--cat-ink);
+  border-color: var(--cat-ink);
+  color: var(--surface);
+}
+.chip.cat.on svg {
+  color: inherit;
+}
 ```
 
-**Chips de categoria**: faixa rolável na horizontal, sem barra de rolagem visível, que se estende até as bordas da tela (as margens negativas compensam o espaçamento da página). O chip escolhido fica azul.
+**Chips de categoria**: faixa rolável na horizontal, sem barra de rolagem visível, que se estende até as bordas da tela (as margens negativas compensam o espaçamento da página). O chip escolhido fica azul; os de categoria têm o ícone colorido e, quando escolhidos, ficam preenchidos com a cor da categoria.
 
-**Linhas 630 a 698**
+**Linhas 659 a 670**
+
+```css
+/* Cor da categoria: o componente põe --cat (categories.jsx) e daqui saem o fundo
+   clarinho e o tom do texto. No modo escuro o texto clareia para continuar legível. */
+.cat {
+  --cat-ink: var(--cat);
+  --cat-soft: color-mix(in srgb, var(--cat) 13%, var(--surface));
+}
+@media (prefers-color-scheme: dark) {
+  .cat {
+    --cat-ink: color-mix(in srgb, var(--cat) 45%, #ffffff);
+    --cat-soft: color-mix(in srgb, var(--cat) 26%, var(--surface));
+  }
+}
+```
+
+**Cor da categoria.** Cada elemento com a classe `.cat` recebe `--cat` do componente e daqui saem duas variáveis: `--cat-ink` (o tom para texto e ícone) e `--cat-soft` (o fundo clarinho, 13% da cor misturada ao fundo do cartão com `color-mix`). No modo escuro, o texto é clareado misturando com branco e o fundo fica um pouco mais forte, para continuar legível.
+
+**Linhas 672 a 744**
 
 ```css
 .badge {
@@ -815,6 +865,10 @@ Caixas de mensagem: erro (vermelho) e avisos (`.notice`) nas variações verde, 
 .badge.danger {
   background: var(--danger-soft);
   color: var(--danger);
+}
+.badge.cat {
+  background: var(--cat-soft);
+  color: var(--cat-ink);
 }
 
 .distance {
@@ -855,9 +909,9 @@ Caixas de mensagem: erro (vermelho) e avisos (`.notice`) nas variações verde, 
 }
 ```
 
-**Etiquetas** pequenas (categoria, estado, destaque) nas cores do tema, a distância em azul e negrito, as estrelas amarelas e as estrelas clicáveis da avaliação.
+**Etiquetas** pequenas (categoria, estado, destaque) nas cores do tema (a de categoria, `.badge.cat`, na cor da categoria), a distância em azul e negrito, as estrelas amarelas e as estrelas clicáveis da avaliação.
 
-**Linhas 700 a 730**
+**Linhas 746 a 776**
 
 ```css
 /* ---------- ofertas ---------- */
@@ -895,7 +949,7 @@ Caixas de mensagem: erro (vermelho) e avisos (`.notice`) nas variações verde, 
 
 **Ofertas**: a lista é uma coluna no celular e duas a partir de 720 px. O `minmax(0, 1fr)` é importante: sem ele, um título comprido alarga a coluna além da tela (aconteceu ao trocar a fonte). O cartão tem miniatura à esquerda e borda azul ao passar o mouse; o cartão em destaque ganha borda amarela.
 
-**Linhas 731 a 758**
+**Linhas 777 a 804**
 
 ```css
 .thumb {
@@ -903,8 +957,8 @@ Caixas de mensagem: erro (vermelho) e avisos (`.notice`) nas variações verde, 
   width: 84px;
   height: 84px;
   border-radius: var(--radius-sm);
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: var(--cat-soft, var(--primary-soft));
+  color: var(--cat-ink, var(--primary));
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -928,9 +982,9 @@ Caixas de mensagem: erro (vermelho) e avisos (`.notice`) nas variações verde, 
 }
 ```
 
-Miniatura quadrada; a foto preenche o quadrado sem distorcer (`object-fit: cover`).
+Miniatura quadrada no fundo e na cor da categoria (cai no azul se não houver categoria); a foto preenche o quadrado sem distorcer (`object-fit: cover`).
 
-**Linhas 760 a 822**
+**Linhas 806 a 868**
 
 ```css
 .gallery {
@@ -952,10 +1006,10 @@ Miniatura quadrada; a foto preenche o quadrado sem distorcer (`object-fit: cover
 .hero-placeholder {
   height: 140px;
   border-radius: var(--radius);
-  background: linear-gradient(135deg, var(--primary-soft), var(--surface-2));
+  background: linear-gradient(135deg, var(--cat-soft, var(--primary-soft)), var(--surface-2));
   display: grid;
   place-items: center;
-  color: var(--primary);
+  color: var(--cat-ink, var(--primary));
   margin-bottom: 16px;
 }
 
@@ -1000,7 +1054,7 @@ Miniatura quadrada; a foto preenche o quadrado sem distorcer (`object-fit: cover
 
 Galeria de fotos da oferta, rolável na horizontal e "encaixando" em cada foto (`scroll-snap`). Sem fotos, um fundo em degradê com ícone. Também os quadrados do seletor de fotos com o botão de remover.
 
-**Linhas 824 a 857**
+**Linhas 870 a 903**
 
 ```css
 /* ---------- listas ---------- */
@@ -1041,7 +1095,7 @@ Galeria de fotos da oferta, rolável na horizontal e "encaixando" em cada foto (
 
 **Listas** (conversas, contratações, notificações): itens com divisória, realce ao passar o mouse e fundo azul claro para não lidos. Os botões que funcionam como item de lista têm o estilo padrão de botão zerado.
 
-**Linhas 858 a 893**
+**Linhas 904 a 939**
 
 ```css
 .avatar {
@@ -1084,7 +1138,7 @@ Galeria de fotos da oferta, rolável na horizontal e "encaixando" em cada foto (
 
 Círculo das iniciais, em dois tamanhos, e o estado vazio (ícone, título e texto centralizados).
 
-**Linhas 895 a 907**
+**Linhas 941 a 953**
 
 ```css
 /* ---------- chat ---------- */
@@ -1104,7 +1158,7 @@ Círculo das iniciais, em dois tamanhos, e o estado vazio (ícone, título e tex
 
 **Chat**: ocupa a altura disponível descontando barra superior e navegação, para que só as mensagens rolem e o campo de digitar fique sempre visível.
 
-**Linhas 908 a 922**
+**Linhas 954 a 968**
 
 ```css
 .chat-head {
@@ -1126,7 +1180,7 @@ Círculo das iniciais, em dois tamanhos, e o estado vazio (ícone, título e tex
 
 Cabeçalho do chat e a área de mensagens rolável, em coluna.
 
-**Linhas 923 a 949**
+**Linhas 969 a 995**
 
 ```css
 .bubble {
@@ -1160,7 +1214,7 @@ Cabeçalho do chat e a área de mensagens rolável, em coluna.
 
 **Balões**: os da outra pessoa à esquerda, brancos; os próprios à direita, azuis. `white-space: pre-wrap` preserva as quebras de linha digitadas. O balão com contato removido ganha contorno tracejado amarelo.
 
-**Linhas 950 a 1006**
+**Linhas 996 a 1052**
 
 ```css
 .sys-msg {
@@ -1224,7 +1278,7 @@ Cabeçalho do chat e a área de mensagens rolável, em coluna.
 
 Mensagens de sistema centralizadas e discretas, o cartão de orçamento amarelo com o valor em destaque, o campo de digitar, a barra da contratação e a barra de progresso dos estados (vermelha quando cancelada).
 
-**Linhas 1008 a 1032**
+**Linhas 1054 a 1109**
 
 ```css
 /* ---------- painéis ---------- */
@@ -1237,9 +1291,40 @@ Mensagens de sistema centralizadas e discretas, o cartão de orçamento amarelo 
   box-shadow: var(--shadow);
 }
 .stat .label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.8rem;
   color: var(--muted);
   font-weight: 500;
+}
+.stat-ico {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: grid;
+  place-items: center;
+}
+.stat-ico.blue {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.stat-ico.yellow {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+.stat-ico.green {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+.stat-ico.orange {
+  background: var(--orange-soft);
+  color: var(--orange);
+}
+.stat-ico.plum {
+  background: var(--plum-soft);
+  color: var(--plum);
 }
 .stat .value {
   font-family: var(--font-title);
@@ -1254,9 +1339,9 @@ Mensagens de sistema centralizadas e discretas, o cartão de orçamento amarelo 
 }
 ```
 
-**Painéis**: cartão de número (rótulo, valor grande com algarismos de largura fixa e texto auxiliar).
+**Painéis**: cartão de número (rótulo, valor grande com algarismos de largura fixa e texto auxiliar). `.stat-ico` é o quadradinho colorido do ícone ao lado do rótulo, em cinco tons (azul, amarelo, verde, laranja, ameixa).
 
-**Linhas 1034 a 1073**
+**Linhas 1111 a 1150**
 
 ```css
 .bars {
@@ -1303,7 +1388,7 @@ Mensagens de sistema centralizadas e discretas, o cartão de orçamento amarelo 
 
 **Gráfico de barras**: cada barra é uma coluna flexível com as duas séries lado a lado, alinhadas na base; as alturas vêm do componente em porcentagem. Legenda com quadradinhos de cor.
 
-**Linhas 1075 a 1099**
+**Linhas 1152 a 1176**
 
 ```css
 .hbar {
@@ -1335,7 +1420,7 @@ Mensagens de sistema centralizadas e discretas, o cartão de orçamento amarelo 
 
 Barra horizontal de proporção (trilho cinza e preenchimento azul ou amarelo).
 
-**Linhas 1101 a 1123**
+**Linhas 1178 a 1200**
 
 ```css
 .tabs {
@@ -1365,7 +1450,7 @@ Barra horizontal de proporção (trilho cinza e preenchimento azul ou amarelo).
 
 Abas com sublinhado na aba ativa, roláveis se não couberem na tela.
 
-**Linhas 1125 a 1140**
+**Linhas 1202 a 1217**
 
 ```css
 /* ---------- mapa ---------- */
@@ -1388,7 +1473,7 @@ Abas com sublinhado na aba ativa, roláveis se não couberem na tela.
 
 **Mapa**: altura fixa, bordas arredondadas e a fonte do sistema também dentro do Leaflet.
 
-**Linhas 1142 a 1180**
+**Linhas 1219 a 1257**
 
 ```css
 /* ---------- modal e aviso ---------- */
@@ -1434,7 +1519,7 @@ Abas com sublinhado na aba ativa, roláveis se não couberem na tela.
 
 **Diálogos**: fundo escurecido cobrindo a tela; no celular a janela sobe de baixo (como as folhas dos aplicativos nativos) e no computador fica centralizada.
 
-**Linhas 1182 a 1216**
+**Linhas 1259 a 1293**
 
 ```css
 .toast {
@@ -1476,7 +1561,7 @@ Abas com sublinhado na aba ativa, roláveis se não couberem na tela.
 
 **Aviso rápido**: flutua acima da navegação, com animação de entrada e versões de erro e sucesso.
 
-**Linhas 1218 a 1237**
+**Linhas 1295 a 1314**
 
 ```css
 .skeleton {
@@ -1503,7 +1588,7 @@ Abas com sublinhado na aba ativa, roláveis se não couberem na tela.
 
 Blocos de carregamento com brilho animado e o ícone girando (`.spin`).
 
-**Linhas 1239 a 1277**
+**Linhas 1316 a 1354**
 
 ```css
 /* ---------- login ---------- */
@@ -1521,8 +1606,8 @@ Blocos de carregamento com brilho animado e o ícone girando (`.spin`).
   padding: 24px;
 }
 .login-sign {
-  background: var(--primary);
-  color: #fff;
+  background: var(--bar);
+  color: var(--bar-ink);
   font-size: 1.6rem;
   padding: 6px 18px 8px;
 }
@@ -1549,7 +1634,7 @@ Blocos de carregamento com brilho animado e o ícone girando (`.spin`).
 
 **Tela de entrada**: cartão centralizado, a placa de rua em tamanho grande (`.login-sign`, com fundo azul próprio porque aqui ela fica sobre o cartão claro) e os botões das contas de demonstração.
 
-**Linhas 1279 a 1301**
+**Linhas 1356 a 1378**
 
 ```css
 /* ---------- comprovante ---------- */
@@ -1579,7 +1664,7 @@ Blocos de carregamento com brilho animado e o ícone girando (`.spin`).
 
 **Comprovante**: linhas com rótulo e valor separadas por tracejado, total em destaque e o código em fonte monoespaçada.
 
-**Linhas 1303 a 1320**
+**Linhas 1380 a 1397**
 
 ```css
 @media print {

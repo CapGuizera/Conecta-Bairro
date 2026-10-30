@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Flag, Lock, MapPin, Megaphone, MessageCircle, Pencil } from 'lucide-react'
-import { categoryIcon } from '../categories.jsx'
+import { catStyle, categoryIcon } from '../categories.jsx'
 import { api, qs } from '../api.js'
 import { ReportDialog } from '../components/ReportDialog.jsx'
 import { Avatar, ErrorBox, Loading, Stars, useLoad } from '../components/ui.jsx'
@@ -53,13 +53,15 @@ export default function OfferDetail() {
           ))}
         </div>
       ) : (
-        <div className="hero-placeholder">
+        <div className="hero-placeholder cat" style={catStyle(offer.category)}>
           <Icon size={48} strokeWidth={1.4} />
         </div>
       )}
 
       <div className="row wrap mb">
-        <span className="badge primary">{offer.categoryName}</span>
+        <span className="badge cat" style={catStyle(offer.category)}>
+          {offer.categoryName}
+        </span>
         <span className="badge">{offer.kind === 'produto' ? 'Produto' : 'Serviço'}</span>
         {offer.highlighted && (
           <span className="badge accent">

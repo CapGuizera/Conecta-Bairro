@@ -164,12 +164,13 @@ O `build` gera a pasta `dist` e eleva o limite do aviso de tamanho (o mapa e o R
 
 Entrada da interface: define as telas (rotas) e quem pode acessar cada uma.
 
-**Linhas 1 a 25**
+**Linhas 1 a 26**
 
 ```jsx
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { registerSW } from 'virtual:pwa-register'
 import { Layout } from './components/Layout.jsx'
 import { Loading } from './components/ui.jsx'
 import Chat from './pages/Chat.jsx'
@@ -196,7 +197,18 @@ import './styles.css'
 
 Importa as telas, o layout, a sessão e o CSS global.
 
-**Linhas 27 a 34**
+**Linhas 28 a 30**
+
+```jsx
+// Quando sai uma versão nova, o service worker troca a antiga e a página recarrega sozinha.
+// Sem isso o navegador seguia mostrando a interface guardada até alguém recarregar na mão.
+registerSW({ immediate: true })
+```
+
+**Atualização automática.** O service worker guarda a interface no aparelho para ela abrir sem internet. O lado ruim: depois de uma versão nova, o navegador continuava mostrando a antiga até alguém recarregar na mão (foi assim que a versão verde do começo do projeto seguiu aparecendo depois da troca de cores).
+`registerSW({ immediate: true })` registra o service worker já na abertura; quando ele percebe uma versão nova, ela assume o lugar da antiga e a página recarrega sozinha uma vez.
+
+**Linhas 32 a 39**
 
 ```jsx
 function Private({ children, provider, roles }) {
@@ -212,7 +224,7 @@ function Private({ children, provider, roles }) {
 **Porteiro das telas.** Sem login, manda para "Entrar", lembrando de onde a pessoa veio (`state.from`) para voltar depois do login. Telas de prestador exigem o perfil de prestador; telas de equipe exigem o perfil certo.
 Isso é só conveniência de navegação: a proteção de verdade está no servidor, que recusa qualquer acesso indevido.
 
-**Linhas 36 a 51**
+**Linhas 41 a 56**
 
 ```jsx
 function App() {
@@ -235,7 +247,7 @@ function App() {
 
 Enquanto a sessão carrega, mostra "Abrindo...". Se não conseguiu falar com o servidor, mostra uma tela com botão para tentar de novo.
 
-**Linhas 52 a 74**
+**Linhas 57 a 79**
 
 ```jsx
   return (
@@ -265,7 +277,7 @@ Enquanto a sessão carrega, mostra "Abrindo...". Se não conseguiu falar com o s
 
 A tabela de rotas. "Entrar" fica fora do layout (tela cheia); as demais ficam dentro do `Layout` (barra superior e navegação inferior). Telas públicas: início, oferta e perfil do prestador. As outras passam pelo `Private`. O `*` final é a página não encontrada.
 
-**Linhas 76 a 84**
+**Linhas 81 a 89**
 
 ```jsx
 createRoot(document.getElementById('root')).render(
@@ -936,7 +948,32 @@ export const categoryIcon = (slug) => CATEGORY_ICONS[slug] || Store
 
 Cada categoria (o mesmo identificador usado no servidor) aponta para um ícone do lucide. `categoryIcon` devolve o ícone, ou uma lojinha para categorias desconhecidas.
 
-**Linhas 20 a 34**
+**Linhas 20 a 36**
+
+```jsx
+// Cor de cada categoria. Vai para a variável CSS --cat, e o styles.css tira dela o fundo
+// clarinho e o tom do texto (mais claro no modo escuro).
+export const CATEGORY_COLORS = {
+  alimentacao: '#c2410c',
+  costura: '#9d3a7a',
+  beleza: '#be185d',
+  aulas: '#4338ca',
+  manutencao: '#a16207',
+  domesticos: '#0f766e',
+  cuidados: '#2f7d4f',
+  tecnologia: '#1d4ed8',
+  artesanato: '#7c3aed',
+  fretes: '#7a5230',
+  outros: '#475569',
+}
+
+export const catStyle = (slug) => ({ '--cat': CATEGORY_COLORS[slug] || CATEGORY_COLORS.outros })
+```
+
+**Cor de cada categoria**, para a tela não ficar toda de uma cor só: alimentação em laranja-tijolo, costura em ameixa, beleza em rosa, aulas em anil, manutenção em ocre, e assim por diante. Os tons foram escolhidos fortes o bastante para servir de texto sobre fundo claro.
+`catStyle` devolve a cor como variável CSS (`--cat`) para ser colocada no `style` do elemento. O CSS (classe `.cat`) tira dela o fundo clarinho e o tom do texto, inclusive no modo escuro, então aqui só existe uma cor por categoria.
+
+**Linhas 38 a 52**
 
 ```jsx
 // Cor do avatar a partir do nome: a mesma pessoa tem sempre a mesma cor.

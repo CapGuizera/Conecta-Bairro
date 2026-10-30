@@ -212,7 +212,7 @@ Painel do prestador (RF14), com o plano de destaque (RF13) e a confirmação de 
 // RF14 (painel do prestador), RF13 (plano de destaque) e RF16 (confirmação de atividade).
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AlertTriangle, BadgeCheck, ClipboardList, Eye, MapPin, Megaphone, Pause, Pencil, Play, Plus, QrCode } from 'lucide-react'
+import { AlertTriangle, BadgeCheck, ClipboardList, Eye, HandCoins, MapPin, Megaphone, MessageCircle, Pause, Pencil, Play, Plus, QrCode } from 'lucide-react'
 import { api } from '../api.js'
 import { Thumb } from '../components/OfferCard.jsx'
 import { ProviderLocation } from '../components/ProviderLocation.jsx'
@@ -416,25 +416,27 @@ Alerta de pedidos aguardando proposta e serviços em andamento, com link para as
 
 Seletor de período: 7, 30 ou 90 dias.
 
-**Linhas 142 a 151**
+**Linhas 142 a 153**
 
 ```jsx
       <div className="grid stats">
-        <Stat label="Pessoas que viram" value={d.totals.views} />
-        <Stat label="Te chamaram no chat" value={d.totals.contacts} sub={plural(d.totals.requests, 'pediu orçamento', 'pediram orçamento')} />
+        <Stat label="Pessoas que viram" value={d.totals.views} icon={Eye} />
+        <Stat label="Te chamaram no chat" icon={MessageCircle} tone="orange" value={d.totals.contacts} sub={plural(d.totals.requests, 'pediu orçamento', 'pediram orçamento')} />
         <Stat
           label="Serviços feitos"
+          icon={BadgeCheck}
+          tone="green"
           value={d.totals.concluded}
           sub={d.totals.conversion <= 100 ? `${String(d.totals.conversion).replace('.', ',')}% de quem chamou` : 'tem cliente voltando!'}
         />
-        <Stat label="Você recebeu" value={brl(d.revenue.net)} sub={`de ${brl(d.revenue.gross)}, já tirando ${brl(d.revenue.commission)} de taxa`} />
+        <Stat label="Você recebeu" icon={HandCoins} tone="yellow" value={brl(d.revenue.net)} sub={`de ${brl(d.revenue.gross)}, já tirando ${brl(d.revenue.commission)} de taxa`} />
       </div>
 ```
 
-Os quatro números do RF14, com nomes do dia a dia: "Pessoas que viram" (visualizações), "Te chamaram no chat" (contatos, com quantos pediram orçamento), "Serviços feitos" e "Você recebeu" (o líquido, com o bruto e a taxa).
+Os quatro números do RF14, cada um com ícone e cor próprios, com nomes do dia a dia: "Pessoas que viram" (visualizações), "Te chamaram no chat" (contatos, com quantos pediram orçamento), "Serviços feitos" e "Você recebeu" (o líquido, com o bruto e a taxa).
 A porcentagem de conversão só aparece até 100%: ela passa disso quando o mesmo cliente volta a contratar na mesma conversa, e aí a tela comemora ("tem cliente voltando!") em vez de mostrar um número que confunde.
 
-**Linhas 152 a 158**
+**Linhas 154 a 160**
 
 ```jsx
       <div className="card mt">
@@ -448,7 +450,7 @@ A porcentagem de conversão só aparece até 100%: ela passa disso quando o mesm
 
 O gráfico diário de visualizações e contatos e a avaliação média.
 
-**Linhas 160 a 165**
+**Linhas 162 a 167**
 
 ```jsx
       <div className="section-title">
@@ -461,7 +463,7 @@ O gráfico diário de visualizações e contatos e a avaliação média.
 
 Cabeçalho da lista de ofertas, com o raio de atendimento atual (tocar abre a edição).
 
-**Linhas 166 a 200**
+**Linhas 168 a 202**
 
 ```jsx
       {myOffers.length === 0 ? (
@@ -503,7 +505,7 @@ Cabeçalho da lista de ofertas, com o raio de atendimento atual (tocar abre a ed
 
 Sem ofertas, um convite para criar a primeira. Com ofertas, um cartão para cada uma com etiquetas (ativa ou pausada, destaque até quando, precisa confirmar), título, preço e os números da oferta no período.
 
-**Linhas 201 a 235**
+**Linhas 203 a 237**
 
 ```jsx
                 <div className="row wrap mt">
@@ -545,7 +547,7 @@ Sem ofertas, um convite para criar a primeira. Com ofertas, um cartão para cada
 
 Ações de cada oferta: editar, pausar ou reativar, confirmar (quando necessário) e destacar.
 
-**Linhas 237 a 250**
+**Linhas 239 a 252**
 
 ```jsx
       {highlight && (
@@ -1851,7 +1853,7 @@ Indicadores do bairro para instituições parceiras, organizados pelas três eta
 ```jsx
 // Painel para instituições parceiras (Business Intelligence): indicadores do Plano de Aplicação
 // (Tabela 5 do artigo) com dados apenas agregados.
-import { Download } from 'lucide-react'
+import { BadgeCheck, ClipboardList, Download, HandCoins, MapPinOff, Percent, Store, UserPlus, Users } from 'lucide-react'
 import { api, getToken } from '../api.js'
 import { Bars, ErrorBox, HBar, Loading, Stat, useLoad } from '../components/ui.jsx'
 import { brl } from '../format.js'
@@ -1924,10 +1926,10 @@ Título, aviso de que os dados são agregados e o botão de exportar.
         <h2>Etapa 1: validação do problema</h2>
       </div>
       <div className="grid stats">
-        <Stat label="Negócios levantados" value={field.approached} />
-        <Stat label="Ausentes de mapas digitais" value={pct(field.notOnMapsPct)} sub={`${field.notOnMaps} de ${field.approached}`} />
-        <Stat label="Cadastrados" value={field.accepted} />
-        <Stat label="Conversão abordados x cadastrados" value={pct(field.conversionPct)} />
+        <Stat icon={ClipboardList} label="Negócios levantados" value={field.approached} />
+        <Stat icon={MapPinOff} tone="orange" label="Ausentes de mapas digitais" value={pct(field.notOnMapsPct)} sub={`${field.notOnMaps} de ${field.approached}`} />
+        <Stat icon={UserPlus} tone="green" label="Cadastrados" value={field.accepted} />
+        <Stat icon={Percent} tone="plum" label="Conversão abordados x cadastrados" value={pct(field.conversionPct)} />
       </div>
       <div className="grid two mt">
         <div className="card">
@@ -1969,10 +1971,10 @@ Título, aviso de que os dados são agregados e o botão de exportar.
         <h2>Etapa 2: validação da solução</h2>
       </div>
       <div className="grid stats">
-        <Stat label="Prestadores com oferta ativa" value={platform.active_providers} sub={`${platform.assisted} via cadastro assistido`} />
-        <Stat label="Moradores que contataram" value={platform.active_clients} />
-        <Stat label="Contratações concluídas" value={platform.concluded} />
-        <Stat label="Volume movimentado" value={brl(platform.grossCents)} sub={`comissão apurada ${brl(platform.commissionCents)}`} />
+        <Stat icon={Store} label="Prestadores com oferta ativa" value={platform.active_providers} sub={`${platform.assisted} via cadastro assistido`} />
+        <Stat icon={Users} tone="orange" label="Moradores que contataram" value={platform.active_clients} />
+        <Stat icon={BadgeCheck} tone="green" label="Contratações concluídas" value={platform.concluded} />
+        <Stat icon={HandCoins} tone="yellow" label="Volume movimentado" value={brl(platform.grossCents)} sub={`comissão apurada ${brl(platform.commissionCents)}`} />
       </div>
       <div className="grid two mt">
         <div className="card">
