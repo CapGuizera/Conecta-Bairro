@@ -1,5 +1,10 @@
-// Comunicação em tempo real (chat, notificações). Cada usuário entra na sala "user:<id>".
+// Comunicação em tempo real (chat, notificações). Dois modos:
+//  - "socket": servidor contínuo com socket.io; cada usuário entra na sala "user:<id>".
+//  - "poll" (Vercel, sem WebSocket): o evento é gravado em realtime_events e o navegador
+//    busca as novidades em /api/events a cada poucos segundos.
 import { Server } from 'socket.io'
+import { config } from './config.js'
+import { q } from './db.js'
 import { userFromToken } from './lib/auth.js'
 
 let io = null
@@ -18,6 +23,10 @@ export function attachRealtime(httpServer) {
   return io
 }
 
-export function emitTo(userId, event, payload) {
+// `run` permite gravar dentro de uma transação já aberta (o PGlite tem uma conexão só).
+export async function emitTo(userId, event, payload, run = q) {
   if (io) io.to(`user:${userId}`).emit(event, payload)
+  if (config.realtime === 'poll') {
+    await run('INSERT INTO realtime_events (user_id, event, payload) VALUES ($1, $2, $3)', [userId, event, JSON.stringify(payload)])
+  }
 }

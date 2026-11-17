@@ -48,7 +48,7 @@ async function saveSurvey(agent, b) {
     if (!phone) fail(400, 'Celular do prestador inválido')
     const lat = Number(p.lat)
     const lng = Number(p.lng)
-    if (!validLatLng(lat, lng)) fail(400, 'Registre a localização do ponto de atendimento')
+    if (!validLatLng(lat, lng)) fail(400, 'Registre a localização do ponto de atendimento (dentro da região de Sorocaba)')
     const radius = Math.min(20, Math.max(0.5, Number(p.serviceRadiusKm) || 2))
     const o = p.offer || {}
     const offer = {

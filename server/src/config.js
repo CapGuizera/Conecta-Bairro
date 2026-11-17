@@ -19,10 +19,16 @@ if (fs.existsSync(envFile)) {
   }
 }
 
-// Segredo do JWT: se não for definido, gera um e guarda em server/data para sobreviver a reinícios.
+// Na Vercel o servidor vira função e só a pasta /tmp aceita gravação. O banco embutido e
+// as fotos ficam lá: são recriados (com os dados de demonstração) quando a função reinicia.
+const SERVERLESS = !!process.env.VERCEL
+const DATA_DIR = SERVERLESS ? path.join('/tmp', 'conecta-bairro') : path.join(ROOT, 'server', 'data')
+
+// Segredo do JWT: se não for definido, gera um e guarda na pasta de dados para sobreviver a reinícios.
+// Na Vercel defina JWT_SECRET nas variáveis do projeto, senão cada reinício derruba os logins.
 function resolveSecret() {
   if (process.env.JWT_SECRET) return process.env.JWT_SECRET
-  const dir = path.join(ROOT, 'server', 'data')
+  const dir = DATA_DIR
   const file = path.join(dir, '.jwt-secret')
   if (fs.existsSync(file)) return fs.readFileSync(file, 'utf8').trim()
   fs.mkdirSync(dir, { recursive: true })
@@ -35,8 +41,13 @@ export const config = {
   port: Number(process.env.PORT || 3000),
   host: process.env.HOST || '0.0.0.0',
   databaseUrl: process.env.DATABASE_URL || '',
-  pgliteDir: process.env.PGLITE_DIR || path.join(ROOT, 'server', 'data', 'pglite'),
-  uploadsDir: path.join(ROOT, 'server', 'data', 'uploads'),
+  pgliteDir: process.env.PGLITE_DIR || path.join(DATA_DIR, 'pglite'),
+  uploadsDir: path.join(DATA_DIR, 'uploads'),
+  serverless: SERVERLESS,
+  // "socket": WebSocket (servidor contínuo). "poll": o navegador consulta /api/events (Vercel).
+  realtime: SERVERLESS ? 'poll' : 'socket',
+  // Protege a rota da rotina diária chamada pelo Cron da Vercel.
+  cronSecret: process.env.CRON_SECRET || '',
   webDist: path.join(ROOT, 'web', 'dist'),
   jwtSecret: process.env.NODE_ENV === 'test' ? 'test-secret' : resolveSecret(),
   // "dev": o código de verificação aparece na tela e no terminal (não há envio de SMS real).
@@ -47,6 +58,15 @@ export const config = {
     name: process.env.PILOT_NAME || 'Bairro piloto - Sorocaba/SP',
     lat: Number(process.env.PILOT_LAT || -23.4806),
     lng: Number(process.env.PILOT_LNG || -47.4205),
+  },
+  // Área atendida: só a região de Sorocaba. Pontos fora deste retângulo são recusados
+  // e o mapa não deixa sair dele.
+  region: {
+    name: 'Região de Sorocaba/SP',
+    south: -23.65,
+    west: -47.62,
+    north: -23.33,
+    east: -47.28,
   },
   // Dias sem confirmação até a oferta pedir confirmação e até sair da busca (RF16).
   activity: { askAfterDays: 30, hideAfterDays: 45 },

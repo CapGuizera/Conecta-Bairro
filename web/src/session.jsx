@@ -5,6 +5,39 @@ import { api, getToken, setToken } from './api.js'
 
 const SessionContext = createContext(null)
 
+// Mesmo formato do socket (on/disconnect), mas buscando /api/events periodicamente.
+// Usado na Vercel, que não mantém WebSocket aberto.
+function createPoller(onConnect) {
+  const handlers = {}
+  let last = null
+  let stopped = false
+  let timer = null
+  const tick = async () => {
+    if (stopped) return
+    if (!document.hidden) {
+      try {
+        const data = await api(last === null ? '/events' : `/events?after=${last}`)
+        if (last === null) onConnect?.()
+        last = data.last
+        for (const e of data.events) handlers[e.event]?.forEach((fn) => fn(e.payload))
+      } catch {
+        /* offline: tenta de novo no próximo ciclo */
+      }
+    }
+    if (!stopped) timer = setTimeout(tick, 4000)
+  }
+  tick()
+  return {
+    on(event, fn) {
+      ;(handlers[event] ||= []).push(fn)
+    },
+    disconnect() {
+      stopped = true
+      clearTimeout(timer)
+    },
+  }
+}
+
 export function SessionProvider({ children }) {
   const [user, setUser] = useState(null)
   const [location, setLocation] = useState({ hasLocation: false })
@@ -61,10 +94,12 @@ export function SessionProvider({ children }) {
   }, [refreshMe])
 
   // Conexão em tempo real enquanto houver usuário logado.
+  // Servidor contínuo: WebSocket. Vercel (meta.realtime === 'poll'): consulta /api/events a cada 4 s.
+  const realtimeMode = ready ? meta?.realtime || 'socket' : null
   useEffect(() => {
-    if (!user) return undefined
+    if (!user || !realtimeMode) return undefined
     refreshUnread()
-    const socket = io({ auth: { token: getToken() }, transports: ['websocket', 'polling'] })
+    const socket = realtimeMode === 'poll' ? createPoller(refreshUnread) : io({ auth: { token: getToken() }, transports: ['websocket', 'polling'] })
     socketRef.current = socket
     socket.on('notification', (n) => {
       setUnread((u) => u + 1)
@@ -87,7 +122,7 @@ export function SessionProvider({ children }) {
       socket.disconnect()
       socketRef.current = null
     }
-  }, [user?.id, refreshUnread, showToast])
+  }, [user?.id, realtimeMode, refreshUnread, showToast])
 
   const subscribe = useCallback((fn) => {
     listeners.current.add(fn)

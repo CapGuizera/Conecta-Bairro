@@ -4,7 +4,9 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 const root = fileURLToPath(new URL('.', import.meta.url))
-const api = `http://localhost:${process.env.PORT || 3000}`
+// 127.0.0.1 e não "localhost": o servidor escuta em IPv4 (0.0.0.0) e, no Windows, "localhost"
+// tenta primeiro o IPv6 (::1), o que deixava cada chamada da API segundos mais lenta no modo dev.
+const api = `http://127.0.0.1:${process.env.PORT || 3000}`
 
 export default defineConfig({
   root,

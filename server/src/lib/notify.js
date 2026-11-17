@@ -8,7 +8,7 @@ export async function notify(userId, { kind, title, body = '', link = '' }, tx =
     'INSERT INTO notifications (user_id, kind, title, body, link) VALUES ($1, $2, $3, $4, $5) RETURNING *',
     [userId, kind, title, body, link],
   )
-  emitTo(userId, 'notification', serializeNotification(rows[0]))
+  await emitTo(userId, 'notification', serializeNotification(rows[0]), run)
   return rows[0]
 }
 

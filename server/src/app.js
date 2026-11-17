@@ -6,6 +6,7 @@ import { config } from './config.js'
 import { loadUser } from './lib/auth.js'
 import authRoutes from './routes/auth.js'
 import conversationRoutes from './routes/conversations.js'
+import eventRoutes from './routes/events.js'
 import fieldRoutes from './routes/field.js'
 import institutionRoutes from './routes/institution.js'
 import metaRoutes from './routes/meta.js'
@@ -17,7 +18,8 @@ import providerRoutes from './routes/provider.js'
 export function createApp() {
   const app = express()
   app.disable('x-powered-by')
-  app.set('trust proxy', 'loopback')
+  // Na Vercel o pedido chega pelo proxy dela; localmente só confia no próprio computador.
+  app.set('trust proxy', config.serverless ? true : 'loopback')
   app.use((_req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff')
     res.setHeader('Referrer-Policy', 'same-origin')
@@ -28,7 +30,7 @@ export function createApp() {
 
   const api = express.Router()
   api.use(loadUser)
-  for (const routes of [metaRoutes, authRoutes, offerRoutes, conversationRoutes, providerRoutes, notificationRoutes, moderationRoutes, fieldRoutes, institutionRoutes]) {
+  for (const routes of [metaRoutes, eventRoutes, authRoutes, offerRoutes, conversationRoutes, providerRoutes, notificationRoutes, moderationRoutes, fieldRoutes, institutionRoutes]) {
     api.use(routes)
   }
   api.use((_req, _res, next) => next(Object.assign(new Error('Rota não encontrada'), { status: 404 })))
@@ -38,7 +40,8 @@ export function createApp() {
   app.use('/uploads', express.static(config.uploadsDir, { maxAge: '30d', immutable: true }))
 
   // Interface web compilada (npm run build). Rotas desconhecidas caem no index.html (SPA).
-  if (fs.existsSync(path.join(config.webDist, 'index.html'))) {
+  // Na Vercel quem serve a interface é a própria Vercel (vercel.json).
+  if (!config.serverless && fs.existsSync(path.join(config.webDist, 'index.html'))) {
     app.use(express.static(config.webDist, { index: false, maxAge: '1h' }))
     app.get(/^\/(?!api\/|uploads\/).*/, (_req, res) => res.sendFile(path.join(config.webDist, 'index.html')))
   } else {

@@ -4,9 +4,21 @@ import { useCallback, useEffect, useState } from 'react'
 
 const KEY = 'cb.position'
 
+// Área atendida: só a região de Sorocaba (igual a server/src/config.js -> region).
+export const REGION = { south: -23.65, west: -47.62, north: -23.33, east: -47.28 }
+export const REGION_BOUNDS = [
+  [REGION.south, REGION.west],
+  [REGION.north, REGION.east],
+]
+export const inRegion = (p) =>
+  !!p && p.lat >= REGION.south && p.lat <= REGION.north && p.lng >= REGION.west && p.lng <= REGION.east
+export const OUT_OF_REGION = 'O ConectaBairro atende só a região de Sorocaba. Marca um ponto no mapa.'
+
 function load() {
   try {
-    return JSON.parse(localStorage.getItem(KEY) || 'null')
+    const p = JSON.parse(localStorage.getItem(KEY) || 'null')
+    // Ponto salvo antes da trava de região (ou fora dela) é descartado.
+    return inRegion(p) ? p : null
   } catch {
     return null
   }
@@ -29,7 +41,11 @@ export function getCurrentPosition() {
       return reject(new Error('Por este endereço o navegador não libera o GPS. Marca o ponto no mapa.'))
     }
     navigator.geolocation.getCurrentPosition(
-      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude, accuracy: Math.round(p.coords.accuracy) }),
+      (p) => {
+        const pos = { lat: p.coords.latitude, lng: p.coords.longitude, accuracy: Math.round(p.coords.accuracy) }
+        if (!inRegion(pos)) return reject(new Error(OUT_OF_REGION))
+        resolve(pos)
+      },
       (err) =>
         reject(new Error(err.code === 1 ? 'Sem permissão pra usar a localização. Marca o ponto no mapa.' : 'Não deu pra achar sua localização agora')),
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },

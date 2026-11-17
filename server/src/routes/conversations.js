@@ -65,8 +65,8 @@ async function insertMessage(run, conversationId, senderId, kind, body, { masked
 async function broadcastMessage(conv, messageId) {
   const m = await one(`${MESSAGE_SELECT} WHERE m.id = $1`, [messageId])
   const payload = serializeMessage(m)
-  emitTo(conv.client_id, 'message', payload)
-  emitTo(conv.provider_id, 'message', payload)
+  await emitTo(conv.client_id, 'message', payload)
+  await emitTo(conv.provider_id, 'message', payload)
   return payload
 }
 
@@ -147,8 +147,8 @@ async function contractDetails(c, userId) {
 }
 
 async function pushContractUpdate(c) {
-  emitTo(c.client_id, 'contract', { id: c.id, conversationId: c.conversation_id })
-  emitTo(c.provider_id, 'contract', { id: c.id, conversationId: c.conversation_id })
+  await emitTo(c.client_id, 'contract', { id: c.id, conversationId: c.conversation_id })
+  await emitTo(c.provider_id, 'contract', { id: c.id, conversationId: c.conversation_id })
 }
 
 // ---------- conversas ----------

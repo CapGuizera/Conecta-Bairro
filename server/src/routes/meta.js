@@ -21,6 +21,8 @@ r.get('/meta', (_req, res) => {
   res.json({
     categories: CATEGORIES.map(({ slug, name }) => ({ slug, name })),
     pilot: config.pilot,
+    region: config.region,
+    realtime: config.realtime,
     radiusOptionsKm: RADIUS_OPTIONS_KM,
     commissionRate: config.commissionRate,
     highlightPlans: HIGHLIGHT_PLANS,

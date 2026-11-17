@@ -94,6 +94,23 @@ Para rodar com PostgreSQL + PostGIS em container (Docker Desktop no Windows):
 docker compose up --build
 ```
 
+## Publicar na Vercel
+
+O projeto já vem pronto (`vercel.json` + `api/index.js`): a interface é servida pela Vercel e a API roda como função.
+
+1. Suba a pasta para um repositório no GitHub e importe-o em vercel.com (ou rode `npx vercel` na pasta).
+2. Não mude nada nas configurações de build: elas vêm do `vercel.json`.
+3. Em **Settings > Environment Variables**, crie:
+   - `JWT_SECRET`: um texto longo e aleatório. Sem ele, os logins caem toda vez que a função reinicia.
+   - `CRON_SECRET` (opcional): protege a rotina diária `/api/cron/activity`.
+   - `PILOT_NAME`, `PILOT_LAT`, `PILOT_LNG` (opcionais), como no `.env`.
+
+Como funciona lá (diferente de rodar no computador):
+- **Banco:** continua o PGlite embutido, gravado na pasta temporária da função. Ele é recriado com os dados de demonstração sempre que a função reinicia (depois de um tempo parada ou numa nova publicação), e cada instância tem o seu. Serve para demonstrar; cadastros feitos lá não ficam guardados.
+- **Chat e notificações:** a Vercel não mantém WebSocket, então o navegador busca as novidades a cada 4 segundos (`/api/events`).
+- **Rotina de ofertas paradas:** roda uma vez por dia pelo Cron da Vercel.
+- A primeira chamada depois de um tempo parada demora alguns segundos (o banco é montado).
+
 ## Requisitos de sistema
 
 - Windows 10/11, Linux ou macOS

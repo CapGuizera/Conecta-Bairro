@@ -232,3 +232,13 @@ CREATE TABLE IF NOT EXISTS satisfaction_surveys (
   comment     text NOT NULL DEFAULT '',
   created_at  timestamptz NOT NULL DEFAULT now()
 );
+
+-- Tempo real sem WebSocket (Vercel): eventos que o navegador busca em /api/events.
+CREATE TABLE IF NOT EXISTS realtime_events (
+  id          bigserial PRIMARY KEY,
+  user_id     integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  event       text NOT NULL,
+  payload     jsonb NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS realtime_events_user_idx ON realtime_events (user_id, id);

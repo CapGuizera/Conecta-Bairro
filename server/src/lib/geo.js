@@ -1,10 +1,13 @@
 // RF04 e RF06: tratamento de localização.
 import crypto from 'node:crypto'
+import { config } from '../config.js'
 
 const EARTH_RADIUS_M = 6_371_000
 
+// Válido = número de verdade e dentro da região atendida (Sorocaba).
 export function validLatLng(lat, lng) {
-  return Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180
+  const { south, north, west, east } = config.region
+  return Number.isFinite(lat) && Number.isFinite(lng) && lat >= south && lat <= north && lng >= west && lng <= east
 }
 
 // Desloca o ponto exato para uma direção aleatória, entre 100 e 300 metros.

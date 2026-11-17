@@ -100,7 +100,7 @@ r.put('/me/location', requireAuth, async (req, res) => {
   const lat = Number(req.body?.lat)
   const lng = Number(req.body?.lng)
   const radius = Number(req.body?.serviceRadiusKm ?? 3)
-  if (!validLatLng(lat, lng)) fail(400, 'Localização inválida')
+  if (!validLatLng(lat, lng)) fail(400, 'Esse ponto fica fora da região de Sorocaba. Marca um ponto dentro dela')
   if (!(radius >= 0.5 && radius <= 20)) fail(400, 'Raio de atendimento deve ficar entre 0,5 e 20 km')
   await saveProviderLocation(q, req.user.id, lat, lng, radius)
   res.json({ location: { hasLocation: true, serviceRadiusKm: radius } })
